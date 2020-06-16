@@ -1,0 +1,11 @@
+# binary
+Implementierung/moore
+
+# test files
+test.svg
+
+# jetbrains related
+.idea
+
+# macOS related
+.DS_Store
