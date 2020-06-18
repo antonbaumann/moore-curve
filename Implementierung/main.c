@@ -23,17 +23,16 @@ int main(int argc, char **argv) {
         printf("failed to create file");
     }
 
-    int nr_coords = 4;
     uint64_t x[] = {0, 0, 1, 1};
     uint64_t y[] = {0, 1, 1, 0};
 
-    save_as_svg(x, y, nr_coords, 10, 10, out_file);
+    save_as_svg(x, y, 4, 10, 10, out_file);
 
     fclose(out_file);
 
 
     enum impl_variant variant = UNKNOWN;
-    int degree = -1;
+    long degree = 0;
 
     static struct option long_options[] = {
             {"implementation", required_argument, NULL, 'i'},
@@ -61,8 +60,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (degree < 0) {
-        printf("[!] invalid argument: degree must be a positive integer\n");
+    if (degree <= 0 || degree > 20) {
+        printf("[!] invalid argument: degree must be an integer in range [1, ..., 20]\n");
         print_help();
         return 1;
     }
@@ -73,15 +72,22 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    // precalculate number of coordinates
+    long nr_coords = 4 << degree;
+
+    // initialize coordinate vectors
+    uint64_t x_coords[nr_coords];
+    uint64_t y_coords[nr_coords];
+
     switch (variant) {
         case C_ITERATIVE:
-            moore_c_iterative(degree);
+            moore_c_iterative(degree, x_coords, y_coords);
             break;
         case C_RECURSIVE:
-            moore_c_recursive(degree);
+            moore_c_recursive(degree, x_coords, y_coords);
             break;
         case ASSEMBLY:
-            moore_asm(degree);
+            moore_asm(degree, x_coords, y_coords);
             break;
         default:
             printf("this should not have happened\n");
@@ -91,8 +97,8 @@ int main(int argc, char **argv) {
 }
 
 // parses argument for --degree flag
-// if argument is invalid return -1
-int parse_degree(char *str) {
+// if argument is invalid return 0
+long parse_degree(char *str) {
     errno = 0;  // reset errno to 0 before call of strtol
     char *endptr = NULL;
     long deg = strtol(str, &endptr, 10);
@@ -106,10 +112,7 @@ int parse_degree(char *str) {
     // overflow occurred
     if (errno == ERANGE && deg == LONG_MAX) return -1;
 
-    // check if number is positive and fits into an integer
-    if (deg < 0 || deg > INT_MAX) return -1;
-
-    return (int) deg;
+    return deg <= 0 ? -1 : deg;
 }
 
 void print_help() {
@@ -119,23 +122,22 @@ void print_help() {
     printf("--degree or -d:         specify degree of moore curve\n\n");
     printf("Usage: moore -i <implementation> -d <degree>\n");
     printf("====================================\n");
-    exit(2);
 }
 
 // TODO: Assembler anbindung/Implementation
-int moore_asm(int n) {
-    printf("moore assembly: degree %d", n);
+int moore_asm(long degree, uint64_t *x, uint64_t *y) {
+    printf("moore assembly: degree %ld\n", degree);
     return 0;
 }
 
 //TODO: C Implementation
-int moore_c_iterative(int n) {
-    printf("moore c iterative: degree %d", n);
+int moore_c_iterative(long degree, uint64_t *x, uint64_t *y) {
+    printf("moore c iterative: degree %ld\n", degree);
     return 0;
 }
 
 //TODO: C Implementation
-int moore_c_recursive(int n) {
-    printf("moore c recursive: degree %d", n);
+int moore_c_recursive(long degree, uint64_t *x, uint64_t *y) {
+    printf("moore c recursive: degree %ld\n", degree);
     return 0;
 }
