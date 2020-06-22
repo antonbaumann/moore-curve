@@ -7,6 +7,7 @@
 #include <limits.h>
 
 #include "svg.c"
+#include "moore.c"
 #include "main.h"
 
 enum impl_variant {
@@ -17,20 +18,6 @@ enum impl_variant {
 };
 
 int main(int argc, char **argv) {
-
-    FILE *out_file = fopen("test.svg", "w");
-    if (out_file == NULL) {
-        printf("failed to create file");
-    }
-
-    uint64_t x[] = {0, 0, 1, 1};
-    uint64_t y[] = {0, 1, 1, 0};
-
-    save_as_svg(x, y, 4, 10, 10, out_file);
-
-    fclose(out_file);
-
-
     enum impl_variant variant = UNKNOWN;
     long degree = 0;
 
@@ -73,11 +60,17 @@ int main(int argc, char **argv) {
     }
 
     // precalculate number of coordinates
-    long nr_coords = 4 << degree;
+    unsigned int shifts = 2 * degree - 1;
+    unsigned long long nr_coords = (unsigned long long) 2 << shifts; // 2^(2 * degree)
+
 
     // initialize coordinate vectors
-    uint64_t x_coords[nr_coords];
-    uint64_t y_coords[nr_coords];
+    uint64_t *x_coords = malloc(sizeof(uint64_t) * nr_coords);
+    uint64_t *y_coords = malloc(sizeof(uint64_t) * nr_coords);
+    if (x_coords == NULL || y_coords == NULL) {
+        printf("Allocation failed...\n");
+        return EXIT_FAILURE;
+    }
 
     switch (variant) {
         case C_ITERATIVE:
@@ -93,7 +86,9 @@ int main(int argc, char **argv) {
             printf("this should not have happened\n");
             return 1;
     }
-    return 0;
+
+    int err = write_svg("test.svg", x_coords, y_coords, degree);
+    return err;
 }
 
 // parses argument for --degree flag
@@ -115,6 +110,30 @@ long parse_degree(char *str) {
     return deg <= 0 ? -1 : deg;
 }
 
+int write_svg(char *filename, uint64_t *x_coords, uint64_t *y_coords, unsigned int degree) {
+    FILE *out_file = fopen(filename, "w");
+    if (out_file == NULL) {
+        printf("failed to create file\n");
+        return 1;
+    }
+
+    save_as_svg(
+            x_coords,
+            y_coords,
+            degree,
+            5,
+            out_file
+    );
+
+    int err = fclose(out_file);
+    if (err != 0) {
+        printf("failed to close file\n");
+        return err;
+    }
+
+    return 0;
+}
+
 void print_help() {
     printf("================Help================\n");
     printf("--help or -h :          print help\n");
@@ -127,12 +146,6 @@ void print_help() {
 // TODO: Assembler anbindung/Implementation
 int moore_asm(long degree, uint64_t *x, uint64_t *y) {
     printf("moore assembly: degree %ld\n", degree);
-    return 0;
-}
-
-//TODO: C Implementation
-int moore_c_iterative(long degree, uint64_t *x, uint64_t *y) {
-    printf("moore c iterative: degree %ld\n", degree);
     return 0;
 }
 

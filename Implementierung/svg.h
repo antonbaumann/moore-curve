@@ -4,8 +4,7 @@
 void save_as_svg(
         const uint64_t *x,
         const uint64_t *y,
-        int nr_coordinates,
-        int svg_size,
-        int scale,
+        unsigned int degree,
+        unsigned int scale,
         FILE *output_file
 );

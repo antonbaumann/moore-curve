@@ -3,4 +3,4 @@ project(moore C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(moore main.c main.h svg.c svg.h)
+add_executable(moore main.c main.h svg.c svg.h moore.c moore.h)
