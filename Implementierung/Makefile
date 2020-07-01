@@ -1,10 +1,9 @@
-CFLAGS: -g -Wall
+CC=gcc
+CFLAGS=-O3
 
-all: build run
-
-build:
-	gcc -o moore main.c $(CFLAGS)
-run:
-	./moore
+.PHONY: clean
+all: moore
+moore: main.c
+	$(CC) $(CFLAGS) -o $@ $^
 clean:
 	rm -f moore
