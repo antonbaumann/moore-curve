@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdint.h>
 
 // makes returning two variables more comfortable
@@ -7,130 +6,95 @@ struct tuple {
 };
 
 
-struct tuple rot(
-        uint64_t x,
-        uint64_t y,
-        uint64_t rx,
-        uint64_t ry,
-        uint64_t p
+struct tuple rotate(struct tuple coord, uint64_t length, uint64_t top, uint64_t right) {
+    struct tuple new_coord;
+    if (!top) {
+        if (right) {
+            new_coord.x = (length - 1) - coord.y;
+            new_coord.y = (length - 1) - coord.x;
+        } else {
+            new_coord.x = coord.y;
+            new_coord.y = coord.x;
+        }
+    } else new_coord = coord;
+    return new_coord;
+}
+
+
+struct tuple hilbert_coord_at_index(uint64_t index, uint64_t degree) {
+    struct tuple coord = {.x=0, .y=0};
+    uint64_t max_iterations = (uint64_t) 2 << (2 * degree - 1);
+
+    for (uint64_t i = 1; i < max_iterations; i *= 2) {
+        uint64_t right = (uint64_t) 1 & (index / 2);
+        uint64_t top = (uint64_t) 1 & (index ^ right);
+
+        coord = rotate(coord, i, top, right);
+        if (right) coord.x += i;
+        if (top) coord.y += i;
+
+        index >>= (uint64_t) 2;
+    }
+
+    if (degree % 2 != 0) {
+        struct tuple new = {.x=coord.y, .y=coord.x};
+        return new;
+    }
+    return coord;
+}
+
+struct tuple moore_coord_at_index(
+        uint64_t index,
+        uint64_t degree,
+        uint64_t max_iterations
 ) {
-    if (ry == 0) {
-        if (rx == 1) {
-            x = p - 1 - x;
-            y = p - 1 - y;
-        }
-        // vertausche x und y
-        uint64_t z = x;
-        x = y;
-        y = z;
+    uint64_t hilbert_max_iterations = max_iterations / 4;
+    uint64_t hilbert_index = index % hilbert_max_iterations;
+    uint64_t hilbert_side_length = (uint64_t) 2 << (degree - 2);
+
+    // todo: handle degree = 1
+    struct tuple coord = hilbert_coord_at_index(
+            hilbert_index,
+            degree - 1
+    );
+
+    uint64_t quadrant = index / hilbert_max_iterations;
+
+    uint64_t tmp;
+
+    switch (quadrant) {
+        case 0:
+            tmp = coord.x;
+            coord.x = hilbert_side_length - coord.y;
+            coord.y = tmp;
+            break;
+        case 1:
+            tmp = coord.x;
+            coord.x = hilbert_side_length - coord.y;
+            coord.y = tmp + hilbert_side_length;
+            break;
+        case 2:
+            tmp = coord.x;
+            coord.x = coord.y + hilbert_side_length + 1;
+            coord.y = 2 * hilbert_side_length - tmp - 1;
+            break;
+        case 3:
+            tmp = coord.x;
+            coord.x = coord.y + hilbert_side_length + 1;
+            coord.y = hilbert_side_length - tmp - 1;
+            break;
     }
-    struct tuple t = {.x = x, .y = y};
-    return t;
+
+    return coord;
 }
 
-struct tuple m(uint64_t t, uint64_t p) {
-    uint64_t x = 0;
-    uint64_t y = 0;
+void moore_c_iterative(uint64_t degree, uint64_t *x, uint64_t *y) {
+    uint64_t shifts = 2 * degree - 1;
+    uint64_t max_iterations = (uint64_t) 2 << shifts; // 2 ^ (2n)
 
-    for (uint64_t m = 1; m < p; m *= 2) {
-        uint64_t rx = (uint64_t) 1 & (t / 2);
-        uint64_t ry = (uint64_t) 1 & (t ^ rx);
-        struct tuple pair = rot(x, y, rx, ry, m);
-        x = pair.x;
-        y = pair.y;
-        x += m * rx;
-        y += m * ry;
-        t /= 4; // zur nächsten Quaternärziffer
+    for (uint64_t i = 0; i < max_iterations; i++) {
+        struct tuple coord = moore_coord_at_index(i, degree, max_iterations);
+        x[i] = coord.x;
+        y[i] = coord.y;
     }
-
-    struct tuple pair = {.x = x, .y = y};
-    return pair;
-}
-
-void hilbert_c_iterative(long degree, uint64_t *x_coords, uint64_t *y_coords) {
-
-    unsigned int shifts = 2 * degree - 1;
-    unsigned long long nr_iterations = (unsigned long long) 2 << shifts; // 2 ^ (2 * degree)
-
-    for (uint64_t i = 0; i < nr_iterations; i++) {
-        if (i % 10000 == 0) {
-            printf("%llu / %llu\r", i, nr_iterations);
-        }
-        struct tuple pair = m(i, nr_iterations);
-        x_coords[i] = pair.x;
-        y_coords[i] = pair.y;
-    }
-
-    //The algorithm returns curves of even/ uneven degree differently. To normalize this, we mirror, rotate and translate the result of 
-    // uneven uneven hilbert-degrees (= even moore degrees)
-    if (degree%2 !=0) {
-
-    	//First, start and endpoint have to be switched (= reverse order of traversal)
-	for (uint64_t i = 0; i < nr_iterations/2; i++) {
-		uint64_t temp = x_coords[i];
-		x_coords[i] = x_coords[nr_iterations-1-i];
-		x_coords[nr_iterations-1-i] = temp;
-		temp = y_coords[i];		
-                y_coords[i] = y_coords[nr_iterations-1-i];
-		y_coords[nr_iterations-1-i] = temp;
-     	}
-
-	unsigned int d = (2 << (degree - 1)) - 1; //half the sidelength of the square with our moore curve (rounded down)  -> amount of x/y translation
-	//second, rotate counterclockwise by 90 degrees x-> d-y, y -> x
-        for (uint64_t i = 0; i < nr_iterations; i++) {
-		uint64_t temp = x_coords[i];
- 		x_coords[i] = d-y_coords[i];
-		y_coords[i] = temp;
-        }
-
-    }
-    
-
-
-}
-
-int moore_c_iterative(long degree, uint64_t *x_coords, uint64_t *y_coords) {
-    
-    printf("moore c iterative: degree %ld\n", degree);
-
-    //Moore and Hilbert are the same for n = 1
-    if (degree == 1) {
-        hilbert_c_iterative(1, x_coords, y_coords);
-        return 0;
-    }
-
-    //Build hilbert curve for lower left quarter (hence degree -1)
-    hilbert_c_iterative(degree-1, x_coords, y_coords);
-     unsigned long long quarter = 2 << (2*degree-3); // times 4 equals amount of all points
-
-    unsigned int d = (2 << (degree - 2)) - 1; //half the sidelength of the square with our moore curve (rounded down)  -> amount of x/y translation
-    unsigned long long counter = quarter; // quarter of the points are already drawn, wrong for now but we start with upper left quadrant
-
-    //rotate to the left and translate up to create upper left quarter of moore; x -> d-y, y -> d+x+1
-    while (counter < 2*quarter) {
-        y_coords[counter] = x_coords[counter - quarter] + d + 1;
-        x_coords[counter] = d - y_coords[counter - quarter];
-        counter++;
-    }
-    // draw top right quadrant; x -> d+y+1, y -> 2d-x+1 (from hilbert curve)
-    while (counter < 3*quarter) {
-        x_coords[counter] = y_coords[counter -2*quarter] + d + 1;
-        y_coords[counter] = 2*d - x_coords[counter -2*quarter] + 1;
-        counter++;
-    }
-    //draw bottom right quadrant (translate from above)
-    while (counter < 4*quarter) {
-        x_coords[counter] = x_coords[counter - quarter];
-        y_coords[counter] = y_coords[counter - quarter] - d - 1;
-        counter++;
-    }
-    //now redraw bottom left quadrant, copy from above quadrant
-    counter = 0;
-    while (counter < quarter) {
-        x_coords[counter] = x_coords[counter + quarter];
-        y_coords[counter] = y_coords[counter + quarter] - d - 1;
-        counter++;
-    }
-
-    return 0;
 }

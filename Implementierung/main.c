@@ -13,7 +13,6 @@
 enum impl_variant {
     ASSEMBLY,
     C_ITERATIVE,
-    C_RECURSIVE,
     UNKNOWN,
 };
 
@@ -34,8 +33,7 @@ int main(int argc, char **argv) {
         switch (c) {
             case 'i':
                 if (strcmp(optarg, "assembly") == 0) variant = ASSEMBLY;
-                else if (strcmp(optarg, "c_iterative") == 0) variant = C_ITERATIVE;
-                else if (strcmp(optarg, "c_recursive") == 0) variant = C_RECURSIVE;
+                else if (strcmp(optarg, "c") == 0) variant = C_ITERATIVE;
                 else variant = UNKNOWN;
                 break;
             case 'd':
@@ -74,10 +72,7 @@ int main(int argc, char **argv) {
 
     switch (variant) {
         case C_ITERATIVE:
-            moore_c_iterative(degree, x_coords, y_coords);
-            break;
-        case C_RECURSIVE:
-            moore_c_recursive(degree, x_coords, y_coords);
+            moore_c_iterative((uint64_t) degree, x_coords, y_coords);
             break;
         case ASSEMBLY:
             moore_asm(degree, x_coords, y_coords);
@@ -146,11 +141,5 @@ void print_help() {
 // TODO: Assembler anbindung/Implementation
 int moore_asm(long degree, uint64_t *x, uint64_t *y) {
     printf("moore assembly: degree %ld\n", degree);
-    return 0;
-}
-
-//TODO: C Implementation
-int moore_c_recursive(long degree, uint64_t *x, uint64_t *y) {
-    printf("moore c recursive: degree %ld\n", degree);
     return 0;
 }
