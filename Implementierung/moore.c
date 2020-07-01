@@ -68,22 +68,22 @@ struct tuple moore_coord_at_index(
     switch (quadrant) {
         case 0:
             tmp = coord.x;
-            coord.x = hilbert_side_length - coord.y;
+            coord.x = hilbert_side_length - coord.y - 1;
             coord.y = tmp;
             break;
         case 1:
             tmp = coord.x;
-            coord.x = hilbert_side_length - coord.y;
+            coord.x = hilbert_side_length - coord.y - 1;
             coord.y = tmp + hilbert_side_length;
             break;
         case 2:
             tmp = coord.x;
-            coord.x = coord.y + hilbert_side_length + 1;
+            coord.x = coord.y + hilbert_side_length;
             coord.y = 2 * hilbert_side_length - tmp - 1;
             break;
         case 3:
             tmp = coord.x;
-            coord.x = coord.y + hilbert_side_length + 1;
+            coord.x = coord.y + hilbert_side_length;
             coord.y = hilbert_side_length - tmp - 1;
             break;
     }
