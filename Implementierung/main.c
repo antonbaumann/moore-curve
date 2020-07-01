@@ -43,8 +43,7 @@ int main(int argc, char **argv) {
                 degree = parse_degree(optarg);
                 break;
             case 'p':
-                printf("1\n");
-                path = parse_path(optarg);
+                path = optarg;
                 break;
             default:
                 print_help();
@@ -65,8 +64,8 @@ int main(int argc, char **argv) {
     }
 
 
-    if (strcmp(path, "\0") == 0){
-        printf("[!] invalid argument: invalid path\n");
+    if (strstr(path, ".svg") == NULL || strlen(path) < 5){
+        printf("[!] invalid argument: invalid path or filename, filename should resemble \"file.svg\"\n");
         print_help();
         return 1;
     }
@@ -119,17 +118,6 @@ long parse_degree(char *str) {
     if (errno == ERANGE && deg == LONG_MAX) return -1;
 
     return deg <= 0 ? -1 : deg;
-}
-
-char* parse_path(char *str){
-  if(strlen(str) < 0){
-    printf("The file name has been set to \"moore.svg\"\n");
-    return "moore.svg";
-  } else if(strstr(str, ".svg") == NULL){
-    printf("Your name should contain \".svg\" at the end of the Filename\n");
-    return "\0";
-  }
-  return str;
 }
 
 int write_svg(char *path, uint64_t *x_coords, uint64_t *y_coords, unsigned int degree) {
