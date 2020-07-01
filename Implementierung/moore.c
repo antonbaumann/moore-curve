@@ -48,11 +48,14 @@ struct tuple moore_coord_at_index(
         uint64_t degree,
         uint64_t max_iterations
 ) {
+    if (degree == 1) {
+        return hilbert_coord_at_index(index,1);
+    }
+
     uint64_t hilbert_max_iterations = max_iterations / 4;
     uint64_t hilbert_index = index % hilbert_max_iterations;
     uint64_t hilbert_side_length = (uint64_t) 2 << (degree - 2);
 
-    // todo: handle degree = 1
     struct tuple coord = hilbert_coord_at_index(
             hilbert_index,
             degree - 1
