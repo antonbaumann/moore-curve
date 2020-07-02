@@ -139,7 +139,7 @@ void print_help() {
 }
 
 // TODO: Assembler anbindung/Implementation
-int moore_asm(long degree, uint64_t *x, uint64_t *y) {
+void moore_asm(long degree, uint64_t *x, uint64_t *y) {
     printf("moore assembly: degree %ld\n", degree);
-    return 0;
+    moore((uint64_t) degree, x, y);
 }
