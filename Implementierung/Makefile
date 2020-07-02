@@ -1,9 +1,9 @@
 CC=gcc
-CFLAGS=-O3
+CFLAGS=-O3 -Wall -Wextra -ggdb
 
 .PHONY: clean
 all: moore
-moore: main.c
+moore: main.c moore.S
 	$(CC) $(CFLAGS) -o $@ $^
 clean:
 	rm -f moore

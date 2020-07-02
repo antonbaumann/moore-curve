@@ -18,7 +18,7 @@ void save_as_svg(
 
     unsigned long long side_length = (unsigned long long) 2 << (degree - 1);
 
-    unsigned int padding = scale;
+    unsigned long long padding = scale;
     unsigned long long nr_coordinates = side_length * side_length;
     unsigned long long svg_size = side_length * scale + padding;
 
@@ -29,7 +29,7 @@ void save_as_svg(
     if (nr_coordinates > 0) {
         fprintf(output_file, "M%llu %llu ", x[0] * scale + padding, svg_size - (y[0] * scale + padding));
     }
-
+    
     // print remaining coordinates to svg file
     for (uint64_t i = 1; i < nr_coordinates; i++) {
         fprintf(output_file, "L%llu %llu ", x[i] * scale + padding, svg_size - (y[i] * scale + padding));
