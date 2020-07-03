@@ -3,6 +3,7 @@ cmake-build-debug
 
 # binary
 Implementierung/moore
+moore.dSYM
 
 # test files
 test.svg

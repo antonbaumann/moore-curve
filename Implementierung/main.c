@@ -5,10 +5,9 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
-#include <sys/stat.h>
 
-#include "svg.c"
-#include "moore.c"
+#include "svg.h"
+#include "moore.h"
 #include "main.h"
 
 enum impl_variant {
@@ -20,8 +19,8 @@ enum impl_variant {
 int main(int argc, char **argv) {
     enum impl_variant variant = UNKNOWN;
     long degree = 0;
-    char *path;
-    size_t path_length;
+    char *path = "";
+    size_t path_length = 0;
 
     static struct option long_options[] = {
             {"implementation", required_argument, NULL, 'i'},
@@ -36,7 +35,7 @@ int main(int argc, char **argv) {
         if (c == -1)break;
         switch (c) {
             case 'i':
-                if (strcmp(optarg, "assembly") == 0) variant = ASSEMBLY;
+                if (strcmp(optarg, "asm") == 0) variant = ASSEMBLY;
                 else if (strcmp(optarg, "c") == 0) variant = C_ITERATIVE;
                 else variant = UNKNOWN;
                 break;
@@ -96,7 +95,7 @@ int main(int argc, char **argv) {
             printf("this should not have happened\n");
             return 1;
     }
-//
+
     int err = write_svg(path, x_coords, y_coords, degree);
     free(x_coords);
     free(y_coords);
