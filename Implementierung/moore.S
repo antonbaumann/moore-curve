@@ -1,10 +1,10 @@
 .intel_syntax noprefix
-.global _moore
+.global moore
 
 .text
 
 // void moore( uint64_t degree, uint64_t *x, uint64_t *y)
-_moore:
+moore:
 /*
 Args (when incoming):
     degree: in rdi
