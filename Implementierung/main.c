@@ -5,6 +5,7 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
+#include <sys/stat.h>
 
 #include "svg.c"
 #include "moore.c"
@@ -19,16 +20,19 @@ enum impl_variant {
 int main(int argc, char **argv) {
     enum impl_variant variant = UNKNOWN;
     long degree = 0;
+    char *path;
+    size_t path_length;
 
     static struct option long_options[] = {
             {"implementation", required_argument, NULL, 'i'},
             {"degree",         required_argument, NULL, 'd'},
+            {"path",           required_argument, NULL, 'p'},
             {NULL,             no_argument,       NULL, 0},
     };
 
     int c;
     // loop over all of the options
-    while ((c = getopt_long(argc, argv, "i:d:", long_options, NULL)) != -1) {
+    while ((c = getopt_long(argc, argv, "i:d:p:", long_options, NULL)) != -1) {
         if (c == -1)break;
         switch (c) {
             case 'i':
@@ -38,6 +42,10 @@ int main(int argc, char **argv) {
                 break;
             case 'd':
                 degree = parse_degree(optarg);
+                break;
+            case 'p':
+                path = optarg;
+                path_length = strlen(path);
                 break;
             default:
                 print_help();
@@ -53,6 +61,13 @@ int main(int argc, char **argv) {
 
     if (variant == UNKNOWN) {
         printf("[!] invalid argument: unknown implementation variant specified\n");
+        print_help();
+        return 1;
+    }
+
+
+    if (!(4 <= path_length && !strcmp (path + path_length - 4, ".svg"))){   // pointer arithmetik "file.svg"\0 und srtlen(".svg") == 4
+        printf("[!] invalid argument: filename, filename should resemble \"file.svg\"\n");
         print_help();
         return 1;
     }
@@ -81,8 +96,10 @@ int main(int argc, char **argv) {
             printf("this should not have happened\n");
             return 1;
     }
-
-    int err = write_svg("test.svg", x_coords, y_coords, degree);
+//
+    int err = write_svg(path, x_coords, y_coords, degree);
+    free(x_coords);
+    free(y_coords);
     return err;
 }
 
@@ -105,13 +122,12 @@ long parse_degree(char *str) {
     return deg <= 0 ? -1 : deg;
 }
 
-int write_svg(char *filename, uint64_t *x_coords, uint64_t *y_coords, unsigned int degree) {
-    FILE *out_file = fopen(filename, "w");
+int write_svg(char *path, uint64_t *x_coords, uint64_t *y_coords, unsigned int degree) {
+    FILE *out_file = fopen(path, "w");
     if (out_file == NULL) {
         printf("failed to create file\n");
         return 1;
     }
-
     save_as_svg(
             x_coords,
             y_coords,
@@ -125,16 +141,16 @@ int write_svg(char *filename, uint64_t *x_coords, uint64_t *y_coords, unsigned i
         printf("failed to close file\n");
         return err;
     }
-
     return 0;
 }
 
 void print_help() {
     printf("================Help================\n");
     printf("--help or -h :          print help\n");
-    printf("--implementation or -i: specify implementation [c_iterative, c_recursive, assembly]\n");
-    printf("--degree or -d:         specify degree of moore curve\n\n");
-    printf("Usage: moore -i <implementation> -d <degree>\n");
+    printf("--implementation or -i: specify implementation [c, assembly]\n");
+    printf("--degree or -d:         specify degree of moore curve\n");
+    printf("--path or -p:           specify path for SVG-File\n");
+    printf("Usage: moore -i <implementation> -d <degree> -p <path>\n");
     printf("====================================\n");
 }
 
