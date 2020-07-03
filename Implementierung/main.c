@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
     enum impl_variant variant = UNKNOWN;
     long degree = 0;
     char *path;
+    size_t path_length;
 
     static struct option long_options[] = {
             {"implementation", required_argument, NULL, 'i'},
@@ -44,6 +45,7 @@ int main(int argc, char **argv) {
                 break;
             case 'p':
                 path = optarg;
+                path_length = strlen(path);
                 break;
             default:
                 print_help();
@@ -64,8 +66,8 @@ int main(int argc, char **argv) {
     }
 
 
-    if (strstr(path, ".svg") == NULL || strlen(path) < 5){
-        printf("[!] invalid argument: invalid path or filename, filename should resemble \"file.svg\"\n");
+    if (!(4 <= path_length && !strcmp (path + path_length - 4, ".svg"))){   // pointer arithmetik "file.svg"\0 und srtlen(".svg") == 4
+        printf("[!] invalid argument: filename, filename should resemble \"file.svg\"\n");
         print_help();
         return 1;
     }
