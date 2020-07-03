@@ -1,0 +1,1 @@
+void benchmark(long degree, long repetitions);
