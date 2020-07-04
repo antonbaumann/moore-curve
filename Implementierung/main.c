@@ -167,16 +167,17 @@ int write_svg(char *path, uint64_t *x_coords, uint64_t *y_coords, unsigned int d
 }
 
 void print_help() {
-    printf("================Help================\n");
+    printf("====================================Help=======================================\n");
+    printf("Usage for printing a SVG-File: moore -i <implementation> -d <degree> -p <path>\n");
+    printf("Usage for benchmarking:        moore --benchmark -d <degree> -r <repetitions> \n");
+    printf("================================Flag Description===============================\n");
     printf("--help or -h :          print help\n");
-    printf("--implementation or -i: specify implementation [c, assembly]\n");
+    printf("--implementation or -i: specify implementation [c, asm]\n");
     printf("--degree or -d:         specify degree of moore curve\n");
     printf("--path or -p:           specify path for SVG-File\n");
-    printf("Usage: moore -i <implementation> -d <degree> -p <path>\n");
-    printf("====================================\n");
+    printf("===============================================================================\n");
 }
 
-// TODO: Assembler anbindung/Implementation
 void moore_asm(long degree, uint64_t *x, uint64_t *y) {
     printf("moore assembly: degree %ld\n", degree);
     moore((uint64_t) degree, x, y);
