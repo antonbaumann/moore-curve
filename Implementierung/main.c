@@ -175,6 +175,7 @@ void print_help() {
     printf("--implementation or -i: specify implementation [c, asm]\n");
     printf("--degree or -d:         specify degree of moore curve\n");
     printf("--path or -p:           specify path for SVG-File\n");
+    printf("--repetitions or -r:    specify amount of repetitions for benchmarking\n");
     printf("===============================================================================\n");
 }
 
