@@ -151,4 +151,6 @@ void benchmark(long degree, long repetitions) {
         exit(EXIT_FAILURE);
     }
 
+    free(x_coords);
+    free(y_coords);
 }
