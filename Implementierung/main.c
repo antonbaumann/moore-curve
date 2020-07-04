@@ -9,6 +9,7 @@
 #include "svg.h"
 #include "moore.h"
 #include "main.h"
+#include "benchmark.h"
 
 enum impl_variant {
     ASSEMBLY,
@@ -16,39 +17,51 @@ enum impl_variant {
     UNKNOWN,
 };
 
+static int benchmark_flag;
+
 int main(int argc, char **argv) {
     enum impl_variant variant = UNKNOWN;
     long degree = 0;
+    long repetitions = -1;
     char *path = "";
     size_t path_length = 0;
 
     static struct option long_options[] = {
-            {"implementation", required_argument, NULL, 'i'},
-            {"degree",         required_argument, NULL, 'd'},
-            {"path",           required_argument, NULL, 'p'},
-            {NULL,             no_argument,       NULL, 0},
+            {"degree",         required_argument, NULL,      'd'},
+            {"implementation", optional_argument, NULL,      'i'},
+            {"path",           optional_argument, NULL,      'p'},
+            {"repetitions",    optional_argument, NULL,      'r'},
+            {"benchmark",      no_argument, &benchmark_flag, 1},
+            {NULL,             no_argument,       NULL,      0},
     };
 
     int c;
+    int option_index = 0;
     // loop over all of the options
-    while ((c = getopt_long(argc, argv, "i:d:p:", long_options, NULL)) != -1) {
+    while ((c = getopt_long(argc, argv, "i:d:p:r:", long_options, &option_index)) != -1) {
         if (c == -1)break;
         switch (c) {
+            case 0:
+                break;
             case 'i':
                 if (strcmp(optarg, "asm") == 0) variant = ASSEMBLY;
                 else if (strcmp(optarg, "c") == 0) variant = C_ITERATIVE;
                 else variant = UNKNOWN;
                 break;
             case 'd':
-                degree = parse_degree(optarg);
+                degree = parse_long(optarg);
+                break;
+            case 'r':
+                repetitions = parse_long(optarg);
                 break;
             case 'p':
                 path = optarg;
                 path_length = strlen(path);
                 break;
+            case '?':
             default:
                 print_help();
-                break;
+                return EXIT_FAILURE;
         }
     }
 
@@ -58,14 +71,23 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    if (benchmark_flag) {
+        if (repetitions < 1) {
+            printf("[!] invalid argument: repetitions must be > 1\n");
+            return 1;
+        }
+        benchmark(degree, repetitions);
+        return 0;
+    }
+
     if (variant == UNKNOWN) {
         printf("[!] invalid argument: unknown implementation variant specified\n");
         print_help();
         return 1;
     }
 
-
-    if (!(4 <= path_length && !strcmp (path + path_length - 4, ".svg"))){   // pointer arithmetik "file.svg"\0 und srtlen(".svg") == 4
+    if (!(4 <= path_length &&
+          !strcmp(path + path_length - 4, ".svg"))) {   // pointer arithmetik "file.svg"\0 und srtlen(".svg") == 4
         printf("[!] invalid argument: filename, filename should resemble \"file.svg\"\n");
         print_help();
         return 1;
@@ -97,6 +119,7 @@ int main(int argc, char **argv) {
     }
 
     int err = write_svg(path, x_coords, y_coords, degree);
+
     free(x_coords);
     free(y_coords);
     return err;
@@ -104,7 +127,7 @@ int main(int argc, char **argv) {
 
 // parses argument for --degree flag
 // if argument is invalid return 0
-long parse_degree(char *str) {
+long parse_long(char *str) {
     errno = 0;  // reset errno to 0 before call of strtol
     char *endptr = NULL;
     long deg = strtol(str, &endptr, 10);
