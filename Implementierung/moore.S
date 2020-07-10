@@ -1,10 +1,14 @@
 .intel_syntax noprefix
-.global _moore
+
+.global moore
+.global _moore // extern function name must start with underscore if compiled on mac
 
 .text
 
-// void moore( uint64_t degree, uint64_t *x, uint64_t *y)
-_moore:
+
+moore:
+_moore: // mac compatibility
+
 /*
 Args (when incoming):
     degree: in rdi
