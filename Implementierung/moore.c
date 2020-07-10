@@ -10,7 +10,7 @@ struct tuple rotate(struct tuple coord, uint64_t length, uint64_t top, uint64_t 
     struct tuple new_coord;
     if (!top) {                                     // the two top one ones are the same shape
         if (right) {                                // and the bottom shapes are mirrored on a diagonal axis
-            new_coord.x = (length - 1) - coord.y;   // they are moved accordingly aswell
+            new_coord.x = (length - 1) - coord.y;   // they are moved accordingly as well
             new_coord.y = (length - 1) - coord.x;
         } else {
             new_coord.x = coord.y;
