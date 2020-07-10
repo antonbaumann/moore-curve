@@ -11,6 +11,10 @@
 #include "main.h"
 #include "benchmark.h"
 
+// Rechnerhalle does not allow us to allocate enough ram to calculate
+// moore curve of degree 17
+const int MAX_DEGREE = 16;
+
 enum impl_variant {
     ASSEMBLY,
     C_ITERATIVE,
@@ -65,8 +69,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (degree <= 0 || degree > 20) {
-        printf("[!] invalid argument: degree must be an integer in range [1, ..., 20]\n");
+    if (degree <= 0 || degree > MAX_DEGREE) {
+        printf("[!] invalid argument: degree must be an integer in range [1, ..., %d]\n", MAX_DEGREE);
         print_help();
         return 1;
     }

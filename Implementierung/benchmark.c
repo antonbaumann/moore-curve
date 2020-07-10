@@ -116,6 +116,11 @@ void benchmark(long degree, long repetitions) {
     uint64_t *x_coords = malloc(sizeof(uint64_t) * nr_coords);
     uint64_t *y_coords = malloc(sizeof(uint64_t) * nr_coords);
 
+    if (x_coords == NULL || y_coords == NULL) {
+        printf("Allocation failed...\n");
+        exit(EXIT_FAILURE);
+    }
+
     struct benchmark_result res;
 
     printf("[i] running assembly implementation %ld times (degree: %ld)\n", repetitions, degree);
