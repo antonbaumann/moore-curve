@@ -26,13 +26,15 @@ struct tuple hilbert_coord_at_index(uint64_t index, uint64_t degree) {
     uint64_t max_iterations = (uint64_t) 2 << (2 * degree - 1);
 
     for (uint64_t i = 1; i < max_iterations; i *= 2) {  // i *= 2,  simulates a binary shit to the left
-        uint64_t right = (uint64_t) 1 & (index / 2);    // to decide what Quadrant look up the 2 least significant Bits of i, for ex. 7 = 0b01(11)
-        uint64_t top = (uint64_t) 1 & (index ^ right);  // first see if on left or right Half by checking the first of those deciding Bits
-                                                        // secondly check the second of those two if in the right or left corner
+        uint64_t right = (uint64_t) 1 & (index /
+                                         2);    // to decide what Quadrant look up the 2 least significant Bits of i, for ex. 7 = 0b01(11)
+        uint64_t top = (uint64_t) 1 & (index ^
+                                       right);  // first see if on left or right Half by checking the first of those deciding Bits
+        // secondly check the second of those two if in the right or left corner
         coord = rotate(coord, i, top, right);           // 00 -> bottom-left
         if (right) coord.x += i;                        // 01 -> top-left
         if (top) coord.y += i;                          // 10 -> top-right
-                                                        // 11 -> bottom-right
+        // 11 -> bottom-right
         index >>= (uint64_t) 2;
     }
 
@@ -42,6 +44,7 @@ struct tuple hilbert_coord_at_index(uint64_t index, uint64_t degree) {
     }
     return coord;
 }
+
 // constructs moore curve out of 4 * (n-1) degree Hilbert-Curves
 struct tuple moore_coord_at_index(
         uint64_t index,
@@ -49,7 +52,7 @@ struct tuple moore_coord_at_index(
         uint64_t max_iterations
 ) { // deg 1 Hilbert-Curve = deg 1 Moore-Curve
     if (degree == 1) {
-        return hilbert_coord_at_index(index,1);
+        return hilbert_coord_at_index(index, 1);
     }
     // converting moore_Index to hilbert_Index, the Hilbert-Curve (degree = n-1) fits exactly 4 times into Moore-Curve (degree = n)
     uint64_t hilbert_max_iterations = max_iterations / 4;
@@ -93,11 +96,63 @@ struct tuple moore_coord_at_index(
 
 void moore_c_iterative(uint64_t degree, uint64_t *x, uint64_t *y) {
     uint64_t shifts = 2 * degree - 1;
-    uint64_t max_iterations = (uint64_t) 2 << shifts; // 2 ^ (2n) , each shift == 2* in binary we use this to iterate over the index in binary for ex. 7 == 0b0111
-                                                      // pass max_iterations which equals amount of points 2^(2n) = 4^n
+    uint64_t max_iterations = (uint64_t) 2
+            << shifts; // 2 ^ (2n) , each shift == 2* in binary we use this to iterate over the index in binary for ex. 7 == 0b0111
+    // pass max_iterations which equals amount of points 2^(2n) = 4^n
     for (uint64_t i = 0; i < max_iterations; i++) {
         struct tuple coord = moore_coord_at_index(i, degree, max_iterations);
         x[i] = coord.x;
         y[i] = coord.y;
     }
+}
+
+void hilbert_c_iterative(uint64_t degree, uint64_t *x, uint64_t *y) {
+    uint64_t shifts = 2 * degree - 1;
+    uint64_t max_iterations = (uint64_t) 2
+            << shifts; // 2 ^ (2n) , each shift == 2* in binary we use this to iterate over the index in binary for ex. 7 == 0b0111
+    // pass max_iterations which equals amount of points 2^(2n) = 4^n
+
+    for (uint64_t i = 0; i < max_iterations; i++) {
+        struct tuple coord = hilbert_coord_at_index(i, degree);
+        x[i] = coord.x;
+        y[i] = coord.y;
+    }
+}
+
+void moore_c_batch(uint64_t degree, uint64_t *x, uint64_t *y) {
+    if (degree == 1) {
+        return moore_c_iterative(degree, x, y);
+    }
+
+    hilbert_c_iterative(degree - 1, x, y);
+
+    uint64_t quarter = (uint64_t) 2 << (2 * degree - 3); // times 4 equals amount of all points
+
+    // half the sidelength of the square with our moore curve (rounded down)  -> amount of x/y translation
+    uint64_t offset = ((uint64_t) 2 << (degree - 2)) - 1;
+
+    //rotate to the left and translate up to create upper left quarter of moore; x -> d-y, y -> d+x+1
+    for (uint64_t i = quarter; i < 2 * quarter; i++) {
+        x[i] = offset - y[i - quarter];
+        y[i] = x[i - quarter] + offset + 1;
+    }
+
+    // draw top right quadrant; x -> d+y+1, y -> 2d-x+1 (from hilbert curve)
+    for (uint64_t i = 2 * quarter; i < 3 * quarter; i++) {
+        x[i] = y[i - 2 * quarter] + offset + 1;
+        y[i] = 2 * offset - x[i - 2 * quarter] + 1;
+    }
+
+    //draw bottom right quadrant (translate from above)
+    for (uint64_t i = 3 * quarter; i < 4 * quarter; i++) {
+        x[i] = x[i - quarter];
+        y[i] = y[i - quarter] - offset - 1;
+    }
+
+    //now redraw bottom left quadrant, copy from above quadrant
+    for (uint64_t i = 0; i < quarter; i++) {
+        x[i] = x[i + quarter];
+        y[i] = y[i + quarter] - offset - 1;
+    }
+
 }

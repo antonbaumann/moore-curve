@@ -17,7 +17,7 @@ struct benchmark_result {
 };
 
 enum implementation {
-    C, ASM
+    C, ASM, C_BATCH
 };
 
 // creates benchmark dir if not existing
@@ -39,6 +39,9 @@ int save_last_result(long degree, enum implementation impl, uint64_t *x_coords, 
             break;
         case ASM:
             implementation_description = "ASM";
+            break;
+        case C_BATCH:
+            implementation_description = "C_BATCH";
             break;
         default:
             printf("[!] implementation not valid\n");
@@ -140,7 +143,7 @@ void benchmark(long degree, long repetitions) {
     }
 
 
-    printf("[i] running c implementation %ld times (degree: %ld)\n", repetitions, degree);
+    printf("[i] running c_naive implementation %ld times (degree: %ld)\n", repetitions, degree);
     res = benchmark_implementation(
             degree,
             repetitions,
@@ -152,6 +155,22 @@ void benchmark(long degree, long repetitions) {
     printf("[i] average time:  %f\n", res.avg_time);
 
     err = save_last_result(degree, C, x_coords, y_coords);
+    if (err != 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    printf("[i] running c_batch implementation %ld times (degree: %ld)\n", repetitions, degree);
+    res = benchmark_implementation(
+            degree,
+            repetitions,
+            x_coords,
+            y_coords,
+            moore_c_batch
+    );
+    printf("[i] absolute time: %f\n", res.abs_time);
+    printf("[i] average time:  %f\n", res.avg_time);
+
+    err = save_last_result(degree, C_BATCH, x_coords, y_coords);
     if (err != 0) {
         exit(EXIT_FAILURE);
     }
