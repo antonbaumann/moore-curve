@@ -57,6 +57,10 @@ _moore: // mac compatibility
     cmp edi, 0x01
     jle .L_done
 
+    // id degree = 2 -> generate hilbert
+    cmp edi, 0x02
+    je .L_moore_transformation
+
     // we need hilbert(degree-1) to calculate moore(degree)
     // initialize counter with c = degree - 2
     xor r15, r15
@@ -117,23 +121,20 @@ _moore: // mac compatibility
     mov r11, rdx                        // r11 = rdx + r12
     add r11, r12
 
-    movdqu [r10], xmm0      // quadrant A
+    movdqu [r10], xmm0            // quadrant A
     movdqu [r11], xmm1
 
-    add r10, r14
-    add r11, r14
-    movdqu [r10], xmm2     // quadrant B
-    movdqu [r11], xmm3
+    movdqu [r10 + 4*r14], xmm2    // quadrant B
+    movdqu [r11 + 4*r14], xmm3
 
-    add r10, r14
-    add r11, r14
-    movdqu [r10], xmm4    // quadrant C
-    movdqu [r11], xmm5
+    movdqu [r10 + 8*r14], xmm4    // quadrant C
+    movdqu [r11 + 8*r14], xmm5
 
-    add r10, r14
-    add r11, r14
-    movdqu [r10], xmm6    // quadrant D
-    movdqu [r11], xmm7
+    lea r10, [r10 + 8*r14]
+    lea r11, [r11 + 8*r14]
+
+    movdqu [r10 + 4*r14], xmm6    // quadrant D
+    movdqu [r11 + 4*r14], xmm7
 
     add r12, 0x04                   // increase counter by 4 since we processed 4 points in one step
 
@@ -142,7 +143,7 @@ _moore: // mac compatibility
     jnz .L_hilbert_inner_loop_body
 
     shl r14, 0x02                   // number of points *= 4
-    shl r13, 0x01                   // side length *= 2
+    // brauch ma ned: shl r13, 0x01                   // side length *= 2
 
     pslld xmm14, 0x01
     movdqa xmm13, xmm14
@@ -153,6 +154,7 @@ _moore: // mac compatibility
 .L_hilbert_loop_cond:
     jnz .L_hilbert_loop_body        // flags are still set from decreasing counter
 
+.L_moore_transformation:
     // moore stuff
 
 
