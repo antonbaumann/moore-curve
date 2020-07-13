@@ -2,8 +2,8 @@
 #include <stdio.h>
 
 void save_as_svg(
-        const uint64_t *x,
-        const uint64_t *y,
+        const uint32_t *x,
+        const uint32_t *y,
         unsigned int degree,
         unsigned int scale,
         FILE *output_file

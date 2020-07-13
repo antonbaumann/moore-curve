@@ -4,8 +4,8 @@
 #include "svg.h"
 
 void save_as_svg(
-        const uint64_t *x,
-        const uint64_t *y,
+        const uint32_t *x,
+        const uint32_t *y,
         unsigned int degree,
         unsigned int scale,
         FILE *output_file
@@ -16,11 +16,11 @@ void save_as_svg(
     char *svg_path_open = "<path d=\"";
     char *svg_path_close = "\" stroke=\"#000\" fill=\"none\"/>\"";
 
-    unsigned long long side_length = (unsigned long long) 2 << (degree - 1);
+    uint64_t side_length = (uint32_t) 2 << (degree - 1);
 
-    unsigned long long padding = scale;
-    unsigned long long nr_coordinates = side_length * side_length;
-    unsigned long long svg_size = side_length * scale + padding;
+    uint64_t padding = scale;
+    uint64_t nr_coordinates = side_length * side_length;
+    uint64_t svg_size = side_length * scale + padding;
 
     fprintf(output_file, svg_open_f, svg_size, svg_size);
     fprintf(output_file, "%s", svg_path_open);

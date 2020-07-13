@@ -26,8 +26,8 @@ static int benchmark_flag;
 
 int main(int argc, char **argv) {
     enum impl_variant variant = UNKNOWN;
-    long degree = 0;
-    long repetitions = -1;
+    uint32_t degree = 0;
+    uint32_t repetitions = 0;
     char *path = "";
     size_t path_length = 0;
 
@@ -55,10 +55,10 @@ int main(int argc, char **argv) {
                 else variant = UNKNOWN;
                 break;
             case 'd':
-                degree = parse_long(optarg);
+                degree = parse_uint32(optarg);
                 break;
             case 'r':
-                repetitions = parse_long(optarg);
+                repetitions = parse_uint32(optarg);
                 break;
             case 'p':
                 path = optarg;
@@ -74,39 +74,39 @@ int main(int argc, char **argv) {
     if (degree <= 0 || degree > MAX_DEGREE) {
         printf("[!] invalid argument: degree must be an integer in range [1, ..., %d]\n", MAX_DEGREE);
         print_help();
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if (benchmark_flag) {
-        if (repetitions < 1) {
+        if (repetitions <= 0) {
             printf("[!] invalid argument: repetitions must be > 1\n");
-            return 1;
+            return EXIT_FAILURE;
         }
         benchmark(degree, repetitions);
-        return 0;
+        return EXIT_SUCCESS;
     }
 
     if (variant == UNKNOWN) {
         printf("[!] invalid argument: unknown implementation variant specified\n");
         print_help();
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if (!(4 <= path_length &&
           !strcmp(path + path_length - 4, ".svg"))) {   // pointer arithmetik "file.svg"\0 und srtlen(".svg") == 4
         printf("[!] invalid argument: filename, filename should resemble \"file.svg\"\n");
         print_help();
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // precalculate number of coordinates
-    unsigned int shifts = 2 * degree - 1;
-    unsigned long long nr_coords = (unsigned long long) 2 << shifts; // 2^(2 * degree)
+    uint32_t shifts = 2 * degree - 1;
+    uint64_t nr_coords = (uint64_t) 2 << shifts; // 2^(2 * degree)
 
 
     // initialize coordinate vectors
-    uint64_t *x_coords = malloc(sizeof(uint64_t) * nr_coords);
-    uint64_t *y_coords = malloc(sizeof(uint64_t) * nr_coords);
+    uint32_t *x_coords = malloc(sizeof(uint32_t) * nr_coords);
+    uint32_t *y_coords = malloc(sizeof(uint32_t) * nr_coords);
     if (x_coords == NULL || y_coords == NULL) {
         printf("Allocation failed...\n");
         return EXIT_FAILURE;
@@ -114,10 +114,10 @@ int main(int argc, char **argv) {
 
     switch (variant) {
         case C_ITERATIVE:
-            moore_c_iterative((uint64_t) degree, x_coords, y_coords);
+            moore_c_iterative((uint32_t) degree, x_coords, y_coords);
             break;
         case C_BATCH:
-            moore_c_batch((uint64_t) degree, x_coords, y_coords);
+            moore_c_batch((uint32_t) degree, x_coords, y_coords);
             break;
         case ASSEMBLY:
             moore_asm(degree, x_coords, y_coords);
@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
 
 // parses argument for --degree flag
 // if argument is invalid return 0
-long parse_long(char *str) {
+uint32_t parse_uint32(char *str) {
     errno = 0;  // reset errno to 0 before call of strtol
     char *endptr = NULL;
     long deg = strtol(str, &endptr, 10);
@@ -150,10 +150,13 @@ long parse_long(char *str) {
     // overflow occurred
     if (errno == ERANGE && deg == LONG_MAX) return -1;
 
-    return deg <= 0 ? -1 : deg;
+    // error if deg > 2^32
+    if (deg > UINT32_MAX) return -1;
+
+    return deg <= 0 ? 0 : deg;
 }
 
-int write_svg(char *path, uint64_t *x_coords, uint64_t *y_coords, unsigned int degree) {
+int write_svg(char *path, uint32_t *x_coords, uint32_t *y_coords, unsigned int degree) {
     FILE *out_file = fopen(path, "w");
     if (out_file == NULL) {
         printf("failed to create file\n");
@@ -188,7 +191,7 @@ void print_help() {
     printf("===============================================================================\n");
 }
 
-void moore_asm(long degree, uint64_t *x, uint64_t *y) {
+void moore_asm(long degree, uint32_t *x, uint32_t *y) {
     printf("moore assembly: degree %ld\n", degree);
-    moore((uint64_t) degree, x, y);
+    moore((uint32_t) degree, x, y);
 }

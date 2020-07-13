@@ -6,7 +6,7 @@ struct tuple {
 };
 
 // rotates/modifies shape for all 4 quadrants
-struct tuple rotate(struct tuple coord, uint64_t length, uint64_t top, uint64_t right) {
+struct tuple rotate(struct tuple coord, uint32_t length, uint32_t top, uint32_t right) {
     struct tuple new_coord;
     if (!top) {                                     // the two top one ones are the same shape
         if (right) {                                // and the bottom shapes are mirrored on a diagonal axis
@@ -26,10 +26,8 @@ struct tuple hilbert_coord_at_index(uint64_t index, uint64_t degree) {
     uint64_t max_iterations = (uint64_t) 2 << (2 * degree - 1);
 
     for (uint64_t i = 1; i < max_iterations; i *= 2) {  // i *= 2,  simulates a binary shit to the left
-        uint64_t right = (uint64_t) 1 & (index /
-                                         2);    // to decide what Quadrant look up the 2 least significant Bits of i, for ex. 7 = 0b01(11)
-        uint64_t top = (uint64_t) 1 & (index ^
-                                       right);  // first see if on left or right Half by checking the first of those deciding Bits
+        uint64_t right = (uint64_t) 1 & (index /2);    // to decide what Quadrant look up the 2 least significant Bits of i, for ex. 7 = 0b01(11)
+        uint64_t top = (uint64_t) 1 & (index ^ right);  // first see if on left or right Half by checking the first of those deciding Bits
         // secondly check the second of those two if in the right or left corner
         coord = rotate(coord, i, top, right);           // 00 -> bottom-left
         if (right) coord.x += i;                        // 01 -> top-left
@@ -94,7 +92,7 @@ struct tuple moore_coord_at_index(
     return coord;
 }
 
-void moore_c_iterative(uint64_t degree, uint64_t *x, uint64_t *y) {
+void moore_c_iterative(uint32_t degree, uint32_t *x, uint32_t *y) {
     uint64_t shifts = 2 * degree - 1;
     uint64_t max_iterations = (uint64_t) 2
             << shifts; // 2 ^ (2n) , each shift == 2* in binary we use this to iterate over the index in binary for ex. 7 == 0b0111
@@ -106,7 +104,7 @@ void moore_c_iterative(uint64_t degree, uint64_t *x, uint64_t *y) {
     }
 }
 
-void hilbert_c_iterative(uint64_t degree, uint64_t *x, uint64_t *y) {
+void hilbert_c_iterative(uint32_t degree, uint32_t *x, uint32_t *y) {
     uint64_t shifts = 2 * degree - 1;
     uint64_t max_iterations = (uint64_t) 2
             << shifts; // 2 ^ (2n) , each shift == 2* in binary we use this to iterate over the index in binary for ex. 7 == 0b0111
@@ -119,96 +117,95 @@ void hilbert_c_iterative(uint64_t degree, uint64_t *x, uint64_t *y) {
     }
 }
 
-void s_to_b(uint64_t total, uint64_t side, uint64_t *x, uint64_t *y){
-    uint64_t *new_x = x + total;
-    uint64_t *new_y = y + total;
-    for (uint64_t i = 0; i < total; i++){
-        new_y[i] = side + y[i];
-        new_x[i] = x[i];
-    }
+//void s_to_b(uint64_t total, uint64_t side, uint32_t *x, uint32_t *y){
+//    uint64_t *new_x = x + total;
+//    uint64_t *new_y = y + total;
+//    for (uint64_t i = 0; i < total; i++){
+//        new_y[i] = side + y[i];
+//        new_x[i] = x[i];
+//    }
+//}
+//
+//void b_to_a(uint64_t total, uint64_t *x, uint64_t *y){
+//    uint64_t temp = 0;
+//    for (uint64_t i = 0; i < total; i++){
+//        temp = x[i];
+//        x[i] = y[i];
+//        y[i] = temp;
+//    }
+//}
+//
+//void b_to_c(uint64_t total, uint64_t side, uint64_t *x, uint64_t *y){
+//    uint64_t *new_x = x + 2*total;
+//    uint64_t *new_y = y + 2*total;
+//    for (uint64_t i = 0; i < total; i++){
+//        new_x[i] = x[i + total] + side;
+//        new_y[i] = y[i + total];
+//    }
+//}
+//
+//void a_to_d(uint64_t total, uint64_t side, uint64_t *x, uint64_t *y){
+//    uint64_t *new_x = x + 3*total;
+//    uint64_t *new_y = y + 3*total;
+//    for (uint64_t i = 0; i < total; i++){
+//        new_x[i] = (side - 1) - x[i] + side;
+//        new_y[i] = (side - 1) - y[i];
+//    }
+//}
+
+void hilbert_c_batch(uint32_t degree, uint64_t *x, uint64_t *y) {
+//    x[0] = 0; y[0] = 0;
+//    x[1] = 0; y[1] = 1;
+//    x[2] = 1; y[2] = 1;
+//    x[3] = 1; y[3] = 0;
+//    if (degree == 1){
+//        return;
+//    }
+//    uint64_t total = 4;
+//    uint64_t side = 2;
+//    for (uint64_t i = 2; i <= degree; i++){
+//        s_to_b(total, side, x, y);
+//        b_to_c(total, side, x, y);
+//        b_to_a(total, x, y);
+//        a_to_d(total, side, x, y);
+//        total *= 4;
+//        side *= 2;
+//    }
 }
 
-void b_to_a(uint64_t total, uint64_t *x, uint64_t *y){
-    uint64_t temp = 0;
-    for (uint64_t i = 0; i < total; i++){
-        temp = x[i];
-        x[i] = y[i];
-        y[i] = temp;
-    }
-}
-
-void b_to_c(uint64_t total, uint64_t side, uint64_t *x, uint64_t *y){
-    uint64_t *new_x = x + 2*total;
-    uint64_t *new_y = y + 2*total;
-    for (uint64_t i = 0; i < total; i++){
-        new_x[i] = x[i + total] + side;
-        new_y[i] = y[i + total];
-    }
-}
-
-void a_to_d(uint64_t total, uint64_t side, uint64_t *x, uint64_t *y){
-    uint64_t *new_x = x + 3*total;
-    uint64_t *new_y = y + 3*total;
-    for (uint64_t i = 0; i < total; i++){
-        new_x[i] = (side - 1) - x[i] + side;
-        new_y[i] = (side - 1) - y[i];
-    }
-}
-
-void hilbert_c_batch(uint64_t degree, uint64_t *x, uint64_t *y) {
-    x[0] = 0; y[0] = 0;
-    x[1] = 0; y[1] = 1;
-    x[2] = 1; y[2] = 1;
-    x[3] = 1; y[3] = 0;
-    if (degree == 1){
-        return;
-    }
-    uint64_t total = 4;
-    uint64_t side = 2;
-    for (uint64_t i = 2; i <= degree; i++){
-        s_to_b(total, side, x, y);
-        b_to_c(total, side, x, y);
-        b_to_a(total, x, y);
-        a_to_d(total, side, x, y);
-        total *= 4;
-        side *= 2;
-    }
-}
-
-void moore_c_batch(uint64_t degree, uint64_t *x, uint64_t *y) {
-    if (degree == 1) {
-        return moore_c_iterative(degree, x, y);
-    }
-
-    hilbert_c_batch(degree - 1, x, y);
-
-    uint64_t quarter = (uint64_t) 2 << (2 * degree - 3); // times 4 equals amount of all points
-
-    // half the sidelength of the square with our moore curve (rounded down)  -> amount of x/y translation
-    uint64_t offset = ((uint64_t) 2 << (degree - 2)) - 1;
-
-    //rotate to the left and translate up to create upper left quarter of moore; x -> d-y, y -> d+x+1
-    for (uint64_t i = quarter; i < 2 * quarter; i++) {
-        x[i] = offset - y[i - quarter];
-        y[i] = x[i - quarter] + offset + 1;
-    }
-
-    // draw top right quadrant; x -> d+y+1, y -> 2d-x+1 (from hilbert curve)
-    for (uint64_t i = 2 * quarter; i < 3 * quarter; i++) {
-        x[i] = y[i - 2 * quarter] + offset + 1;
-        y[i] = 2 * offset - x[i - 2 * quarter] + 1;
-    }
-
-    //draw bottom right quadrant (translate from above)
-    for (uint64_t i = 3 * quarter; i < 4 * quarter; i++) {
-        x[i] = x[i - quarter];
-        y[i] = y[i - quarter] - offset - 1;
-    }
-
-    //now redraw bottom left quadrant, copy from above quadrant
-    for (uint64_t i = 0; i < quarter; i++) {
-        x[i] = x[i + quarter];
-        y[i] = y[i + quarter] - offset - 1;
-    }
-
+void moore_c_batch(uint32_t degree, uint64_t *x, uint64_t *y) {
+//    if (degree == 1) {
+//        return moore_c_iterative(degree, x, y);
+//    }
+//
+//    hilbert_c_batch(degree - 1, x, y);
+//
+//    uint64_t quarter = (uint64_t) 2 << (2 * degree - 3); // times 4 equals amount of all points
+//
+//    // half the sidelength of the square with our moore curve (rounded down)  -> amount of x/y translation
+//    uint64_t offset = ((uint64_t) 2 << (degree - 2)) - 1;
+//
+//    //rotate to the left and translate up to create upper left quarter of moore; x -> d-y, y -> d+x+1
+//    for (uint64_t i = quarter; i < 2 * quarter; i++) {
+//        x[i] = offset - y[i - quarter];
+//        y[i] = x[i - quarter] + offset + 1;
+//    }
+//
+//    // draw top right quadrant; x -> d+y+1, y -> 2d-x+1 (from hilbert curve)
+//    for (uint64_t i = 2 * quarter; i < 3 * quarter; i++) {
+//        x[i] = y[i - 2 * quarter] + offset + 1;
+//        y[i] = 2 * offset - x[i - 2 * quarter] + 1;
+//    }
+//
+//    //draw bottom right quadrant (translate from above)
+//    for (uint64_t i = 3 * quarter; i < 4 * quarter; i++) {
+//        x[i] = x[i - quarter];
+//        y[i] = y[i - quarter] - offset - 1;
+//    }
+//
+//    //now redraw bottom left quadrant, copy from above quadrant
+//    for (uint64_t i = 0; i < quarter; i++) {
+//        x[i] = x[i + quarter];
+//        y[i] = y[i + quarter] - offset - 1;
+//    }
 }

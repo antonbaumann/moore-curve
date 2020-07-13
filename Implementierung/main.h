@@ -1,7 +1,7 @@
 void print_help();
 
-void moore_asm(long degree, uint64_t *x, uint64_t *y);
+void moore_asm(long degree, uint32_t *x, uint32_t *y);
 
-long parse_long(char *);
+uint32_t parse_uint32(char *);
 
-int write_svg(char *filename, uint64_t *x, uint64_t *y, unsigned int degree);
+int write_svg(char *filename, uint32_t *x, uint32_t *y, unsigned int degree);
