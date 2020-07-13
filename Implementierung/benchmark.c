@@ -126,7 +126,7 @@ void benchmark(uint32_t degree, uint32_t repetitions) {
 
     struct benchmark_result res;
 
-    printf("[i] running assembly implementation %du times (degree: %du)\n", repetitions, degree);
+    printf("[i] running assembly implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
             degree,
             repetitions,
@@ -143,7 +143,7 @@ void benchmark(uint32_t degree, uint32_t repetitions) {
     }
 
 
-    printf("[i] running c_naive implementation %du times (degree: %du)\n", repetitions, degree);
+    printf("[i] running c_naive implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
             degree,
             repetitions,
@@ -159,7 +159,7 @@ void benchmark(uint32_t degree, uint32_t repetitions) {
         exit(EXIT_FAILURE);
     }
 
-    printf("[i] running c_batch implementation %du times (degree: %du)\n", repetitions, degree);
+    printf("[i] running c_batch implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
             degree,
             repetitions,
