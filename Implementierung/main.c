@@ -18,6 +18,7 @@ const int MAX_DEGREE = 16;
 enum impl_variant {
     ASSEMBLY,
     C_ITERATIVE,
+    C_BATCH,
     UNKNOWN,
 };
 
@@ -49,7 +50,8 @@ int main(int argc, char **argv) {
                 break;
             case 'i':
                 if (strcmp(optarg, "asm") == 0) variant = ASSEMBLY;
-                else if (strcmp(optarg, "c") == 0) variant = C_ITERATIVE;
+                else if (strcmp(optarg, "c_naive") == 0) variant = C_ITERATIVE;
+                else if (strcmp(optarg, "c_batch") == 0) variant = C_BATCH;
                 else variant = UNKNOWN;
                 break;
             case 'd':
@@ -114,6 +116,9 @@ int main(int argc, char **argv) {
         case C_ITERATIVE:
             moore_c_iterative((uint64_t) degree, x_coords, y_coords);
             break;
+        case C_BATCH:
+            moore_c_batch((uint64_t) degree, x_coords, y_coords);
+            break;
         case ASSEMBLY:
             moore_asm(degree, x_coords, y_coords);
             break;
@@ -176,7 +181,7 @@ void print_help() {
     printf("Usage for benchmarking:        moore --benchmark -d <degree> -r <repetitions> \n");
     printf("================================Flag Description===============================\n");
     printf("--help or -h :          print help\n");
-    printf("--implementation or -i: specify implementation [c, asm]\n");
+    printf("--implementation or -i: specify implementation [c_naive, c_batch, asm]\n");
     printf("--degree or -d:         specify degree of moore curve\n");
     printf("--path or -p:           specify path for SVG-File\n");
     printf("--repetitions or -r:    specify amount of repetitions for benchmarking\n");
