@@ -73,7 +73,7 @@ _moore: // mac compatibility
     pshufd xmm15, xmm15, 0x00
 
     // init temp register that holds previous side length
-    movd xmm14, r14d
+    movd xmm14, r13d
     pshufd xmm14, xmm14, 0x00
     movdqa xmm13, xmm14
     psubd xmm13, xmm15
@@ -144,7 +144,7 @@ _moore: // mac compatibility
     shl r14, 0x02                   // number of points *= 4
     shl r13, 0x01                   // side length *= 2
 
-    pslld xmm14, 0x02
+    pslld xmm14, 0x01
     movdqa xmm13, xmm14
     psubd xmm13, xmm15
 
