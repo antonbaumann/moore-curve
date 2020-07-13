@@ -119,12 +119,68 @@ void hilbert_c_iterative(uint64_t degree, uint64_t *x, uint64_t *y) {
     }
 }
 
+void s_to_b(uint64_t total, uint64_t side, uint64_t *x, uint64_t *y){
+    uint64_t *new_x = x + total;
+    uint64_t *new_y = y + total;
+    for (uint64_t i = 0; i < total; i++){
+        new_y[i] = side + y[i];
+        new_x[i] = x[i];
+    }
+}
+
+void b_to_a(uint64_t total, uint64_t *x, uint64_t *y){
+    uint64_t temp = 0;
+    for (uint64_t i = 0; i < total; i++){
+        temp = x[i];
+        x[i] = y[i];
+        y[i] = temp;
+    }
+}
+
+void b_to_c(uint64_t total, uint64_t side, uint64_t *x, uint64_t *y){
+    uint64_t *new_x = x + 2*total;
+    uint64_t *new_y = y + 2*total;
+    for (uint64_t i = 0; i < total; i++){
+        new_x[i] = x[i + total] + side;
+        new_y[i] = y[i + total];
+    }
+}
+
+void a_to_d(uint64_t total, uint64_t side, uint64_t *x, uint64_t *y){
+    uint64_t *new_x = x + 3*total;
+    uint64_t *new_y = y + 3*total;
+    for (uint64_t i = 0; i < total; i++){
+        new_x[i] = (side - 1) - x[i] + side;
+        new_y[i] = (side - 1) - y[i];
+    }
+}
+
+void hilbert_c_batch(uint64_t degree, uint64_t *x, uint64_t *y) {
+    x[0] = 0; y[0] = 0;
+    x[1] = 0; y[1] = 1;
+    x[2] = 1; y[2] = 1;
+    x[3] = 1; y[3] = 0;
+    if (degree == 1){
+        return;
+    }
+    uint64_t total = 4;
+    uint64_t side = 2;
+    for (uint64_t i = 2; i <= degree; i++){
+        s_to_b(total, side, x, y);
+        b_to_c(total, side, x, y);
+        b_to_a(total, x, y);
+        a_to_d(total, side, x, y);
+        total *= 4;
+        side *= 2;
+    }
+}
+
 void moore_c_batch(uint64_t degree, uint64_t *x, uint64_t *y) {
     if (degree == 1) {
         return moore_c_iterative(degree, x, y);
     }
 
-    hilbert_c_iterative(degree - 1, x, y);
+    hilbert_c_batch(degree - 1, x, y);
 
     uint64_t quarter = (uint64_t) 2 << (2 * degree - 3); // times 4 equals amount of all points
 
