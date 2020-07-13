@@ -99,30 +99,30 @@ _moore: // mac compatibility
     movdqa xmm5, xmm3               // xmm5 holds y values that go into quadrant C
     paddd xmm4, xmm14               // shift x values right (into quadrant C)
 
-    // swap(x, y) in quadrant A
-    movdqa xmm8, xmm0
-    movdqa xmm0, xmm1
-    movdqa xmm1, xmm8
 
     // copy and transform A -> D
     // x -> 2 * len - 1 - x
     // y -> len - 1 - y
     movdqa xmm6, xmm14              // xmm6 holds x values that go into quadrant D
     paddd xmm6, xmm13
-    psubd xmm6, xmm0
+    psubd xmm6, xmm1
 
     movdqa xmm7, xmm13              // xmm6 holds y values that go into quadrant D
-    psubd xmm7, xmm1
+    psubd xmm7, xmm0
 
     // write register content to memory
     // init temp registers
-    mov r10, rsi                        // r10 = rsi + r12
-    add r10, r12
-    mov r11, rdx                        // r11 = rdx + r12
-    add r11, r12
+    lea r10, [rsi + 4* r12]
+    //mov r10, rsi                        // r10 = rsi + r12
+    //add r10, r12
 
-    movdqu [r10], xmm0            // quadrant A
-    movdqu [r11], xmm1
+    lea r11, [rdx + 4* r12]
+    //mov r11, rdx                        // r11 = rdx + r12
+    //add r11, r12
+
+
+    movdqu [r10], xmm1            // quadrant A
+    movdqu [r11], xmm0            // swap x and y values
 
     movdqu [r10 + 4*r14], xmm2    // quadrant B
     movdqu [r11 + 4*r14], xmm3
@@ -143,7 +143,6 @@ _moore: // mac compatibility
     jnz .L_hilbert_inner_loop_body
 
     shl r14, 0x02                   // number of points *= 4
-    // brauch ma ned: shl r13, 0x01                   // side length *= 2
 
     pslld xmm14, 0x01
     movdqa xmm13, xmm14
