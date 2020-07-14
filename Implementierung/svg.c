@@ -27,12 +27,12 @@ void save_as_svg(
 
     // move origin of path to first coordinate in coord list
     if (nr_coordinates > 0) {
-        fprintf(output_file, "M%d %llu ", x[0] * scale + padding, svg_size - (u_int64_t) (y[0] * scale + padding));
+        fprintf(output_file, "M%d %llu ", x[0] * scale + padding, svg_size - (uint64_t) (y[0] * scale + padding));
     }
     
     // print remaining coordinates to svg file
     for (uint64_t i = 1; i < nr_coordinates; i++) {
-        fprintf(output_file, "L%d %llu ", x[i] * scale + padding, svg_size - (u_int64_t) (y[i] * scale + padding));
+        fprintf(output_file, "L%d %llu ", x[i] * scale + padding, svg_size - (uint64_t) (y[i] * scale + padding));
     }
 
     fprintf(output_file, "%s", svg_path_close);
