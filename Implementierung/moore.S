@@ -86,8 +86,8 @@ _moore: // mac compatibility
     xor r12, r12                    // hilbert_inner_counter with 0
 
 .L_hilbert_inner_loop_body:         // iterate over all coordinates from previous hilbert iteration
-    movdqu xmm0, [rsi + r12]        // fill xmm registers with next 4 coordinates we want to process
-    movdqu xmm1, [rdx + r12]
+    movdqu xmm0, [rsi + 4 * r12]        // fill xmm registers with next 4 coordinates we want to process
+    movdqu xmm1, [rdx + 4 * r12]
 
     // copy coordinates from A -> B
     movdqa xmm2, xmm0               // xmm2 holds x values that go into quadrant B
@@ -106,20 +106,13 @@ _moore: // mac compatibility
     movdqa xmm6, xmm14              // xmm6 holds x values that go into quadrant D
     paddd xmm6, xmm13
     psubd xmm6, xmm1
-
     movdqa xmm7, xmm13              // xmm6 holds y values that go into quadrant D
     psubd xmm7, xmm0
 
     // write register content to memory
     // init temp registers
-    lea r10, [rsi + 4* r12]
-    //mov r10, rsi                        // r10 = rsi + r12
-    //add r10, r12
-
-    lea r11, [rdx + 4* r12]
-    //mov r11, rdx                        // r11 = rdx + r12
-    //add r11, r12
-
+    lea r10, [rsi + 4* r12]         // r10 = rsi + 4 * r12
+    lea r11, [rdx + 4* r12]         // r11 = rdx + 4 * r12
 
     movdqu [r10], xmm1            // quadrant A
     movdqu [r11], xmm0            // swap x and y values
