@@ -13,7 +13,7 @@
 
 // Rechnerhalle does not allow us to allocate enough ram to calculate
 // moore curve of degree 17
-const int MAX_DEGREE = 16;
+const int MAX_DEGREE = 32;
 
 enum impl_variant {
     ASSEMBLY,
@@ -23,6 +23,7 @@ enum impl_variant {
 };
 
 static int benchmark_flag;
+static int write_benchmark_results_flag;
 
 int main(int argc, char **argv) {
     enum impl_variant variant = UNKNOWN;
@@ -32,12 +33,13 @@ int main(int argc, char **argv) {
     size_t path_length = 0;
 
     static struct option long_options[] = {
-            {"degree",         required_argument, NULL,      'd'},
-            {"implementation", optional_argument, NULL,      'i'},
-            {"path",           optional_argument, NULL,      'p'},
-            {"repetitions",    optional_argument, NULL,      'r'},
-            {"benchmark",      no_argument, &benchmark_flag, 1},
-            {NULL,             no_argument,       NULL,      0},
+            {"degree",         required_argument, NULL,                    'd'},
+            {"implementation", optional_argument, NULL,                    'i'},
+            {"path",           optional_argument, NULL,                    'p'},
+            {"repetitions",    optional_argument, NULL,                    'r'},
+            {"benchmark",      no_argument, &benchmark_flag,               1},
+            {"write_results",  no_argument, &write_benchmark_results_flag, 1},
+            {NULL,             no_argument,       NULL,                    0},
     };
 
     int c;
@@ -82,7 +84,7 @@ int main(int argc, char **argv) {
             printf("[!] invalid argument: repetitions must be > 1\n");
             return EXIT_FAILURE;
         }
-        benchmark(degree, repetitions);
+        benchmark(degree, repetitions, write_benchmark_results_flag);
         return EXIT_SUCCESS;
     }
 
@@ -184,12 +186,14 @@ int write_svg(char *path, uint32_t *x_coords, uint32_t *y_coords, unsigned int d
 void print_help() {
     printf("====================================Help=======================================\n");
     printf("Usage for printing a SVG-File: moore -i <implementation> -d <degree> -p <path>\n");
-    printf("Usage for benchmarking:        moore --benchmark -d <degree> -r <repetitions> \n");
+    printf("Usage for benchmarking:        moore --benchmark -d <degree> -r <repetitions> (--write_results) \n");
     printf("================================Flag Description===============================\n");
     printf("--help or -h :          print help\n");
     printf("--implementation or -i: specify implementation [c_naive, c_batch, asm]\n");
     printf("--degree or -d:         specify degree of moore curve\n");
     printf("--path or -p:           specify path for SVG-File\n");
+    printf("--benchmark             set benchmark mode\n");
+    printf("--write_results         write benchmark results to disk\n");
     printf("--repetitions or -r:    specify amount of repetitions for benchmarking\n");
     printf("===============================================================================\n");
 }

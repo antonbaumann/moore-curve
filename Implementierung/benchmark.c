@@ -105,7 +105,7 @@ struct benchmark_result benchmark_implementation(
     return res;
 }
 
-void benchmark(uint32_t degree, uint32_t repetitions) {
+void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
     int err = create_benchmark_dir();
     if (err != 0) {
         printf("[!] failed to create benchmark directory\n");
@@ -138,9 +138,11 @@ void benchmark(uint32_t degree, uint32_t repetitions) {
     printf("[i] absolute time: %f\n", res.abs_time);
     printf("[i] average time:  %f\n", res.avg_time);
 
-    err = save_last_result(degree, ASM, x_coords, y_coords);
-    if (err != 0) {
-        exit(EXIT_FAILURE);
+    if (write_result) {
+        err = save_last_result(degree, ASM, x_coords, y_coords);
+        if (err != 0) {
+            exit(EXIT_FAILURE);
+        }
     }
 
 
@@ -155,9 +157,11 @@ void benchmark(uint32_t degree, uint32_t repetitions) {
     printf("[i] absolute time: %f\n", res.abs_time);
     printf("[i] average time:  %f\n", res.avg_time);
 
-    err = save_last_result(degree, C, x_coords, y_coords);
-    if (err != 0) {
-        exit(EXIT_FAILURE);
+    if (write_result) {
+        err = save_last_result(degree, C, x_coords, y_coords);
+        if (err != 0) {
+            exit(EXIT_FAILURE);
+        }
     }
 
     printf("[i] running c_batch implementation %d times (degree: %d)\n", repetitions, degree);
@@ -171,9 +175,11 @@ void benchmark(uint32_t degree, uint32_t repetitions) {
     printf("[i] absolute time: %f\n", res.abs_time);
     printf("[i] average time:  %f\n", res.avg_time);
 
-    err = save_last_result(degree, C_BATCH, x_coords, y_coords);
-    if (err != 0) {
-        exit(EXIT_FAILURE);
+    if (write_result) {
+        err = save_last_result(degree, C_BATCH, x_coords, y_coords);
+        if (err != 0) {
+            exit(EXIT_FAILURE);
+        }
     }
 
     free(x_coords);
