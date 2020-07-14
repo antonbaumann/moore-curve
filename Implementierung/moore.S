@@ -86,8 +86,14 @@ _moore: // mac compatibility
     xor r12, r12                    // hilbert_inner_counter with 0
 
 .L_hilbert_inner_loop_body:         // iterate over all coordinates from previous hilbert iteration
-    movdqu xmm0, [rsi + 4 * r12]        // fill xmm registers with next 4 coordinates we want to process
-    movdqu xmm1, [rdx + 4 * r12]
+
+    // write register content to memory
+    // init temp registers
+    lea r10, [rsi + 4* r12]         // r10 = rsi + 4 * r12
+    lea r11, [rdx + 4* r12]         // r11 = rdx + 4 * r12
+
+    movdqu xmm0, [r10]              // fill xmm registers with next 4 coordinates we want to process
+    movdqu xmm1, [r11]
 
     // copy coordinates from A -> B
     // xmm0 holds correct x values for quardrant B
@@ -108,25 +114,20 @@ _moore: // mac compatibility
     movdqa xmm7, xmm13              // xmm6 holds y values that go into quadrant D
     psubd xmm7, xmm0
 
-    // write register content to memory
-    // init temp registers
-    lea r10, [rsi + 4* r12]         // r10 = rsi + 4 * r12
-    lea r11, [rdx + 4* r12]         // r11 = rdx + 4 * r12
-
     movdqu [r10], xmm1            // quadrant A
     movdqu [r11], xmm0            // swap x and y values
 
-    movdqu [r10 + 4*r14], xmm0    // quadrant B
-    movdqu [r11 + 4*r14], xmm3
+    lea r10, [r10 + 4*r14]
+    lea r11, [r11 + 4*r14]
 
-    movdqu [r10 + 8*r14], xmm4    // quadrant C
-    movdqu [r11 + 8*r14], xmm3
+    movdqu [r10], xmm0    // quadrant B
+    movdqu [r11], xmm3
 
-    lea r10, [r10 + 8*r14]
-    lea r11, [r11 + 8*r14]
+    movdqu [r10 + 4 * r14], xmm4    // quadrant C
+    movdqu [r11 + 4 * r14], xmm3
 
-    movdqu [r10 + 4*r14], xmm6    // quadrant D
-    movdqu [r11 + 4*r14], xmm7
+    movdqu [r10 + 8 * r14], xmm6    // quadrant D
+    movdqu [r11 + 8 * r14], xmm7
 
     add r12, 0x04                   // increase counter by 4 since we processed 4 points in one step
 
@@ -149,8 +150,13 @@ _moore: // mac compatibility
     xor r15, r15                    // set counter to 0
 
 .L_moore_loop_body:
-    movdqu xmm0, [rsi + 4 * r15]
-    movdqu xmm1, [rdx + 4 * r15]
+    // write register content to memory
+    // init temp registers
+    lea r10, [rsi + 4* r15]         // r10 = rsi + 4 * r12
+    lea r11, [rdx + 4* r15]         // r11 = rdx + 4 * r12
+
+    movdqu xmm0, [r10]
+    movdqu xmm1, [r11]
 
     // copy coordinates from bottom left to top left (hilbert A -> moore B)
     movdqa xmm2, xmm13              // x -> len - 1 - y
@@ -172,25 +178,20 @@ _moore: // mac compatibility
     movdqa xmm1, xmm3               // y -> y - len
     psubd xmm1, xmm14               // correct x values already in xmm2
 
-    // write register content to memory
-    // init temp registers
-    lea r10, [rsi + 4* r15]         // r10 = rsi + 4 * r12
-    lea r11, [rdx + 4* r15]         // r11 = rdx + 4 * r12
-
     movdqu [r10], xmm2            // quadrant A
     movdqu [r11], xmm1            // use x values from quadrant B
 
-    movdqu [r10 + 4*r14], xmm2    // quadrant B
-    movdqu [r11 + 4*r14], xmm3
+    lea r10, [r10 + 4 * r14]
+    lea r11, [r11 + 4 * r14]
 
-    movdqu [r10 + 8*r14], xmm6    // quadrant C
-    movdqu [r11 + 8*r14], xmm5    // use x values from quadrant D
+    movdqu [r10], xmm2    // quadrant B
+    movdqu [r11], xmm3
 
-    lea r10, [r10 + 8*r14]
-    lea r11, [r11 + 8*r14]
+    movdqu [r10 + 4*r14], xmm6    // quadrant C
+    movdqu [r11 + 4*r14], xmm5    // use x values from quadrant D
 
-    movdqu [r10 + 4*r14], xmm6    // quadrant D
-    movdqu [r11 + 4*r14], xmm7
+    movdqu [r10 + 8*r14], xmm6    // quadrant D
+    movdqu [r11 + 8*r14], xmm7
 
     add r15, 0x04
 
