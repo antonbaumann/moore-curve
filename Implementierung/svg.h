@@ -4,7 +4,7 @@
 void save_as_svg(
         const uint32_t *x,
         const uint32_t *y,
-        unsigned int degree,
-        unsigned int scale,
+        uint32_t degree,
+        uint32_t scale,
         FILE *output_file
 );
