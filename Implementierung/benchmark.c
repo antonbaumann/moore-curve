@@ -31,7 +31,7 @@ int create_benchmark_dir() {
     return -1;
 }
 
-int save_last_result(long degree, enum implementation impl, uint64_t *x_coords, uint64_t *y_coords) {
+int save_last_result(long degree, enum implementation impl, uint32_t *x_coords, uint32_t *y_coords) {
     char *implementation_description;
     switch (impl) {
         case C:
@@ -65,6 +65,7 @@ int save_last_result(long degree, enum implementation impl, uint64_t *x_coords, 
         return -1;
     }
 
+    printf("[i] writing last result to disk ...\n");
     save_as_svg(x_coords, y_coords, degree, 5, svg_file);
     return 0;
 }
@@ -72,9 +73,9 @@ int save_last_result(long degree, enum implementation impl, uint64_t *x_coords, 
 struct benchmark_result benchmark_implementation(
         long degree,
         long repetitions,
-        uint64_t *x_coords,
-        uint64_t *y_coords,
-        void impl(uint64_t, uint64_t *, uint64_t *)
+        uint32_t *x_coords,
+        uint32_t *y_coords,
+        void impl(uint32_t, uint32_t *, uint32_t *)
 ) {
     struct timespec start;
     int err = clock_gettime(CLOCK_MONOTONIC, &start);
@@ -104,7 +105,7 @@ struct benchmark_result benchmark_implementation(
     return res;
 }
 
-void benchmark(long degree, long repetitions) {
+void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
     int err = create_benchmark_dir();
     if (err != 0) {
         printf("[!] failed to create benchmark directory\n");
@@ -112,12 +113,12 @@ void benchmark(long degree, long repetitions) {
     }
 
     // precalculate number of coordinates
-    unsigned long shifts = 2 * degree - 1;
-    unsigned long long nr_coords = (unsigned long long) 2 << shifts; // 2^(2 * degree)
+    uint64_t shifts = 2 * degree - 1;
+    uint64_t nr_coords = (uint64_t) 2 << shifts; // 2^(2 * degree)
 
     // initialize coordinate vectors
-    uint64_t *x_coords = malloc(sizeof(uint64_t) * nr_coords);
-    uint64_t *y_coords = malloc(sizeof(uint64_t) * nr_coords);
+    uint32_t *x_coords = malloc(sizeof(uint32_t) * nr_coords);
+    uint32_t *y_coords = malloc(sizeof(uint32_t) * nr_coords);
 
     if (x_coords == NULL || y_coords == NULL) {
         printf("Allocation failed...\n");
@@ -126,7 +127,7 @@ void benchmark(long degree, long repetitions) {
 
     struct benchmark_result res;
 
-    printf("[i] running assembly implementation %ld times (degree: %ld)\n", repetitions, degree);
+    printf("[i] running assembly implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
             degree,
             repetitions,
@@ -137,13 +138,15 @@ void benchmark(long degree, long repetitions) {
     printf("[i] absolute time: %f\n", res.abs_time);
     printf("[i] average time:  %f\n", res.avg_time);
 
-    err = save_last_result(degree, ASM, x_coords, y_coords);
-    if (err != 0) {
-        exit(EXIT_FAILURE);
+    if (write_result) {
+        err = save_last_result(degree, ASM, x_coords, y_coords);
+        if (err != 0) {
+            exit(EXIT_FAILURE);
+        }
     }
 
 
-    printf("[i] running c_naive implementation %ld times (degree: %ld)\n", repetitions, degree);
+    printf("[i] running c_naive implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
             degree,
             repetitions,
@@ -154,12 +157,14 @@ void benchmark(long degree, long repetitions) {
     printf("[i] absolute time: %f\n", res.abs_time);
     printf("[i] average time:  %f\n", res.avg_time);
 
-    err = save_last_result(degree, C, x_coords, y_coords);
-    if (err != 0) {
-        exit(EXIT_FAILURE);
+    if (write_result) {
+        err = save_last_result(degree, C, x_coords, y_coords);
+        if (err != 0) {
+            exit(EXIT_FAILURE);
+        }
     }
 
-    printf("[i] running c_batch implementation %ld times (degree: %ld)\n", repetitions, degree);
+    printf("[i] running c_batch implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
             degree,
             repetitions,
@@ -170,9 +175,11 @@ void benchmark(long degree, long repetitions) {
     printf("[i] absolute time: %f\n", res.abs_time);
     printf("[i] average time:  %f\n", res.avg_time);
 
-    err = save_last_result(degree, C_BATCH, x_coords, y_coords);
-    if (err != 0) {
-        exit(EXIT_FAILURE);
+    if (write_result) {
+        err = save_last_result(degree, C_BATCH, x_coords, y_coords);
+        if (err != 0) {
+            exit(EXIT_FAILURE);
+        }
     }
 
     free(x_coords);

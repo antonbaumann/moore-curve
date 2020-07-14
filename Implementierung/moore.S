@@ -8,235 +8,203 @@
 
 moore:
 _moore: // mac compatibility
-
-/*
-Args (when incoming):
-    degree: in rdi
-    x: in rsi
-    y: in rdx
-
-Registers (during loop):
-
-    r8: iterations = quarter of points = 2^(degree*2-2)
-    rcx: used for shifting
-    rdi: degree
-    r10: counter & index of current point
-    r12, r13: temp registers
-    rsi: current x address
-    rdx: current y address
-    rax: current x-coord value
-    rbx: current y-coord value
-    r14: half of sidelength (rounded down)
-    r15: half of sidelength (rounded up)
-
-
-==============INITIALISE VALUES AND PUSH CALLEE-SAVED REGISTERS==========
-*/
- 
-    push rbx  	  
+    push rbx
     push r12
     push r13
     push r14
     push r15
-    //save start adresses for later
     push rsi
     push rdx
 
-    mov rcx, rdi
-    sub rcx, 1
-    mov r14, 1
-    shl r14, cl    // r14 = 2^(degree-1) = half of sidelength
-    mov r15, r14
-    dec r14	   // (rounded down)
-    shl rcx, 1     // rcx = 2*degree - 2
-    mov r8, 1
-    shl r8, cl     // r8 := 2 ^ (2 * degree-2) = quarter of points
+    // Args
+    //
+    // edi:     degree
+    // rsi:     *x
+    // rdx:     *y
 
-    mov r10, 0     // counter := 0
+    // Registers
+    //
+    // CL:      shifts
+    // r15:     hilbert_loop_counter
+    // r14:     number of coordinates in previous hilbert iteration
+    // r13:     side length of previous hilbert iteration
+    // r12:     hilbert_inner_loop_counter
+    // r11,r10: tmp registers
+    //
+    // xmm13:       helper register (holds 4 copies of (side length - 1) of previous hilbert iteration)
+    // xmm14:       helper register (holds 4 copies of side length of previous hilbert iteration)
+    // xmm15:       helper register (holds 4 copies of `1`)
+    // xmm0:        holds current x vector
+    // xmm1:        holds current y vector
+    // xmm2, xmm3:  x and y values in quadrant B
+    // xmm4, xmm5:  x and y values in quadrant C
+    // xmm6, xmm7:  x and y values in quadrant D
+    // xmm8:        temp register
 
-//=========BEGIN BIG LOOP OVER QUARTER OF POINTS============
+    // write coordinates of first iteration of hilbert curve
+    // into the array
+    mov DWORD PTR [rsi +  0], 0x00
+    mov DWORD PTR [rsi +  4], 0x00
+    mov DWORD PTR [rsi +  8], 0x01
+    mov DWORD PTR [rsi + 12], 0x01
 
-    jmp .Lcond 	   // maybe unnecessary
-.Lstart:
-   /* calculate hilbert coordinates at index
-    Expecting:
-      r10: index
-      rdi: degree
-      r8:  max_iterations
-    Uses:
-      r9:  counter
-      r11: index_copy
-    Returns:
-      rax: x-coord
-      rbx: y-coord
-    */
-  
+    mov DWORD PTR [rdx +  0], 0x00
+    mov DWORD PTR [rdx +  4], 0x01
+    mov DWORD PTR [rdx +  8], 0x01
+    mov DWORD PTR [rdx + 12], 0x00
 
-    xor rax, rax
-    xor rbx, rbx
-    mov r11, r10     // create copy of index
-    mov r9, 1        // initialize counter
+     // nr of coordinates in hilbert(1) is 4
+     mov r14, 0x04
+     mov r13, 0x02      // side len
 
-//------ BEGIN LOOP FOR POINT POSITIONING (ROTATE & TRANSLATE-------
+     // init temp register that holds 4 copies of 1
+     mov r11d, 0x01                  // use temp register
+     movd xmm15, r11d
+     pshufd xmm15, xmm15, 0x00
 
-.LHilbert_body:
-    /* rotate
-    Uses:
-      r11: as modifiable index (source for bits that are relevant for positioning)     
-    */   
-    test r11, 0b10      	// look at second to last bit
-    jz .LHilbert_left   	// if zero, then we are in the left half,
-.LHilbert_right:        	// else we are right
-    test r11, 1			// look at last bit
-    jz .LHilbert_continue 	// if zero, no rotation necessary
-    mov r13, r9         	// else mirroring like described below	
-    dec r13			// r13 := current sidelength - 1
-    mov r12, rax        	// save x value in tmp register
-    mov rax, r13
-    sub rax, rbx        	// x' := length - 1 - y
-    mov rbx, r13
-    sub rbx, r12        	// y' := length - 1 - x
-    jmp .LHilbert_continue
-.LHilbert_left:
-    test r11, 1         	// we are in left half, look at last bit
-    jnz .LHilbert_continue	// if last bit is 1, no rotation is necessary
-    mov r12, rax 		// else, swap rax and rbx
-    mov rax, rbx
-    mov rbx, r12
+     // init temp register that holds previous side length
+     movd xmm14, r13d
+     pshufd xmm14, xmm14, 0x00
+     movdqa xmm13, xmm14
+     psubd xmm13, xmm15
 
-//ROTATION DONE
+    // if we want to know moore(1) we are done
+    cmp edi, 0x01
+    jle .L_done
 
-//BEGIN TRANSLATION
+    // id degree = 2 -> generate moore
+    cmp edi, 0x02
+    je .L_moore_transformation
 
-.LHilbert_continue:
-    test r11, 0b10		// Like above, if second to last bit is set we are in right half and need to translate
-    jz .LHilbert_x_Translation_done
-    add rax, r9			// if right -> translate to right by current sidelength
-.LHilbert_x_Translation_done:
-    mov r12, r11		// Here we compare the two last bits. If they are the same...
-    shr r12, 1
-    xor r12, r11
-    test r12, 1
-    jz .LHilbert_y_Translation_done	// ...then we dont need to translate vertically
-    add rbx, r9				// else translate upwards by current sidelength
-.LHilbert_y_Translation_done:
-    shr r11, 2       // throw away last two bits of index to look at next two bits
-    shl r9, 1        // counter *= 2, sidelength *= 2
+    // we need hilbert(degree-1) to calculate moore(degree)
+    // initialize counter with c = degree - 2
+    xor r15, r15
+    mov r15d, edi
+    sub r15d, 0x02
 
-//TRANSLATION DONE
+.L_hilbert_loop_body:
+    xor r12, r12                    // hilbert_inner_counter with 0
 
-.LHilbert_cond:
-    cmp r9, r8      // counter - max_iterations
-    jle .LHilbert_body
+.L_hilbert_inner_loop_body:         // iterate over all coordinates from previous hilbert iteration
+    movdqu xmm0, [rsi + 4 * r12]        // fill xmm registers with next 4 coordinates we want to process
+    movdqu xmm1, [rdx + 4 * r12]
 
-//--------END LOOP FOR POINT POSITIONING--------
+    // copy coordinates from A -> B
+    // xmm0 holds correct x values for quardrant B
+    movdqa xmm3, xmm1               // xmm3 holds y values that go into quadrant B
+    paddd xmm3, xmm14               // shift y values upwards (into quadrant B)
 
-    // if hilbert degree is odd -> swap x and y
-    test rdi, 1    
-    jz .LHilbert_even
-    mov r12, rax        // swap rax and rbx
-    mov rax, rbx
-    mov rbx, r12
-.LHilbert_even:
+    // copy coordinates from B -> C
+    // xmm3 holds correct y vaues for quadrant C
+    movdqa xmm4, xmm0               // xmm4 holds x values that go into quadrant C
+    paddd xmm4, xmm14               // shift x values right (into quadrant C)
 
-    // rotate counterclockwise to create lower left moore quarter
-    // (x, y) -> (half_sidelength - y, x)
-    mov r12, rax
-    mov rax, r14
-    sub rax, rbx
-    mov rbx, r12
+    // copy and transform A -> D
+    // x -> 2 * len - 1 - x
+    // y -> len - 1 - y
+    movdqa xmm6, xmm14              // xmm6 holds x values that go into quadrant D
+    paddd xmm6, xmm13
+    psubd xmm6, xmm1
+    movdqa xmm7, xmm13              // xmm6 holds y values that go into quadrant D
+    psubd xmm7, xmm0
 
-    // Write coords into memory
-    mov [rsi], rax
-    mov [rdx], rbx
-    // Increase y-pointer, x-pointer and loopcounter
-    add rsi, 8
-    add rdx, 8
-    inc r10
-.Lcond:
-    cmp r10, r8     // counter - max_iterations
-    jl .Lstart
- 
-//==========END BIG LOOP OVER QUARTER OF POINTS============
+    // write register content to memory
+    // init temp registers
+    lea r10, [rsi + 4* r12]         // r10 = rsi + 4 * r12
+    lea r11, [rdx + 4* r12]         // r11 = rdx + 4 * r12
 
-//==========BEGIN COPYING AND ROTATION/TRANSLATION OF CALCULATED QUARTER======
-//TODO: Parallelise more with xmm registers?
+    movdqu [r10], xmm1            // quadrant A
+    movdqu [r11], xmm0            // swap x and y values
 
-    // copy from lower left upper left, translate by half sidelength
-    xor r10, r10 	// reset counter
-    pop r12		// y beginning adress in r12
-    pop r13		// x beginning adress in r13
+    movdqu [r10 + 4*r14], xmm0    // quadrant B
+    movdqu [r11 + 4*r14], xmm3
 
-.LMoore_body_left_upper:
-    //Load corresponding hilbert-points
-    mov rax, [r13]
-    mov rbx, [r12]
-    // manipulate: (x, y) -> (x, sidelength+y)
-    add rbx, r15
-    //Write coords into memory
-    mov [rsi], rax
-    mov [rdx], rbx
-    // Increase y-pointer, x-pointer and loopcounter
-    add r12, 8
-    add r13, 8
-    add rsi, 8
-    add rdx, 8
-    inc r10
-    cmp r10, r8
-    jl .LMoore_body_left_upper
-    
+    movdqu [r10 + 8*r14], xmm4    // quadrant C
+    movdqu [r11 + 8*r14], xmm3
 
-    //mirror from upper left to upper right
-    xor r10, r10 	//reset loopcounter
-.LMoore_body_right_upper:
-    //Load corresponding hilbert-points
-    mov rax, [r13]
-    mov rbx, [r12]
-    // manipulate: (x, y) -> (2*sidelength-x-1, 3*sidelength-y-1))
-    neg rax
-    add rax, r15
-    add rax, r14
-    neg rbx
-    add rbx, r15
-    add rbx, r15
-    add rbx, r14
-    //Write coords into memory
-    mov [rsi], rax
-    mov [rdx], rbx
-    // Increase y-pointer, x-pointer and loopcounter
-    add r12, 8
-    add r13, 8
-    add rsi, 8
-    add rdx, 8
-    inc r10
-    cmp r10, r8
-    jl .LMoore_body_right_upper
+    lea r10, [r10 + 8*r14]
+    lea r11, [r11 + 8*r14]
 
-    
-    // copy from upper right and translate down to lower right
-    xor r10, r10	// reset counter    
-.LMoore_body_right_lower:
-    //Load corresponding hilbert-points
-    mov rax, [r13]
-    mov rbx, [r12]
-    // manipulate: (x, y) -> (x, y-sidelength)
-    sub rbx, r15
-    //Write coords into memory
-    mov [rsi], rax
-    mov [rdx], rbx
-    // Increase y-pointer, x-pointer and loopcounter
-    add r12, 8
-    add r13, 8
-    add rsi, 8
-    add rdx, 8
-    inc r10
-    cmp r10, r8
-    jl .LMoore_body_right_lower
+    movdqu [r10 + 4*r14], xmm6    // quadrant D
+    movdqu [r11 + 4*r14], xmm7
 
-//===== restore registers =====
+    add r12, 0x04                   // increase counter by 4 since we processed 4 points in one step
+
+.L_hilbert_inner_loop_cond:
+    cmp r12, r14
+    jnz .L_hilbert_inner_loop_body
+
+    shl r14, 0x02                   // number of points *= 4
+
+    pslld xmm14, 0x01               // side len *= 2
+    movdqa xmm13, xmm14
+    psubd xmm13, xmm15              // xmm13 = xmm14 - 1
+
+    sub r15, 0x01                   // decrease counter by one
+
+.L_hilbert_loop_cond:
+    jnz .L_hilbert_loop_body        // flags are still set from decreasing counter
+
+.L_moore_transformation:
+    xor r15, r15                    // set counter to 0
+
+.L_moore_loop_body:
+    movdqu xmm0, [rsi + 4 * r15]
+    movdqu xmm1, [rdx + 4 * r15]
+
+    // copy coordinates from bottom left to top left (hilbert A -> moore B)
+    movdqa xmm2, xmm13              // x -> len - 1 - y
+    psubd xmm2, xmm1
+    movdqa xmm3, xmm14              // y -> len + x
+    paddd xmm3, xmm0
+
+    // copy (hilbert A -> moore D)
+    movdqa xmm6, xmm1               // x -> y + len
+    paddd xmm6, xmm14
+    movdqa xmm7, xmm13              // y -> len - 1 - x
+    psubd xmm7, xmm0
+
+    // copy (moore D -> moore C)
+    movdqa xmm5, xmm7               // y -> y + len
+    paddd xmm5, xmm14               // correct x values already in xmm6
+
+    // copy (moore B -> moore A)
+    movdqa xmm1, xmm3               // y -> y - len
+    psubd xmm1, xmm14               // correct x values already in xmm2
+
+    // write register content to memory
+    // init temp registers
+    lea r10, [rsi + 4* r15]         // r10 = rsi + 4 * r12
+    lea r11, [rdx + 4* r15]         // r11 = rdx + 4 * r12
+
+    movdqu [r10], xmm2            // quadrant A
+    movdqu [r11], xmm1            // use x values from quadrant B
+
+    movdqu [r10 + 4*r14], xmm2    // quadrant B
+    movdqu [r11 + 4*r14], xmm3
+
+    movdqu [r10 + 8*r14], xmm6    // quadrant C
+    movdqu [r11 + 8*r14], xmm5    // use x values from quadrant D
+
+    lea r10, [r10 + 8*r14]
+    lea r11, [r11 + 8*r14]
+
+    movdqu [r10 + 4*r14], xmm6    // quadrant D
+    movdqu [r11 + 4*r14], xmm7
+
+    add r15, 0x04
+
+.L_moore_loop_cond:
+    cmp r15, r14
+    jl .L_moore_loop_body
+
+.L_done:
+    pop rdx
+    pop rsi
     pop r15
     pop r14
     pop r13
     pop r12
     pop rbx
+
     ret

@@ -4,10 +4,10 @@
 #include "svg.h"
 
 void save_as_svg(
-        const uint64_t *x,
-        const uint64_t *y,
-        unsigned int degree,
-        unsigned int scale,
+        const uint32_t *x,
+        const uint32_t *y,
+        uint32_t degree,
+        uint32_t scale,
         FILE *output_file
 ) {
     // define svg components
@@ -16,23 +16,23 @@ void save_as_svg(
     char *svg_path_open = "<path d=\"";
     char *svg_path_close = "\" stroke=\"#000\" fill=\"none\"/>\"";
 
-    unsigned long long side_length = (unsigned long long) 2 << (degree - 1);
+    uint32_t side_length = (uint32_t) 2 << (degree - 1);
 
-    unsigned long long padding = scale;
-    unsigned long long nr_coordinates = side_length * side_length;
-    unsigned long long svg_size = side_length * scale + padding;
+    uint32_t padding = scale;
+    uint64_t nr_coordinates = side_length * side_length;
+    uint64_t svg_size = side_length * scale + padding;
 
     fprintf(output_file, svg_open_f, svg_size, svg_size);
     fprintf(output_file, "%s", svg_path_open);
 
     // move origin of path to first coordinate in coord list
     if (nr_coordinates > 0) {
-        fprintf(output_file, "M%llu %llu ", x[0] * scale + padding, svg_size - (y[0] * scale + padding));
+        fprintf(output_file, "M%d %lu ", x[0] * scale + padding, svg_size - (y[0] * scale + padding));
     }
-    
+
     // print remaining coordinates to svg file
     for (uint64_t i = 1; i < nr_coordinates; i++) {
-        fprintf(output_file, "L%llu %llu ", x[i] * scale + padding, svg_size - (y[i] * scale + padding));
+        fprintf(output_file, "L%d %lu ", x[i] * scale + padding, svg_size - (y[i] * scale + padding));
     }
 
     fprintf(output_file, "%s", svg_path_close);
