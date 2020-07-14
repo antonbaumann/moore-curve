@@ -13,7 +13,7 @@
 
 // Rechnerhalle does not allow us to allocate enough ram to calculate
 // moore curve of degree 17
-const int MAX_DEGREE = 32;
+const uint32_t MAX_DEGREE = 32;
 
 enum impl_variant {
     ASSEMBLY,
