@@ -53,11 +53,26 @@ _moore: // mac compatibility
     mov DWORD PTR [rdx +  8], 0x01
     mov DWORD PTR [rdx + 12], 0x00
 
+     // nr of coordinates in hilbert(1) is 4
+     mov r14, 0x04
+     mov r13, 0x02      // side len
+
+     // init temp register that holds 4 copies of 1
+     mov r11d, 0x01                  // use temp register
+     movd xmm15, r11d
+     pshufd xmm15, xmm15, 0x00
+
+     // init temp register that holds previous side length
+     movd xmm14, r13d
+     pshufd xmm14, xmm14, 0x00
+     movdqa xmm13, xmm14
+     psubd xmm13, xmm15
+
     // if we want to know moore(1) we are done
     cmp edi, 0x01
     jle .L_done
 
-    // id degree = 2 -> generate hilbert
+    // id degree = 2 -> generate moore
     cmp edi, 0x02
     je .L_moore_transformation
 
@@ -67,21 +82,6 @@ _moore: // mac compatibility
     mov r15d, edi
     sub r15d, 0x02
 
-    // nr of coordinates in hilbert(1) is 4
-    mov r14, 0x04
-    mov r13, 0x02
-
-    // init temp register that holds 4 copies of 1
-    mov r11d, 0x01                  // use temp register
-    movd xmm15, r11d
-    pshufd xmm15, xmm15, 0x00
-
-    // init temp register that holds previous side length
-    movd xmm14, r13d
-    pshufd xmm14, xmm14, 0x00
-    movdqa xmm13, xmm14
-    psubd xmm13, xmm15
-
 .L_hilbert_loop_body:
     xor r12, r12                    // hilbert_inner_counter with 0
 
@@ -90,15 +90,14 @@ _moore: // mac compatibility
     movdqu xmm1, [rdx + 4 * r12]
 
     // copy coordinates from A -> B
-    movdqa xmm2, xmm0               // xmm2 holds x values that go into quadrant B
+    // xmm0 holds correct x values for quardrant B
     movdqa xmm3, xmm1               // xmm3 holds y values that go into quadrant B
     paddd xmm3, xmm14               // shift y values upwards (into quadrant B)
 
     // copy coordinates from B -> C
-    movdqa xmm4, xmm2               // xmm4 holds x values that go into quadrant C
-    movdqa xmm5, xmm3               // xmm5 holds y values that go into quadrant C
+    // xmm3 holds correct y vaues for quadrant C
+    movdqa xmm4, xmm0               // xmm4 holds x values that go into quadrant C
     paddd xmm4, xmm14               // shift x values right (into quadrant C)
-
 
     // copy and transform A -> D
     // x -> 2 * len - 1 - x
@@ -117,11 +116,11 @@ _moore: // mac compatibility
     movdqu [r10], xmm1            // quadrant A
     movdqu [r11], xmm0            // swap x and y values
 
-    movdqu [r10 + 4*r14], xmm2    // quadrant B
+    movdqu [r10 + 4*r14], xmm0    // quadrant B
     movdqu [r11 + 4*r14], xmm3
 
     movdqu [r10 + 8*r14], xmm4    // quadrant C
-    movdqu [r11 + 8*r14], xmm5
+    movdqu [r11 + 8*r14], xmm3
 
     lea r10, [r10 + 8*r14]
     lea r11, [r11 + 8*r14]
@@ -137,9 +136,9 @@ _moore: // mac compatibility
 
     shl r14, 0x02                   // number of points *= 4
 
-    pslld xmm14, 0x01
+    pslld xmm14, 0x01               // side len *= 2
     movdqa xmm13, xmm14
-    psubd xmm13, xmm15
+    psubd xmm13, xmm15              // xmm13 = xmm14 - 1
 
     sub r15, 0x01                   // decrease counter by one
 
@@ -147,9 +146,57 @@ _moore: // mac compatibility
     jnz .L_hilbert_loop_body        // flags are still set from decreasing counter
 
 .L_moore_transformation:
-    // moore stuff
+    xor r15, r15                    // set counter to 0
 
+.L_moore_loop_body:
+    movdqu xmm0, [rsi + 4 * r15]
+    movdqu xmm1, [rdx + 4 * r15]
 
+    // copy coordinates from bottom left to top left (hilbert A -> moore B)
+    movdqa xmm2, xmm13              // x -> len - 1 - y
+    psubd xmm2, xmm1
+    movdqa xmm3, xmm14              // y -> len + x
+    paddd xmm3, xmm0
+
+    // copy (hilbert A -> moore D)
+    movdqa xmm6, xmm1               // x -> y + len
+    paddd xmm6, xmm14
+    movdqa xmm7, xmm13              // y -> len - 1 - x
+    psubd xmm7, xmm0
+
+    // copy (moore D -> moore C)
+    movdqa xmm5, xmm7               // y -> y + len
+    paddd xmm5, xmm14               // correct x values already in xmm6
+
+    // copy (moore B -> moore A)
+    movdqa xmm1, xmm3               // y -> y - len
+    psubd xmm1, xmm14               // correct x values already in xmm2
+
+    // write register content to memory
+    // init temp registers
+    lea r10, [rsi + 4* r15]         // r10 = rsi + 4 * r12
+    lea r11, [rdx + 4* r15]         // r11 = rdx + 4 * r12
+
+    movdqu [r10], xmm2            // quadrant A
+    movdqu [r11], xmm1            // use x values from quadrant B
+
+    movdqu [r10 + 4*r14], xmm2    // quadrant B
+    movdqu [r11 + 4*r14], xmm3
+
+    movdqu [r10 + 8*r14], xmm6    // quadrant C
+    movdqu [r11 + 8*r14], xmm5    // use x values from quadrant D
+
+    lea r10, [r10 + 8*r14]
+    lea r11, [r11 + 8*r14]
+
+    movdqu [r10 + 4*r14], xmm6    // quadrant D
+    movdqu [r11 + 4*r14], xmm7
+
+    add r15, 0x04
+
+.L_moore_loop_cond:
+    cmp r15, r14
+    jl .L_moore_loop_body
 
 .L_done:
     pop rdx
