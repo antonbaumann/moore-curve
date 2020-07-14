@@ -114,13 +114,13 @@ int main(int argc, char **argv) {
 
     switch (variant) {
         case C_ITERATIVE:
-            moore_c_iterative((uint32_t) degree, x_coords, y_coords);
+            moore_c_naive_wrapper(degree, x_coords, y_coords);
             break;
         case C_BATCH:
-            moore_c_batch((uint32_t) degree, x_coords, y_coords);
+            moore_c_batch_wrapper(degree, x_coords, y_coords);
             break;
         case ASSEMBLY:
-            moore_asm(degree, x_coords, y_coords);
+            moore_asm_wrapper(degree, x_coords, y_coords);
             break;
         default:
             printf("this should not have happened\n");
@@ -162,6 +162,9 @@ int write_svg(char *path, uint32_t *x_coords, uint32_t *y_coords, unsigned int d
         printf("failed to create file\n");
         return 1;
     }
+
+    printf("writing data...\n");
+
     save_as_svg(
             x_coords,
             y_coords,
@@ -191,7 +194,20 @@ void print_help() {
     printf("===============================================================================\n");
 }
 
-void moore_asm(long degree, uint32_t *x, uint32_t *y) {
-    printf("moore assembly: degree %ld\n", degree);
-    moore((uint32_t) degree, x, y);
+void moore_asm_wrapper(uint32_t degree, uint32_t *x, uint32_t *y) {
+    printf("moore assembly: degree %u\n", degree);
+    moore(degree, x, y);
+    printf("done!\n");
+}
+
+void moore_c_naive_wrapper(uint32_t degree, uint32_t *x, uint32_t *y) {
+    printf("c naive: degree %u\n", degree);
+    moore_c_iterative(degree, x, y);
+    printf("done!\n");
+}
+
+void moore_c_batch_wrapper(uint32_t degree, uint32_t *x, uint32_t *y) {
+    printf("c batch: degree %u\n", degree);
+    moore_c_batch(degree, x, y);
+    printf("done!\n");
 }

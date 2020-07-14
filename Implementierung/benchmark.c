@@ -65,6 +65,7 @@ int save_last_result(long degree, enum implementation impl, uint32_t *x_coords, 
         return -1;
     }
 
+    printf("[i] writing last result to disk ...\n");
     save_as_svg(x_coords, y_coords, degree, 5, svg_file);
     return 0;
 }
