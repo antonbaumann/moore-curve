@@ -145,6 +145,23 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
         }
     }
 
+    printf("[i] running c_batch implementation %d times (degree: %d)\n", repetitions, degree);
+    res = benchmark_implementation(
+            degree,
+            repetitions,
+            x_coords,
+            y_coords,
+            moore_c_batch
+    );
+    printf("[i] absolute time: %f\n", res.abs_time);
+    printf("[i] average time:  %f\n", res.avg_time);
+
+    if (write_result) {
+        err = save_last_result(degree, C_BATCH, x_coords, y_coords);
+        if (err != 0) {
+            exit(EXIT_FAILURE);
+        }
+    }
 
     printf("[i] running c_naive implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
@@ -159,24 +176,6 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
 
     if (write_result) {
         err = save_last_result(degree, C, x_coords, y_coords);
-        if (err != 0) {
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    printf("[i] running c_batch implementation %d times (degree: %d)\n", repetitions, degree);
-    res = benchmark_implementation(
-            degree,
-            repetitions,
-            x_coords,
-            y_coords,
-            moore_c_batch
-    );
-    printf("[i] absolute time: %f\n", res.abs_time);
-    printf("[i] average time:  %f\n", res.avg_time);
-
-    if (write_result) {
-        err = save_last_result(degree, C_BATCH, x_coords, y_coords);
         if (err != 0) {
             exit(EXIT_FAILURE);
         }
