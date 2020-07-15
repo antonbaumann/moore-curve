@@ -256,11 +256,54 @@ _moore_avx: // mac compatibility
     jl .L_moore_loop_body_128
     jmp .L_done
 
-
 .L_moore_transformation_256:
+    xor r15, r15
+
 .L_moore_loop_body_256:
+    // write register content to memory
+    // init temp registers
+    lea r10, [rsi + 4 * r15]         // r10 = rsi + 4 * r12
+    lea r11, [rdx + 4 * r15]         // r11 = rdx + 4 * r12
+
+    vmovdqu ymm0, [r10]
+    vmovdqu ymm1, [r11]
+
+    // copy coordinates from bottom left to top left (hilbert A -> moore B)
+    vpsubd ymm2, ymm13, ymm1         // x -> len - 1 - y
+    vpaddd ymm3, ymm14, ymm0         // y -> len + x
+
+    // copy (hilbert A -> moore D)
+    vpaddd ymm6, ymm1, ymm14         // x -> y + len
+    vpsubd ymm7, ymm13, ymm0         // y -> len - 1 - x
+
+    // copy (moore D -> moore C)
+    vpaddd ymm5, ymm7, ymm14         // y -> y + len
+                                     // correct x values already in ymm6
+
+    // copy (moore B -> moore A)
+    vpsubd ymm1, ymm3, ymm14         // y -> y - len
+                                     // correct x values already in ymm2
+
+    vmovdqu [r10], ymm2              // quadrant A
+    vmovdqu [r11], ymm1              // use x values from quadrant B
+
+    lea r10, [r10 + 4 * r14]
+    lea r11, [r11 + 4 * r14]
+
+    vmovdqu [r10], ymm2              // quadrant B
+    vmovdqu [r11], ymm3
+
+    vmovdqu [r10 + 4*r14], ymm6      // quadrant C
+    vmovdqu [r11 + 4*r14], ymm5      // use x values from quadrant D
+
+    vmovdqu [r10 + 8*r14], ymm6      // quadrant D
+    vmovdqu [r11 + 8*r14], ymm7
+
+    add r15, 0x08
 
 .L_moore_loop_cond_256:
+    cmp r15, r14
+    jl .L_moore_loop_body_256
 
 .L_done:
     pop rdx
