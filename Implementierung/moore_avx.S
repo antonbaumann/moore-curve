@@ -53,9 +53,12 @@ _moore_avx: // mac compatibility
     mov DWORD PTR [rdx +  8], 0x01
     mov DWORD PTR [rdx + 12], 0x00
 
-    // nr of coordinates in hilbert(1) is 4
-    mov r14, 0x04
-    mov r13, 0x02      // side len
+    // if we want to know moore(1) we are done
+    cmp edi, 0x01
+    jle .L_done
+
+    mov r14, 0x04                   // nr of coordinates in hilbert(1) is 4
+    mov r13, 0x02                   // side len
 
     // init temp register that holds 4 copies of 1
     mov r11d, 0x01                  // use temp register
@@ -68,10 +71,6 @@ _moore_avx: // mac compatibility
     movdqa xmm13, xmm14
     psubd xmm13, xmm15
 
-    // if we want to know moore(1) we are done
-    cmp edi, 0x01
-    jle .L_done
-
     // id degree = 2 -> generate moore
     cmp edi, 0x02
     je .L_moore_transformation_128
@@ -79,6 +78,54 @@ _moore_avx: // mac compatibility
     // since hilbert(1) has only 4 coordinates we have to handle
     // hilbert(2) separately
     // the easiest and most efficient way is to hardcode hilbert(2) into the array
+    // hardcode x-vaues of hilbert(2) into array
+.L_hardcode_hilbert_degree_2:
+    mov DWORD PTR [rsi +  0], 0x00
+    mov DWORD PTR [rsi +  4], 0x01
+    mov DWORD PTR [rsi +  8], 0x01
+    mov DWORD PTR [rsi + 12], 0x00
+
+    mov DWORD PTR [rsi + 16], 0x00
+    mov DWORD PTR [rsi + 20], 0x00
+    mov DWORD PTR [rsi + 24], 0x01
+    mov DWORD PTR [rsi + 28], 0x01
+
+    mov DWORD PTR [rsi + 32], 0x02
+    mov DWORD PTR [rsi + 36], 0x02
+    mov DWORD PTR [rsi + 40], 0x03
+    mov DWORD PTR [rsi + 44], 0x03
+
+    mov DWORD PTR [rsi + 48], 0x03
+    mov DWORD PTR [rsi + 52], 0x02
+    mov DWORD PTR [rsi + 56], 0x02
+    mov DWORD PTR [rsi + 60], 0x03
+
+    // hardcode y-vaues of hilbert(2) into array
+    mov DWORD PTR [rdx +  0], 0x00
+    mov DWORD PTR [rdx +  4], 0x00
+    mov DWORD PTR [rdx +  8], 0x01
+    mov DWORD PTR [rdx + 12], 0x01
+
+    mov DWORD PTR [rdx + 16], 0x02
+    mov DWORD PTR [rdx + 20], 0x03
+    mov DWORD PTR [rdx + 24], 0x03
+    mov DWORD PTR [rdx + 28], 0x02
+
+    mov DWORD PTR [rdx + 32], 0x02
+    mov DWORD PTR [rdx + 36], 0x03
+    mov DWORD PTR [rdx + 40], 0x03
+    mov DWORD PTR [rdx + 44], 0x02
+
+    mov DWORD PTR [rdx + 48], 0x01
+    mov DWORD PTR [rdx + 52], 0x01
+    mov DWORD PTR [rdx + 56], 0x00
+    mov DWORD PTR [rdx + 60], 0x00
+
+    // update hilbert side length
+    shl r14, 0x02                   // number of coordiantes in hilbert(2) is 8
+    pslld xmm14, 0x01               // side len *= 2
+    movdqa xmm13, xmm14
+    psubd xmm13, xmm15              // xmm13 = xmm14 - 1
 
     // if we are here: degree >= 3
     // so we can use 256 bit registers
@@ -86,11 +133,14 @@ _moore_avx: // mac compatibility
     VBROADCASTSS ymm14, xmm14           // ymm14 = {side len} * 8
     VBROADCASTSS ymm13, xmm13           // ymm14 = {side len - 1} * 8
 
+    cmp edi, 0x03
+    je .L_moore_transformation_256
+
     // we need hilbert(degree-1) to calculate moore(degree)
-    // initialize counter with c = degree - 2
+    // initialize counter with c = degree - 3
     xor r15, r15
     mov r15d, edi
-    sub r15d, 0x02
+    sub r15d, 0x03
 
 .L_hilbert_loop_body:
     xor r12, r12                    // hilbert_inner_counter with 0
@@ -102,44 +152,40 @@ _moore_avx: // mac compatibility
     lea r10, [rsi + 4* r12]         // r10 = rsi + 4 * r12
     lea r11, [rdx + 4* r12]         // r11 = rdx + 4 * r12
 
-    movdqu xmm0, [r10]              // fill xmm registers with next 4 coordinates we want to process
-    movdqu xmm1, [r11]
+    vmovdqu ymm0, [r10]             // fill xmm registers with next 4 coordinates we want to process
+    vmovdqu ymm1, [r11]
 
     // copy coordinates from A -> B
-    // xmm0 holds correct x values for quardrant B
-    movdqa xmm3, xmm1               // xmm3 holds y values that go into quadrant B
-    paddd xmm3, xmm14               // shift y values upwards (into quadrant B)
+    // ymm0 holds correct x values for quardrant B
+    vpaddd ymm3, ymm1, ymm14         // shift y values upwards (into quadrant B)
 
     // copy coordinates from B -> C
-    // xmm3 holds correct y vaues for quadrant C
-    movdqa xmm4, xmm0               // xmm4 holds x values that go into quadrant C
-    paddd xmm4, xmm14               // shift x values right (into quadrant C)
+    // ymm3 holds correct y vaues for quadrant C
+    vpaddd ymm4, ymm0, ymm14         // shift x values to the right (into quadrant C)
 
     // copy and transform A -> D
     // x -> 2 * len - 1 - x
     // y -> len - 1 - y
-    movdqa xmm6, xmm14              // xmm6 holds x values that go into quadrant D
-    paddd xmm6, xmm13
-    psubd xmm6, xmm1
-    movdqa xmm7, xmm13              // xmm6 holds y values that go into quadrant D
-    psubd xmm7, xmm0
+    vpaddd ymm6, ymm13, ymm14       // ymm6 holds x values that go into quadrant D
+    vpsubd ymm6, ymm6, ymm1
+    vpsubd ymm7, ymm0, ymm13         // ymm7 holds y values that go into quadrant D
 
-    movdqu [r10], xmm1              // quadrant A
-    movdqu [r11], xmm0              // swap x and y values
+    vmovdqu [r10], ymm1             // quadrant A
+    vmovdqu [r11], ymm0             // swap x and y values
 
-    lea r10, [r10 + 4*r14]
-    lea r11, [r11 + 4*r14]
+    lea r10, [r10 + 4 * r14]
+    lea r11, [r11 + 4 * r14]
 
-    movdqu [r10], xmm0              // quadrant B
-    movdqu [r11], xmm3
+    vmovdqu [r10], ymm0              // quadrant B
+    vmovdqu [r11], ymm3
 
-    movdqu [r10 + 4 * r14], xmm4    // quadrant C
-    movdqu [r11 + 4 * r14], xmm3
+    vmovdqu [r10 + 4 * r14], ymm4    // quadrant C
+    vmovdqu [r11 + 4 * r14], ymm3
 
-    movdqu [r10 + 8 * r14], xmm6    // quadrant D
-    movdqu [r11 + 8 * r14], xmm7
+    vmovdqu [r10 + 8 * r14], ymm6    // quadrant D
+    vmovdqu [r11 + 8 * r14], ymm7
 
-    add r12, 0x04                   // increase counter by 4 since we processed 4 points in one step
+    add r12, 0x08                   // increase counter by 8 since we processed 8 points in one step
 
 .L_hilbert_inner_loop_cond:
     cmp r12, r14
@@ -147,14 +193,14 @@ _moore_avx: // mac compatibility
 
     shl r14, 0x02                   // number of points *= 4
 
-    pslld xmm14, 0x01               // side len *= 2
-    movdqa xmm13, xmm14
-    psubd xmm13, xmm15              // xmm13 = xmm14 - 1
+    vpsllvd ymm14, ymm14, ymm15     // side len *= 2
+    vpsubd ymm13, ymm14, ymm15      // xmm13 = xmm14 - 1
 
     sub r15, 0x01                   // decrease counter by one
 
 .L_hilbert_loop_cond:
     jnz .L_hilbert_loop_body        // flags are still set from decreasing counter
+    jmp .L_moore_transformation_256
 
 .L_moore_transformation_128:
     xor r15, r15                    // set counter to 0
@@ -208,6 +254,13 @@ _moore_avx: // mac compatibility
 .L_moore_loop_cond_128:
     cmp r15, r14
     jl .L_moore_loop_body_128
+    jmp .L_done
+
+
+.L_moore_transformation_256:
+.L_moore_loop_body_256:
+
+.L_moore_loop_cond_256:
 
 .L_done:
     pop rdx
