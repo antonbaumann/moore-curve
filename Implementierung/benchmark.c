@@ -17,7 +17,7 @@ struct benchmark_result {
 };
 
 enum implementation {
-    C, ASM, C_BATCH
+    C, ASM, ASM_AVX, C_BATCH
 };
 
 // creates benchmark dir if not existing
@@ -39,6 +39,9 @@ int save_last_result(long degree, enum implementation impl, uint32_t *x_coords, 
             break;
         case ASM:
             implementation_description = "ASM";
+            break;
+        case ASM_AVX:
+            implementation_description = "ASM_AVX";
             break;
         case C_BATCH:
             implementation_description = "C_BATCH";
@@ -134,7 +137,24 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
 
     struct benchmark_result res;
 
-    printf("[i] running assembly implementation %d times (degree: %d)\n", repetitions, degree);
+    printf("[i] running assembly avx implementation %d times (degree: %d)\n", repetitions, degree);
+    res = benchmark_implementation(
+            degree,
+            repetitions,
+            x_coords,
+            y_coords,
+            moore_avx
+    );
+    print_result(res);
+
+    if (write_result) {
+        err = save_last_result(degree, ASM_AVX, x_coords, y_coords);
+        if (err != 0) {
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    printf("[i] running assembly (without avx) implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
             degree,
             repetitions,

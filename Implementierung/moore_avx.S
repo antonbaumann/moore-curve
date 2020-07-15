@@ -146,7 +146,6 @@ _moore_avx: // mac compatibility
     xor r12, r12                    // hilbert_inner_counter with 0
 
 .L_hilbert_inner_loop_body:         // iterate over all coordinates from previous hilbert iteration
-
     // write register content to memory
     // init temp registers
     lea r10, [rsi + 4* r12]         // r10 = rsi + 4 * r12
