@@ -200,7 +200,7 @@ void print_help() {
 
 void moore_asm_wrapper(uint32_t degree, uint32_t *x, uint32_t *y) {
     printf("moore assembly: degree %u\n", degree);
-    moore(degree, x, y);
+    moore_avx(degree, x, y);
     printf("done!\n");
 }
 

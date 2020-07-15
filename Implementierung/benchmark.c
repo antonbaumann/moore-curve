@@ -12,8 +12,8 @@
 static const char *BENCHMARK_DIR = "benchmark";
 
 struct benchmark_result {
-    double abs_time;
-    double avg_time;
+    long abs_time_ns;
+    long avg_time_ns;
 };
 
 enum implementation {
@@ -70,6 +70,13 @@ int save_last_result(long degree, enum implementation impl, uint32_t *x_coords, 
     return 0;
 }
 
+void print_result(struct benchmark_result res) {
+    double seconds = res.abs_time_ns * 1e-9;
+
+    printf("[i] absolute time: %fs\n", seconds);
+    printf("[i] average time:  %ldns\n", res.avg_time_ns);
+}
+
 struct benchmark_result benchmark_implementation(
         long degree,
         long repetitions,
@@ -95,12 +102,12 @@ struct benchmark_result benchmark_implementation(
         exit(EXIT_FAILURE);
     }
 
-    double time = end.tv_sec - start.tv_sec + 1e-9 * (end.tv_nsec - start.tv_nsec);
-    double avg_time = time / repetitions;
+    long time_ns = (end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec);
+    long avg_time_ns = time_ns / repetitions;
 
     struct benchmark_result res = {
-            .abs_time=time,
-            .avg_time=avg_time,
+            .abs_time_ns=time_ns,
+            .avg_time_ns=avg_time_ns,
     };
     return res;
 }
@@ -135,8 +142,7 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
             y_coords,
             moore
     );
-    printf("[i] absolute time: %f\n", res.abs_time);
-    printf("[i] average time:  %f\n", res.avg_time);
+    print_result(res);
 
     if (write_result) {
         err = save_last_result(degree, ASM, x_coords, y_coords);
@@ -153,8 +159,7 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
             y_coords,
             moore_c_batch
     );
-    printf("[i] absolute time: %f\n", res.abs_time);
-    printf("[i] average time:  %f\n", res.avg_time);
+    print_result(res);
 
     if (write_result) {
         err = save_last_result(degree, C_BATCH, x_coords, y_coords);
@@ -171,8 +176,7 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
             y_coords,
             moore_c_iterative
     );
-    printf("[i] absolute time: %f\n", res.abs_time);
-    printf("[i] average time:  %f\n", res.avg_time);
+    print_result(res);
 
     if (write_result) {
         err = save_last_result(degree, C, x_coords, y_coords);
