@@ -76,11 +76,15 @@ _moore_avx: // mac compatibility
     cmp edi, 0x02
     je .L_moore_transformation_128
 
+    // since hilbert(1) has only 4 coordinates we have to handle
+    // hilbert(2) separately
+    // the easiest and most efficient way is to hardcode hilbert(2) into the array
+
     // if we are here: degree >= 3
     // so we can use 256 bit registers
-    VBROADCASTSS ymm15, xmm15
-    VBROADCASTSS ymm14, xmm14
-    VBROADCASTSS ymm13, xmm13
+    VBROADCASTSS ymm15, xmm15           // ymm15 = {1,1,1,1,1,1,1,1}
+    VBROADCASTSS ymm14, xmm14           // ymm14 = {side len} * 8
+    VBROADCASTSS ymm13, xmm13           // ymm14 = {side len - 1} * 8
 
     // we need hilbert(degree-1) to calculate moore(degree)
     // initialize counter with c = degree - 2
