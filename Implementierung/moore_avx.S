@@ -168,7 +168,7 @@ _moore_avx: // mac compatibility
     // y -> len - 1 - y
     vpaddd ymm6, ymm13, ymm14       // ymm6 holds x values that go into quadrant D
     vpsubd ymm6, ymm6, ymm1
-    vpsubd ymm7, ymm0, ymm13         // ymm7 holds y values that go into quadrant D
+    vpsubd ymm7,ymm13 ,ymm0         // ymm7 holds y values that go into quadrant D
 
     vmovdqu [r10], ymm1             // quadrant A
     vmovdqu [r11], ymm0             // swap x and y values
