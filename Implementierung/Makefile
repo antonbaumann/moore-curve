@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-O3 -Wall -Wextra -ggdb
+CFLAGS=-O3 -mavx2 -mavx
 
 .PHONY: clean
 all: moore
