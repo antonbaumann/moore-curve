@@ -127,14 +127,14 @@ _moore_avx: // mac compatibility
     movdqa xmm13, xmm14
     psubd xmm13, xmm15              // xmm13 = xmm14 - 1
 
+    cmp edi, 0x03
+    je .L_moore_transformation_128
+
     // if we are here: degree >= 3
     // so we can use 256 bit registers
     VBROADCASTSS ymm15, xmm15           // ymm15 = {1,1,1,1,1,1,1,1}
     VBROADCASTSS ymm14, xmm14           // ymm14 = {side len} * 8
     VBROADCASTSS ymm13, xmm13           // ymm14 = {side len - 1} * 8
-
-    cmp edi, 0x03
-    je .L_moore_transformation_256
 
     // we need hilbert(degree-1) to calculate moore(degree)
     // initialize counter with c = degree - 3
