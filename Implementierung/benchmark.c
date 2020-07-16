@@ -156,6 +156,7 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
             exit(EXIT_FAILURE);
         }
     }
+    #endif
 
     printf("[i] running assembly (without avx) implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
@@ -174,7 +175,6 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
             exit(EXIT_FAILURE);
         }
     }
-    #endif
 
     printf("[i] running c_batch implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
