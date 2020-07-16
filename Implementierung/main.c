@@ -199,12 +199,12 @@ void print_help() {
 }
 
 void moore_asm_wrapper(uint32_t degree, uint32_t *x, uint32_t *y) {
-    #ifndef __AVX__
-    printf("moore assembly (without avx) registers: degree %u\n", degree);
-    moore(degree, x, y);
-    #else
+    #ifdef __AVX2__
     printf("moore assembly using avx registers: degree %u\n", degree);
     moore_avx(degree, x, y);
+    #else
+    printf("moore assembly (without avx registers): degree %u\n", degree);
+    moore(degree, x, y);
     #endif
     printf("done!\n");
 }

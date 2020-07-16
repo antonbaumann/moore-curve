@@ -138,6 +138,7 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
 
     struct benchmark_result res;
 
+    #ifdef __AVX2__
     printf("[i] running assembly avx implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
             degree,
@@ -173,6 +174,7 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
             exit(EXIT_FAILURE);
         }
     }
+    #endif
 
     printf("[i] running c_batch implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
