@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <time.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "moore.h"
 #include "svg.h"
@@ -146,6 +147,7 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
             moore_avx
     );
     print_result(res);
+    sleep(3);
 
     if (write_result) {
         err = save_last_result(degree, ASM_AVX, x_coords, y_coords);
@@ -163,6 +165,7 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
             moore
     );
     print_result(res);
+    sleep(3);
 
     if (write_result) {
         err = save_last_result(degree, ASM, x_coords, y_coords);
@@ -180,6 +183,7 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
             moore_c_batch
     );
     print_result(res);
+    sleep(3);
 
     if (write_result) {
         err = save_last_result(degree, C_BATCH, x_coords, y_coords);

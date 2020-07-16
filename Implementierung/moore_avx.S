@@ -100,7 +100,7 @@ _moore_avx: // mac compatibility
     mov DWORD PTR [rsi + 56], 0x02
     mov DWORD PTR [rsi + 60], 0x03
 
-    // hardcode y-vaues of hilbert(2) into array
+    // hardcode y-values of hilbert(2) into array
     mov DWORD PTR [rdx +  0], 0x00
     mov DWORD PTR [rdx +  4], 0x00
     mov DWORD PTR [rdx +  8], 0x01
@@ -127,6 +127,8 @@ _moore_avx: // mac compatibility
     movdqa xmm13, xmm14
     psubd xmm13, xmm15              // xmm13 = xmm14 - 1
 
+    // it is faster to use 128 bit registers to compute moore(3)
+    // from the 16 points of hilbert(2)
     cmp edi, 0x03
     je .L_moore_transformation_128
 
