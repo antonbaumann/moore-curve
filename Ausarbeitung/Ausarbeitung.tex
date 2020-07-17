@@ -1,5 +1,12 @@
 % Diese Zeile bitte -nicht- aendern.
 \documentclass[course=erap]{aspdoc}
+\graphicspath{ {./images/} }
+%\usepackage{xcolor}
+%\lstset{basicstyle=\ttfamily,language=c,keywordstyle=\color{blue}}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amssymb}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TODO: Ersetzen Sie in den folgenden Zeilen die entsprechenden -Texte-
@@ -23,20 +30,140 @@
 
 \subsection{Die Moore Kurve}
 
-Die Moore Kurve ist eine flächenfüllende Kurve, 
-....\ \\
+Wie im letzten Abschnitt erwähnt, kann die Moore Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads n-1 erzeugt werden (für n > 1).
 Das Problem kann also umformuliert werden in die Erzeugung der Hilbert Kurve und dem anschließendenden Kopieren, Verschieben und Rotieren der Punkte. 
 \\
 Es gibt rekursive Algorithmen für die Erzeugung der Hilbert Kurve, diese klammern wir im Folgenden jedoch aus. (Siehe Aufgabenstellung)
 
 \subsection{Erzeugung der Hilbert Kurve: iterativer Punkte-für-Punkt Ansatz}
-%rekursiven Ansatz vermieden
+Im Folgenden soll ein Algorithmus dargestellt werden, der für gegebenen Index i und Grad n die Koordinaten des korrespondierenden Punktes an der Stelle i der Moore Kurve berechnet.
+Geht man davon aus, schon einen solchen funktionierenden Algorithmus für die Hilbert Kurve zu haben, so muss nur der Quadrant des Punktes bestimmt werden, dann der entsprechende Punkt der Hilbert Kurve errechnet und je nach Quadrant verschoben, gespiegelt oder rotiert werden. Dies wird in Abbildung \ref{HilbertZuMoore} grafisch veranschaulicht und im Algorithmus \ref{moore:iterative} skizziert.
+
+\begin{figure}[h]
+\centering
+\def\svgwidth{240pt}
+\input{images/HilbertZuMooreVektorG.pdf_tex}
+\caption{Transformation von Hilbert Kurve des Grads n-1 zu Moore Kurve des Grads n}
+\label{HilbertZuMoore}
+\end{figure}
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+\caption{Compute coordinates of point on Moore curve}
+\label{moore:iterative}
+\Function{computeMooreCoord}{$index$, $degree$}
+	\State $len \leftarrow 2^{degree -1}$ \Comment{Half of the sidelength of final curve}
+	\State find out quadrant $q$ of point ($q \in \{A, B, C, D\}$)
+	\State t$uple \leftarrow$ computeHilbertCoord($index$, $degree-1$)
+	\State $tmp \leftarrow tuple.x$
+	\If {$q = A$} 
+		\Comment{A: rotate 90$^{\circ} \circlearrowleft$}
+		\State $tuple.x \leftarrow len - tuple.y - 1$
+		\State $tuple.y \leftarrow tmp$
+	\ElsIf{$q = B$}
+		\Comment{B: rotate 90$^{\circ}\circlearrowleft$ and shift up}
+		\State $tuple.x \leftarrow len - tuple.y - 1$
+		\State $tuple.y \leftarrow tmp + len$
+	\ElsIf{$q = C$}
+		\Comment{C: rotate 90$^{\circ}\circlearrowright$ and shift up and right}
+		\State $tuple.x \leftarrow tuple.y + len$
+		\State $tuple.y \leftarrow 2*len - tmp -1$
+	\ElsIf{$q = D$} 
+		\Comment{D: rotate 90$^{\circ} \circlearrowright$ and shift right}
+		\State $tuple.x \leftarrow tuple.y + len$
+		\State $tuple.y \leftarrow len - tmp -1$
+	\EndIf
+\EndFunction
+\Function{computeHilbertCoord}{$index$, $degree$}
+	\State [...]
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+
 
 
 
 
 
 \subsection{Erzeugung der Hilbert Kurve: Bottom-up Ansatz}
+Der oben dargestellte Algorithmus hat den Vorteil, für einen gegebenen Index und Grad die Koordinaten des korrespondierenden Punktes ausrechnen zu können, ohne dafür die gesamte Kurve erzeugen zu müssen und dann die Koordinaten an der Stelle des Index auszulesen.\\ 
+Soll allerdings die gesamte Kurve erstellt werden, also x-Werte und y-Werte für alle Punkte errechnet werden, so ist der iterative Aufruf des oben gezeigten Algorithmus für jeden Index sehr ineffizient.\\
+Ebenso wie die Moore Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads n aufgebaut werden kann, so kann auch die Hilbert Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads n-1 erzeugt werden (Abbildung \ref{HilbertZuHilbert}).
+
+\begin{figure}[h]
+\centering
+\def\svgwidth{240pt}
+\input{images/HilbertZuHilbertVektorG.pdf_tex}
+\caption{Transformation von Hilbert Kurve des Grads n-1 zu Hilbert Kurve des Grads n}
+\label{HilbertZuHilbert}
+\end{figure}
+
+Man kann also bei der Erzeugung der Hilbert Kurve ähnlich vorgehen wie bei Algorithmus \ref{moore:iterative}: Mit gegebenen Punkten der Hilbert Kurve des Grads n-1 lassen sich alle Punkte der Hilbert Kurve des Grads n erzeugen.
+Die Spiegelungen, Rotationen und Translationen für die jeweiligen Quadranten sind natürlich anders als in Algorithmus \ref{moore:iterative}.
+Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern ohne die gesamte Kurve zu berechnen, andererseits ist dafür die Berechnung aller Punkte der Kurve insgesamt bei weitem effizienter als der iterative Aufruf des Punkt-zu-Punkt Ansatzes. Algorithmus \ref{moore:batch} zeigt, wie zunächst die Hilbert Kurve bis Grad n-1 aufgebaut und daraus dann die Moore Kurve des Grads n erzeugt wird. Für die Nachvollziehbarkeit sind Abbildung \ref{HilbertZuHilbert} und \ref{HilbertZuMoore} essentiell.
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+\caption{Compute all points of Moore Curve}
+\label{moore:batch}
+\Function{computeAllMoorePoints}{$degree$, int[] $x$, int[] $y$}
+\State hardcode coordinates for $degree =1$ into arrays (each 4 values)
+\If {$degree = 1$}
+	\Return
+\EndIf	
+\State computeAllHilbertPoints($degree - 1$, int[] $x$, int[] $y$)
+\State $i \leftarrow 0$
+\State $len \leftarrow 2^{degree - 1} -1$ \Comment{offset for translation}
+\State $quarter \leftarrow 4^{degree-1}$\Comment{sidelength of hilbert curve squared $= {(2^{degree - 1}})^2$}
+\While {$i < quarter$}
+\\ \Comment{quadrant B: rotate A 90$^{\circ}\circlearrowleft$ and shift up}
+\State $x[i + quarter] \leftarrow len - y[i]$
+\State $y[i + quarter] \leftarrow x[i] + len + 1$
+\\ \Comment{quadrant C: rotate A 90$^{\circ}\circlearrowright$ and shift up and right}
+\State $x[i + 2*quarter] \leftarrow y[i] + len + 1$
+\State $y[i + 2*quarter] \leftarrow 2 * len - x[i] + 1$
+\\ \Comment{quadrant D: copy C and shift down}
+\State $x[i + 3*quarter] \leftarrow x[i + 2*quarter]$
+\State $y[i + 3*quarter] \leftarrow y[i + 2*quarter] - len - 1$
+\\ \Comment{quadrant A: copy B and shift down}
+\State $x[i] \leftarrow x[i + quarter]$
+\State $y[i] \leftarrow y[i + quarter] - len - 1$
+\\
+\State $i \leftarrow i+1$
+\EndWhile
+\EndFunction
+
+
+\Function{computeAllHilbertPoints}{$degree$, int[] $x$, int[] $y$}
+
+\State $j \leftarrow 2$\Comment{we start buildup from degree 2, as degree 1 is hardcoded}
+\State $len \leftarrow 2$ \Comment{offset starts at 2}
+\State $quarter \leftarrow 4$\Comment{we begin with 4 points which are hardcoded}
+\While{$j \leq degree$}
+\While {$i < quarter$}
+\\ \Comment{quadrant B: shift up A}
+\State $x[i + quarter] \leftarrow x[i]$
+\State $y[i + quarter] \leftarrow y[i] + len$
+\\ \Comment{quadrant A: mirror along the line $x=y$}
+\State swap($x[i], y[i]$)
+\\ \Comment{quadrant C: copy B and shift right}
+\State $x[i + 2*quarter] \leftarrow x[i + quarter] + len$
+\State $y[i + 2*quarter] \leftarrow y[i + quarter]$
+\\ \Comment{quadrant D: rotate A 180$^{\circ}$ and shift right}
+\State $x[i + 3*quarter] \leftarrow 2*len - 1 - x[i]$
+\State $y[i + 3*quarter] \leftarrow len - 1 - y[i]$
+\\
+\State $i \leftarrow i+1$
+\State $len \leftarrow 2*len$\Comment{with every iteration, the sidelength doubles...}
+\State $quarter \leftarrow 4*quarter$\Comment{ ...and the amount of points quadruples}
+\EndWhile
+\EndWhile
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
 
 \subsection{Laufzeitanalyse und Vergleich}
 
