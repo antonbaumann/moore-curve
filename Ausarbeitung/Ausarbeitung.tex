@@ -85,12 +85,21 @@ Ein Beispiel der Verwendung einer raumfüllenden Kurve ist bei der raumbezogenen
 \section{Performanzanalyse}
 Um das Laufzeitzeitverhalten unserer Implementierung der Moore-Kurve zu überprüfen und beurteilen, haben wir Benchmarks folgender vier Implementierungen auf einem MaxBook Pro mit einem 3,1 Ghz Dual-Core Intel i7 und 16 Gb 1867 Mhz DDR3 RAM durchgeführt.
 
-\begin{figure}[h]
- \centering
- \includegraphics{media/laufzeitvergleich_1_bis_6.png}
- \caption{Meine Grafik}
- \label{fig:meine-grafik}
-\end{figure}
+
+\begin{figure}[htbp] 
+  \centering
+     \includegraphics[width=0.7\textwidth]{media/laufzeitvergleich_1_bis_6.png}
+  \caption{Laufzeitübersicht}
+  \label{fig:Bild1}
+ \end{figure}
+ 
+ \subsection{Iterative Berechnung der Moore-Koordinaten}
+Aus Abb. 1 geht klar hervor, dass die iterative Berechnung der Moore-Koordinaten (wie in Sektion 2 beschrieben) deutlich ineffizienter ist als die anderen Implementierungen. Ein Vorteil dieser Variante ist zwar, dass sie nur sehr wenige Speicherzugriffe benötigt, da alle Berechnungen in den Registern durchgeführt werden können und nur das Endergebnis in den Speicher geschrieben wird. Durch das rein iterative Vorgehen kann dieser Algorithmus jedoch nicht sinnvoll auf Datenebene parallelisiert werden. Auch kann der dynamische Ansatz, von dem die übrigen Implementierungen profitieren, hier nicht angewandt werden. Im folgenden liegt daher der Fokus auf den restlichen Implementierungen.
+
+\subsection{Vergleich Assembly (mit AVX2) mit Referenzprogramm}
+Die Implementierungen \textit{c\_ batch} und \textit{asm\_avx}
+
+
 
 
 \section{Zusammenfassung und Ausblick}
