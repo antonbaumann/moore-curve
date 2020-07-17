@@ -13,6 +13,8 @@
 % Diese Zeile bitte -nicht- aendern.
 \title{Gruppe \theGroup{} -- Abgabe zu Aufgabe \theNumber}
 
+\usepackage{subfig}
+
 \begin{document}
 \maketitle
 
@@ -85,20 +87,56 @@ Ein Beispiel der Verwendung einer raumfüllenden Kurve ist bei der raumbezogenen
 \section{Performanzanalyse}
 Um das Laufzeitzeitverhalten unserer Implementierung der Moore-Kurve zu überprüfen und beurteilen, haben wir Benchmarks folgender vier Implementierungen auf einem MaxBook Pro mit einem 3,1 Ghz Dual-Core Intel i7 und 16 Gb 1867 Mhz DDR3 RAM durchgeführt.
 
+\begin{center}
+    \begin{tabular}{| r | r | r | r | r | r | r |}
+    \hline
+    Grad \textit{n} & \# Punkte & Speicher & \textit{asm\_avx} & \textit{asm} & \textit{c\_batch} & \textit{c\_iter}  \\ \hline
+    3 & 64 & 512 B  & 27 ns & 23 ns & 67 ns & 1796 ns \\  \hline
+    6 & 4096 & 32 KiB  & 601 ns & 1213 ns & 6524 ns & 219 $\mu s$ \\  \hline
+    9 & 26144 & 2048 KiB  & 179 $\mu s$ & 289 $\mu s$ & 830 $\mu s$ & 16562 $\mu s$  \\  \hline
+    12 & 16,78 * 1e6 & 128 MiB & 21,5 ms & 24,5 ms & 94,3 ms & 1303,1 ms \\ \hline
+    15 & 1,07 * 1e9 & 8 GiB & 1575,9 ms & 1607,4 ms & 7108,1 ms & 92985,2 ms \\ \hline
+    16 & 4,29 * 1e9 & 32 GiB & 108,3 s & 125,7 s & 175,9 s & 718,1 s \\ \hline
+    \end{tabular}
+\end{center}
 
 \begin{figure}[htbp] 
-  \centering
-     \includegraphics[width=0.7\textwidth]{media/laufzeitvergleich_1_bis_6.png}
-  \caption{Laufzeitübersicht}
-  \label{fig:Bild1}
+    \centering
+    \subfloat[alle Implementierungen]{{\includegraphics[width=0.45\textwidth]{laufzeitvergleich_1-6_alle_impl.png} }}%
+    \qquad
+    \subfloat[ohne \textit{c\_iter}]{{\includegraphics[width=0.45\textwidth]{laufzeitvergleich_1-6_fast.png} }}%
+    \caption{Laufzeitverhalten der vier Implementierungen bis Grad 6}%
+    \label{fig:Laufzeitvergleich}%
  \end{figure}
  
  \subsection{Iterative Berechnung der Moore-Koordinaten}
 Aus Abb. 1 geht klar hervor, dass die iterative Berechnung der Moore-Koordinaten (wie in Sektion 2 beschrieben) deutlich ineffizienter ist als die anderen Implementierungen. Ein Vorteil dieser Variante ist zwar, dass sie nur sehr wenige Speicherzugriffe benötigt, da alle Berechnungen in den Registern durchgeführt werden können und nur das Endergebnis in den Speicher geschrieben wird. Durch das rein iterative Vorgehen kann dieser Algorithmus jedoch nicht sinnvoll auf Datenebene parallelisiert werden. Auch kann der dynamische Ansatz, von dem die übrigen Implementierungen profitieren, hier nicht angewandt werden. Im folgenden liegt daher der Fokus auf den restlichen Implementierungen.
 
-\subsection{Vergleich Assembly (mit AVX2) mit Referenzprogramm}
-Die Implementierungen \textit{c\_ batch} und \textit{asm\_avx}
+\subsection{Vergleich Assembler- mit Referenzprogramm}
+Die Implementierungen \textit{c\_ batch}, \textit{asm\_avx} und \textit{asm} ... siehe Section 3 ... \newline
+An Abb. 1.b und den Benchmarkwerten kann man erkennen, dass die Assembler Implementierungen deutlich performanter sind als die C-Referenzimplementierung. Für Grad 6 ist die Assembler-Implementierung, welche 128-bit Register benutzt, drei mal schneller als das C-Programm. Dies ist darin begründet, dass sich die dynamische Berechnung der Hilberkurve optimal durch SIMD parallelisieren lässt. Somit können einige Koordinaten gleichzeitig innerhalb einer Operation verarbeitet werden. Die Anzahl der Punkte, die in ein SIMD-Register passen ist abhängig vom Datentypen der Koodinaten und der Größe der Vektorregister. Wir haben uns entschieden, von der in der Aufgabenstellung vorgegebenen Signatur \texttt{moore(uint64\_t degree, uint64\_t *x, uint64\_t *y)} abzuweichen und 32 bit Integer zu benutzen. Der maximale darstellbare Wert verringert sich dadurch zwar auf $2^{32}-1$, jedoch werden größere Werte erst ab einem $n > 32$ benötigt. Der Speicherbedarf einer Moore Kurve mit Grad 33 betrüge $4^{33} \cdot 2 \cdot 4 \text{ Bytes } \approx 590 \cdot 10^{18} \text{ Bytes}$, wenn man alle Koordinaten als 32 bit unsigned Integers darstellen könnte und das Doppelte bei Benutzung von 64 bit Integern. 
+\newline
+Durch die Reduzierung auf 32 bit Intger können nun bei Verwenung von 128 bit Vektorregistern vier und bei 258 bit Registern acht Werte gleichzeitig verarbeitet werden (siehe Abb. 2).
 
+\begin{figure}[htbp] 
+    \centering
+    \subfloat{{\includegraphics[width=0.69\textwidth]{hilbert_transformation.png} }}%
+    \caption{Parallelisierung durch SIMD}%
+    \label{fig:SIMD}%
+\end{figure}
+
+Unsere anfängliche Vermutung war, dass \textit{asm\_128} etwa vier mal so schnell ist wie unsere C-Implementierung und textit{asm\_256} in der Hälfte der Zeit von \textit{asm\_128} terminiert.
+
+\begin{figure}[htbp] 
+    \centering
+    \subfloat[Speedup Assembler- ggü. C-Implementirung]{{\includegraphics[width=0.45\textwidth]{speedup_base_c.png} }}%
+    \qquad
+    \subfloat[Speedup \textit{asm\_256} ggü. \textit{asm\_128}]{{\includegraphics[width=0.45\textwidth]{speedup_base_asm_128.png} }}%
+    \caption{Laufzeitverhalten der vier Implementierungen bis Grad 6}%
+    \label{fig:Laufzeitvergleich}%
+ \end{figure}
+ 
+ Abb. 3.a bestätigt den ersten Teil unserer Vermutung. Zwischen Grad 4 und 15 ist die \textit{asm\_128} Implementierung 2,8 bis 5,3 mal schneller als die Referenzimplementierung in C. Der zweite Teil wird nur zur Hälfte bestätigt. Wie in Abb. 3.b zu sehen ist, profitieren vor allem Grade zwischen 6 und 10 von den größeren Vektorregistern - bei größeren Graden bietet die Verwendung von AVX-Registern keine signifikante Performanzsteigerung. 
 
 
 
