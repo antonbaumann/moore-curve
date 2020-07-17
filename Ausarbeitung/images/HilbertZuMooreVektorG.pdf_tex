@@ -54,8 +54,8 @@
     \lineheight{1}%
     \setlength\tabcolsep{0pt}%
     \put(0,0){\includegraphics[width=\unitlength,page=1]{HilbertZuMooreVektorG.pdf}}%
-    \put(-0.0042656,0.00066117){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Hilbert Grad n-1\end{tabular}}}}%
-    \put(0.70475658,0.00446363){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Moore Grad n\end{tabular}}}}%
+    \put(-0.0042656,0.00066117){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Hilbert Grad $n-1$\end{tabular}}}}%
+    \put(0.70475658,0.00446363){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Moore Grad $n$\end{tabular}}}}%
     \put(0.08093132,0.3004232){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Startpunkt\end{tabular}}}}%
     \put(0.0859476,0.2301955){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Endpunkt\end{tabular}}}}%
   \end{picture}%
