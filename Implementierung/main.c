@@ -13,7 +13,10 @@
 
 // Rechnerhalle does not allow us to allocate enough ram to calculate
 // moore curve of degree 17
-const uint32_t MAX_DEGREE = 32;
+
+// don't set MAX_DEGREE > 30
+// otherwise size of allocation cannot be saved in uint64_t
+const uint32_t MAX_DEGREE = 30;
 
 enum impl_variant {
     ASSEMBLY,
@@ -144,16 +147,16 @@ uint32_t parse_uint32(char *str) {
     long deg = strtol(str, &endptr, 10);
 
     // argument does not start with digit
-    if (str == endptr) return -1;
+    if (str == endptr) return 0;
 
     // underflow occurred
-    if (errno == ERANGE && deg == LONG_MIN) return -1;
+    if (errno == ERANGE && deg == LONG_MIN) return 0;
 
     // overflow occurred
-    if (errno == ERANGE && deg == LONG_MAX) return -1;
+    if (errno == ERANGE && deg == LONG_MAX) return 0;
 
     // error if deg > 2^32
-    if (deg > UINT32_MAX) return -1;
+    if (deg > UINT32_MAX) return 0;
 
     return deg <= 0 ? 0 : deg;
 }

@@ -129,9 +129,12 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
 
     // initialize coordinate vectors
     uint32_t *x_coords = malloc(sizeof(uint32_t) * nr_coords);
+    if (x_coords == NULL) {
+        printf("Allocation failed...\n");
+        exit(EXIT_FAILURE);
+    }
     uint32_t *y_coords = malloc(sizeof(uint32_t) * nr_coords);
-
-    if (x_coords == NULL || y_coords == NULL) {
+    if (y_coords == NULL) {
         printf("Allocation failed...\n");
         exit(EXIT_FAILURE);
     }
