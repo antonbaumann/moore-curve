@@ -7,7 +7,7 @@
 \newcommand{\theGroup}{142} % Beispiel: 42
 \newcommand{\theNumber}{A213} % Beispiel: A123
 \author{Anton Baumann \and Felix Brandis \and Michal Cizevskij}
-\date{Sommersemester 2020} % Beispiel: Wintersemester 2019/20
+\date{Sommersemester 2020}  % Beispiel: Wintersemester 2019/20
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Diese Zeile bitte -nicht- aendern.
@@ -21,12 +21,38 @@
 
 \section{Lösungsansatz}
 
+\subsection{Die Moore Kurve}
+
+Die Moore Kurve ist eine flächenfüllende Kurve, 
+....\ \\
+Das Problem kann also umformuliert werden in die Erzeugung der Hilbert Kurve und dem anschließendenden Kopieren, Verschieben und Rotieren der Punkte. 
+\\
+Es gibt rekursive Algorithmen für die Erzeugung der Hilbert Kurve, diese klammern wir im Folgenden jedoch aus. (Siehe Aufgabenstellung)
+
+\subsection{Erzeugung der Hilbert Kurve: iterativer Punkte-für-Punkt Ansatz}
+%rekursiven Ansatz vermieden
+
+
+
+
+
+\subsection{Erzeugung der Hilbert Kurve: Bottom-up Ansatz}
+
+\subsection{Laufzeitanalyse und Vergleich}
+
+
+
+
+%Für die Erzeugung der Koordinaten der Moore Kurve eines gegebenen Grades gibt es verschiedene Herangehensweisen. Allen im Folgenden dargestellten Ansätzen liegt die Tatsache zugrunde, dass die Moore Kurve des Grads n ($ \forall  n \geq 2$) aus 4 rotierten, gespiegelten, verschobenen und dann zusammengefügten Kopien der weitaus besser bekannten Hilbert Kurve zusammengesetzt werden kann. (siehe Bild 1) 
+
+%Ein Algorithmus, der für gegebenen Grad $n$ und Index $i$ ein Koordinatentupel $(x, y)$, das die Lage des $i$-ten Punktes beschreibt, als Ausgabe liefert, kann also naiv folgendermaßen implementiert werden:
 
 % TODO: Je nach Aufgabenstellung einen der Begriffe wählen
 \section{Korrektheit/Genauigkeit}
 
 
 \section{Performanzanalyse}
+
 
 
 \section{Zusammenfassung und Ausblick}
