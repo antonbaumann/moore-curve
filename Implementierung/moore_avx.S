@@ -156,6 +156,8 @@ _moore_avx: // mac compatibility
     vmovdqu ymm0, [r10]             // fill xmm registers with next 4 coordinates we want to process
     vmovdqu ymm1, [r11]
 
+    prefetchw [r10]
+
     // copy coordinates from A -> B
     // ymm0 holds correct x values for quardrant B
     vpaddd ymm3, ymm1, ymm14         // shift y values upwards (into quadrant B)
@@ -268,6 +270,8 @@ _moore_avx: // mac compatibility
 
     vmovdqu ymm0, [r10]
     vmovdqu ymm1, [r11]
+
+    prefetchw [r10]
 
     // copy coordinates from bottom left to top left (hilbert A -> moore B)
     vpsubd ymm2, ymm13, ymm1         // x -> len - 1 - y
