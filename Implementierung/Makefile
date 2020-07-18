@@ -1,9 +1,11 @@
 CC=gcc
-CFLAGS=-O3 -Wall -Wextra -ggdb
+CFLAGS=-O3
 
-.PHONY: clean
+.PHONY: clean disable_avx
 all: moore
-moore: main.c svg.c moore.c benchmark.c moore.S
-	$(CC) $(CFLAGS) -o $@ $^
+moore: main.c svg.c moore.c benchmark.c moore.S moore_avx.S
+	$(CC) $(CFLAGS) -march=native -o $@ $^
+disable_avx:
+	$(CC) $(CFLAGS) -o moore main.c svg.c moore.c benchmark.c moore.S
 clean:
 	rm -f moore
