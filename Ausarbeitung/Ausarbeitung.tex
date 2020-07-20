@@ -3,8 +3,11 @@
 \graphicspath{ {./images/} }
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{amsmath,amsthm}
 \usepackage{amssymb}
 \usepackage[font=small,labelfont=bf]{caption}
+\newcommand{\uproman}[1]{\uppercase\expandafter{\romannumeral#1}}
+\newcommand{\lowroman}[1]{\romannumeral#1\relax}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% TODO: Ersetzen Sie in den folgenden Zeilen die entsprechenden -Texte-
@@ -26,56 +29,51 @@
 \section{Einleitung}
 
 Um die in der Vorlesung erlangten Kenntnisse zu vertiefen, wird vom Lehrstuhl für Rechnerarchitektur und Parallele Systeme ein Semester begleitendes Praktikum angeboten.\\
-Im Rahmen dieses Rechnerarchitektur Praktikums hat sich unsere Gruppe mit dem Thema der Moore Kurve auseinandergesetzt. Die Moore Kurve ist eine von dem Mathematiker Eliakim Hastings Moore (1862-1932) entwickelte raumfüllende Kurve. Sie basiert auf der Hilbert Kurve und findet oft Anwendung in Bildverarbeitung und Datendarstellung. Unsere erste Aufgabe war es einen Algorithmus in Assembler zu entwickeln, der die Moore Kurve beliebigen Grades erstellt und in einer Datei abbildet. Die zweite Aufgabe war es zu beantworten, ob es möglich ist einen beliebigen Punkt der Kurve in konstanter Zeit unabhängig vom Grad zu berechnen.\\
-\\
-\begin{center}
+Im Rahmen dieses Rechnerarchitektur Praktikums hat sich unsere Gruppe mit dem Thema der Moore Kurve auseinandergesetzt. Die Moore Kurve ist eine von dem Mathematiker Eliakim Hastings Moore (1862-1932) entwickelte raumfüllende Kurve. Sie basiert auf der Hilbert Kurve und findet oft Anwendung in Bildverarbeitung und Datendarstellung. Unsere erste Aufgabe war es einen Algorithmus in Assembler zu entwickeln, der die Moore Kurve beliebigen Grades erstellt und in einer Datei abbildet. Die zweite Aufgabe war es zu beantworten, ob es möglich ist einen beliebigen Punkt der Kurve in konstanter Zeit unabhängig vom Grad zu berechnen.
+\begin{figure}[h]
+\centering
     \includegraphics[width=12cm, height=4cm]{Peano}\\ %cite
-    \tiny Figur 1: Die drei ersten Iterationen der Peano Kurve
-\end{center}
-\   \\
+    \caption{Die drei ersten Iterationen der Peano Kurve}
+    \label{fig:Peano}
+\end{figure}
 Generell ist eine raumfüllenden Kurve (Englisch: space-filling curve oder auch SFC) eine "Linie" die von einem Eindimensionalen Raum auf ein N-Dimensionalen Raum abbildet. Einfachheitshalber beschränken wir uns aber auf zweidimensionalen und ein Beispiel im dreidimensionalen Raum. Die Besonderheit dieser Kurve liegt darin, dass sie jeden Punkt des Einheitsquadrats passiert. Genauer gesagt, wenn n für den Grad der Kurve steht und $\lim_{n\to\infty}$, dann wird eine gegebene Fläche durch so eine Kurve gefüllt.\\
-Die erste SFC wurde von einem Italienischen Mathematiker Giuseppe Peano in 1890 entwickelt. 
+Die erste SFC wurde von einem Italienischen Mathematiker Giuseppe Peano in 1890 entwickelt. (Siehe Abb. \ref{fig:Peano})
 \newpage
-Die Motivation für solch eine Erkenntnis bekam er durch einen weitern  renommierten Mathematiker Georg Cantor der wenige Jahre zuvor bewiesen hatte, dass die \\ Mengen der Natürlichen zahlen und die der positiven rationalen Zahlen gleich mächtig sind (Cantors erstes diagonal Argument). 
+Die Motivation für solch eine Erkenntnis bekam er durch einen weitern  renommierten Mathematiker Georg Cantor der wenige Jahre zuvor bewiesen hatte, dass die Mengen der natürlichen Zahlen und die der positiven rationalen Zahlen gleich mächtig sind (Cantors erstes diagonal Argument, Abb. \ref{fig:Cantor}). 
 Durch das verallgemeinern des Cantorischen Diagonalarguments kann man zeigen, dass es eindimensionale Objekte gibt, \\ die zweidimensionale füllen können. Eine raumfüllende Kurve ist also eine surjektive Abbildung, die von einem Einheitsintervall in ein Einheitsquadrat abbildet.
-\\
-\\
-\begin{center}
-    \includegraphics[width=5cm, height=5cm]{Cantor}\\   %cite
-    \tiny Figur 2: Cantorische Paarungsfunktion
-\end{center}
-\   \\
-\\
-Die Hilbert Kurve, die von dem gleichnamigen Mathematiker David Hilbert in 1891 entwickelt wurde ist eine einfachere Version die das Einheitsquadrat in 4 Teile anstatt 9 partitioniert. Diese Quadranten beinhalten dann die Hilbert Kurve vom Grad n - 1. Betrachtet man zum Beispiel die mittlere Abbildung in Fig. 3 ,entsprechend Hilbert von Grad 2. Dann bemerkt man, dass sie vier mal die Kurve vom Grad 1 beinhaltet, die rotiert oder gespiegelt wurde und an den End- bzw. Startpunkten verbunden wurden.
-\\
-\\
-\begin{center}
-    \includegraphics[width=12cm, height=4cm]{Hilbert}\\ %cite
-    \tiny Figur 3: Die drei ersten Iterationen der Hilbert Kurve
-\end{center}
-\   \\
-\newpage %Autor der Moore Kurve ist im Abstract erwähnt fehlt datum leider
-Wie bereits erwähnt ist die Moore Kurve eine Variation der Hilbert Kurve. Die ersten Grade der Moore- und Hilbert-Kurve sind äquivalent. Dabei ergeben sich die weiteren Iterationen der Moore Kurve, durch die Zusammensetzung der Hilbert Kurve vom Grad n - 1.  Also bis zum Grad n -1 zeichnet man eine Hilbert Kurve, jedoch beim Grad n ordnet man die 4 Hilbert Kurven vom Grad n - 1 anders an.\\ % wie genau ist dann Lösungsweg
-Bemerkenswert ist, dass im Gegensatz zur Hilbert Kurve, die Moore Kurve so konstruiert ist, sodass der Anfangspunkt und Endpunkt sich nebeneinander befinden.
-\\
-\\
-\begin{center}
-    \includegraphics[width=12cm, height=4cm]{Moore}\\   %cite
-    \tiny Figur 4: Die drei ersten Iterationen der Moore Kurve
-\end{center}
-\   \\
-Außerdem gehört die Moore Kurve (Peano und Hilbert ebenfalls) einer Unterkategorie der SFC die man FASS Kurven nennt. (FASS: „space-filling, self-avoiding, simple and self-similar“).\\
-Dies birgt wichtige Eigenschaften weshalb sie in der Praxis Verwendung findet. Zu einem die Kurve ist selbst ausweichend, das bedeutet jeder Punkt ist exakt festgelegt, also wird er nur einmal durchlaufen. Hinzu behält die Kurve die Lokalität der Punkte bei. Das bedeutet, sind die Punkte nah beinander im eindimensionalen Einheitsintervall, so sind sie es ebenfalls in der Kurve. % http://blog.christianperone.com/2015/08/googles-s2-geometry-on-the-sphere-cells-and-hilbert-curve/
-\\
-\\
-\begin{center}
-    \includegraphics[width=8cm, height=6cm]{Locality}\\ %cite
-    \tiny Figur 5: Graphik um die Eigenschaft der Lokalität zu verdeutlichen % for spatial DB = raumbezogene Datenbank
-\end{center} 
-\newpage 
+\begin{figure}[h]
+\centering
+     \includegraphics[width=5cm, height=5cm]{Cantor}
+    \caption{Cantorische Paarungsfunktion}
+    \label{fig:Cantor}
+\end{figure}
+Die Hilbert Kurve, die von dem gleichnamigen Mathematiker David Hilbert in 1891 entwickelt wurde ist eine einfachere Version, die das Einheitsquadrat in 4 Teile anstatt 9 partitioniert. Diese Quadranten beinhalten dann die Hilbert Kurve vom Grad $n - 1$. Betrachtet man zum Beispiel die mittlere Abbildung in Abb. \ref{fig:hilbertCurve}, die Hilbert Kurve zweiten Grades, so bemerkt man, dass sie vier mal die Kurve vom Grad 1 beinhaltet, die rotiert oder gespiegelt wurde und an den End- bzw. Startpunkten verbunden wurden.
+\begin{figure}[h]
+\centering
+   \includegraphics[width=12cm, height=4cm]{Hilbert}
+    \caption{Die drei ersten Iterationen der Hilbert Kurve}
+    \label{fig:hilbertCurve}
+\end{figure}
 
-In raumbezogenen Anwendungen kommt es oft vor, dass raumfüllende Kurven verwendet werden, um effizient geographische Daten die in eindimensionaler oder zweidimensionaler Form vorhanden sind in eindimensionale Daten umzuwandeln. \\Dafür teilt man  sein Gebiet in Zellen auf. Diese dienen dann einer kompakten \\ Darstellung der bestimmten Region. Um diese Zellen schnell "`ansprechen"' zu können indexieren wir sie. Dabei ist es uns wichtig, dass sie Sinnvoll indexiert werden, sodass geographisch naheliegende Zellen, es ebenso es im Feld tun.
-Da eine FASS Kurve genau diese Anforderungen erfüllt eignet sie sich besonders gut für solch eine Verwendung. Ein konkretes Beispiel der Anwendung wäre die \href{https://code.google.com/archive/p/s2-geometry-library/}{S2-geometry-library von Google}. 
+\newpage %Autor der Moore Kurve ist im Abstract erwähnt fehlt datum leider
+Wie bereits erwähnt ist die Moore Kurve eine Variation der Hilbert Kurve. Die ersten Grade der Moore- und Hilbert-Kurve sind äquivalent. Dabei ergeben sich die weiteren Iterationen der Moore Kurve, durch die Zusammensetzung der Hilbert Kurve vom Grad $n - 1$.  Es werden also 4 Kopien der Hilbert Kurve des Grads $n-1$ zur Moore Kurve des Grads $n$ zusammengesetzt (Nach Rotation, Spiegelung und Verschiebung). \textbf{hier noch eine Illustration??}
+Entscheidender Unterschied der Moore Kurve zur Hilbert Kurve ist, dass sich ihre Anfangs- und Endpunkte im Gegensatz zur Hilbert Kurve nebeneinander befinden.
+\begin{figure}[h]
+\centering
+      \includegraphics[width=12cm, height=4cm]{Moore}
+    \caption{Die drei ersten Iterationen der Moore Kurven}
+    \label{fig:mooreCurve}
+\end{figure}
+Außerdem gehört die Moore Kurve (Peano und Hilbert ebenfalls) einer Unterkategorie der SFC an, die man FASS Kurven nennt. (FASS: „space-filling, self-avoiding, simple and self-similar“).\\
+Dies birgt wichtige Eigenschaften, weshalb sie in der Praxis Verwendung findet. Zu einem die Kurve ist selbstausweichend, das bedeutet jeder Punkt ist exakt festgelegt, also wird er nur einmal durchlaufen. Hinzu behält die Kurve die Lokalität der Punkte bei. Das bedeutet, sind die Punkte nah beinander im eindimensionalen Einheitsintervall, so sind sie es ebenfalls in der Kurve. (siehe Abb. \ref{fig:locality}) % http://blog.christianperone.com/2015/08/googles-s2-geometry-on-the-sphere-cells-and-hilbert-curve/
+\begin{figure}[h]
+\centering
+      \includegraphics[width=8cm, height=6cm]{Locality}
+    \caption{Graphik um die Eigenschaft der Lokalität zu verdeutlichen} % for spatial DB = raumbezogene Datenbank
+    \label{fig:locality}
+\end{figure}
+In raumbezogenen Anwendungen kommt es oft vor, dass raumfüllende Kurven verwendet werden, um effizient geographische Daten, die in eindimensionaler oder zweidimensionaler Form vorhanden sind, in eindimensionale Daten umzuwandeln. \\Dafür wird das Gebiet in Zellen aufgeteilt. Diese dienen einer kompakten Darstellung der bestimmten Region. Um diese Zellen schnell "ansprechen"' zu können, werden sie indexiert. Dabei ist es erwünscht, dass geographische Nähe, also Nähe in 2 Dimensionen von Bilddaten auch auf der Abbildung in den eindimensionalen Raum erhalten bleibt, da sich so nebeneinander liegende Bilddaten auch nebeneinander im Speicher befinden und effizienter geladen werden können.
+Da eine FASS Kurve genau diese Anforderungen erfüllt, eignet sie sich besonders gut für solch eine Verwendung. Ein konkretes Beispiel der Anwendung wäre die \href{https://code.google.com/archive/p/s2-geometry-library/}{S2-geometry-library von Google}. 
 
 % vielleicht noch erwähnen das es alternativen gibt aber zb Hilbert kurve sehr effizient ist
 \begin{figure}
@@ -83,12 +81,14 @@ Da eine FASS Kurve genau diese Anforderungen erfüllt eignet sie sich besonders 
     \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=0.9\textwidth]{Map}\\
-        \tiny Figur 6: Einteilung von New York in Zellen
+        \caption{Einteilung von New York in Zellen}
+        \label{fig:Gmaps}
     \end{minipage}\hfill
     \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=0.9\textwidth]{Earth} \\
-        \tiny Figur 7: Hilbert projeziert auf die Erde
+        \caption{Hilbert Kurve projiziert auf die Erde}
+        \label{fig:hilbertCurveOnEarth}
     \end{minipage}
 \end{figure}
 
@@ -105,15 +105,15 @@ Da eine FASS Kurve genau diese Anforderungen erfüllt eignet sie sich besonders 
 
 \subsection{Die Moore Kurve}
 
-Wie im letzten Abschnitt erwähnt, kann die Moore Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads n-1 erzeugt werden (für n > 1).
+Wie im letzten Abschnitt erwähnt, kann die Moore Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads n-1 erzeugt werden (für n > 1), siehe dazu auch Abbildung \ref{HilbertZuMoore}.
 Das Problem kann also umformuliert werden in die Erzeugung der Hilbert Kurve und dem anschließendenden Kopieren, Verschieben und Rotieren der Punkte. 
 \\
 Es gibt rekursive Algorithmen für die Erzeugung der Hilbert Kurve, diese klammern wir im Folgenden jedoch aus. (Siehe Aufgabenstellung)
 
 \subsection{Erzeugung der Hilbert Kurve: iterativer Punkt-für-Punkt Ansatz}
-Im Folgenden soll ein Algorithmus dargestellt werden, der für gegebenen Index i und Grad n die Koordinaten des korrespondierenden Punktes an der Stelle i der Moore Kurve berechnet.
+Im Folgenden soll ein Algorithmus dargestellt werden, der für gegebenen Index $i$ und Grad $n$ die Koordinaten des korrespondierenden Punktes an der Stelle $i$ der Moore Kurve berechnet.
 Geht man davon aus, schon einen solchen funktionierenden Algorithmus für die Hilbert Kurve zu haben, so muss nur der Quadrant des Punktes bestimmt werden, dann der entsprechende Punkt der Hilbert Kurve errechnet und je nach Quadrant verschoben, gespiegelt oder rotiert werden. Dies wird in Abbildung \ref{HilbertZuMoore} grafisch veranschaulicht und im Algorithmus \ref{moore:iterative} skizziert.
-
+\newline
 \begin{figure}[h]
 \centering
 \def\svgwidth{240pt}
@@ -121,10 +121,6 @@ Geht man davon aus, schon einen solchen funktionierenden Algorithmus für die Hi
 \caption{Transformation von Hilbert Kurve des Grads n-1 zu Moore Kurve des Grads n}
 \label{HilbertZuMoore}
 \end{figure}
-\ \\
-Ab hier: Erklärung des iterativen Algorithmus zur Hilbert Erzeugung...
-\ \\
-
 \begin{algorithm}[H]
 \begin{algorithmic}
 \caption{Compute coordinates of point on Moore curve}
@@ -157,19 +153,56 @@ Ab hier: Erklärung des iterativen Algorithmus zur Hilbert Erzeugung...
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
+Damit Algorithmus \ref{moore:iterative} funktioniert, fehlt noch eine Methode, die für gegebenen Index $i$ und Grad $n$ die Koordinaten des entsprechenden Punktes auf der Hilbert Kurve zurückgibt. Abbildung \ref{fig:hilbertBuildup} zeigt, wie das funktioniert: Jeder Punkt beginnt mit den Koordinatnen $(0, 0)$. Wird der Index in Binärdarstellung umgewandelt, so können von hinten beginnend immer zwei Stellen angesehen werden und dann nach dem in der Graphik dargestellten Entscheidungsmuster die Koordinaten durch Spiegelung und Verschiebung verändert werden. Durch iterative Ausführung und mit jeder Iteration einer Vergrößerung des Offsets können so die Koordinaten jedes Punktes bestimmt werden. Algorithmus \ref{hilbert:iterative} zeigt eine mögliche Formalisierung.
+
+\begin{figure}[H] 
+    \centering
+    \subfloat{{\includegraphics[width=1.0\textwidth]{HilbertToHilbert} }}%
+    \caption{Bottom-up Errechnung der Koordinaten eines Punkts der Hilbert Kurve, Beispiel für Punkt mit Index 54 und HIlbert Kurve des Grads 3}%
+    \label{fig:hilbertBuildup}%
+\end{figure}
+
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+\caption{Compute coordinates of given point on Hilbert curve}
+\label{hilbert:iterative}
+\Function{computeHilbertCoord}{$index$, $degree$}
+	\State $sidelength \leftarrow 2^{degree}$
+	\State $i \leftarrow 1$
+	\State $coord \leftarrow (0, 0)$
+	\While {$i < sidelength$}
+		\State find out quadrant $q \in \{A, B, C, D\}$ by looking at last two bits of $index$:
+		\State $A \iff '00'$, $B \iff '01'$, $C \iff '10'$, $D \iff '11'$
+		\If{$q \in \{A, D\}$}
+			\If{$q = D$}
+			\State $tmp \leftarrow coord.y$\Comment{mirror along $y = i-1-x$ axis}
+			\State $coord.y \leftarrow i - 1 - coord.x$
+			\State $coord.x \leftarrow i - 1 - tmp$	
+			\Else 
+			\State $swap(coord.x, coord.y)$\Comment{mirror along $y=x$ axis}
+			\EndIf
+		\Else 
+		\State $coord.y \leftarrow coord.y + i$ \Comment{translate upwards, because $q \in \{B, C\}$}
+		\EndIf
+		\If{$q \in \{C, D\}$}
+		\State $coord.x \leftarrow coord.x + i$ \Comment{translate to the right}
+		\EndIf
+		\State $index \leftarrow \frac{index}{4}$ \Comment{shift to the right by two bits to look at next two}
+		\State $i \leftarrow 2i$\Comment{sidelength doubles with every iteration}
+	\EndWhile
+	\State \Return $coord$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
 
 
 
-
-
-
-
-\subsection{Erzeugung der Hilbert Kurve: Bottom-up Ansatz}
+\subsection{Erzeugung der Hilbert Kurve: Effizienterer Reuse-Ansatz}
 Der oben dargestellte Algorithmus hat den Vorteil, für einen gegebenen Index und Grad die Koordinaten des korrespondierenden Punktes ausrechnen zu können, ohne dafür die gesamte Kurve erzeugen zu müssen und dann die Koordinaten an der Stelle des Index auszulesen.\\ 
 Soll allerdings die gesamte Kurve erstellt werden, also x-Werte und y-Werte für alle Punkte errechnet werden, so ist der iterative Aufruf des oben gezeigten Algorithmus für jeden Index sehr ineffizient.\\
-Ebenso wie die Moore Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads n aufgebaut werden kann, so kann auch die Hilbert Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads n-1 erzeugt werden (Abbildung \ref{HilbertZuHilbert}).
-
+Ebenso wie die Moore Kurve des Grads $n$ aus vier Kopien der Hilbert Kurve des Grads n aufgebaut werden kann, so kann auch die Hilbert Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads $n-1$ erzeugt werden (Abbildung \ref{HilbertZuHilbert}).
 \begin{figure}[h]
 \centering
 \def\svgwidth{240pt}
@@ -177,11 +210,9 @@ Ebenso wie die Moore Kurve des Grads n aus vier Kopien der Hilbert Kurve des Gra
 \caption{Transformation von Hilbert Kurve des Grads n-1 zu Hilbert Kurve des Grads n}
 \label{HilbertZuHilbert}
 \end{figure}
-
-Man kann also bei der Erzeugung der Hilbert Kurve ähnlich vorgehen wie bei Algorithmus \ref{moore:iterative}: Mit gegebenen Punkten der Hilbert Kurve des Grads n-1 lassen sich alle Punkte der Hilbert Kurve des Grads n erzeugen.
-Die Spiegelungen, Rotationen und Translationen für die jeweiligen Quadranten sind natürlich anders als in Algorithmus \ref{moore:iterative}.
-Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern ohne die gesamte Kurve zu berechnen, andererseits ist dafür die Berechnung aller Punkte der Kurve insgesamt bei weitem effizienter als der iterative Aufruf des Punkt-zu-Punkt Ansatzes. Algorithmus \ref{moore:batch} zeigt, wie zunächst die Hilbert Kurve bis Grad n-1 aufgebaut und daraus dann die Moore Kurve des Grads n erzeugt wird. Für die Nachvollziehbarkeit sind Abbildung \ref{HilbertZuHilbert} und \ref{HilbertZuMoore} essentiell.
-
+Man kann also bei der Erzeugung der Hilbert Kurve ähnlich vorgehen wie bei Algorithmus \ref{moore:iterative}: Mit gegebenen Punkten der Hilbert Kurve des Grads $n-1$ lassen sich alle Punkte der Hilbert Kurve des Grads $n$ erzeugen. 
+Die Spiegelungen, Rotationen und Translationen für die jeweiligen Quadranten sind natürlich anders als in Algorithmus \ref{moore:iterative}. \\
+Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern ohne die gesamte Kurve zu berechnen, andererseits ist dafür die Berechnung aller Punkte der Kurve insgesamt bei weitem effizienter als der iterative Aufruf des Punkt-zu-Punkt Ansatzes, da schon durchgeführte Berechnungen wiederverwertet werden. Algorithmus \ref{moore:batch} zeigt, wie zunächst die Hilbert Kurve bis Grad $n-1$ aufgebaut und daraus dann die Moore Kurve des Grads $n$ erzeugt wird. Für die Nachvollziehbarkeit sind Abbildung \ref{HilbertZuMoore} und \ref{HilbertZuHilbert} essentiell.
 \begin{algorithm}[H]
 \begin{algorithmic}
 \caption{Compute all points of Moore Curve}
@@ -233,27 +264,45 @@ Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern 
 \State $x[i + 3*quarter] \leftarrow 2*len - 1 - x[i]$
 \State $y[i + 3*quarter] \leftarrow len - 1 - y[i]$
 \\
+
+\EndWhile
 \State $i \leftarrow i+1$
 \State $len \leftarrow 2*len$\Comment{with every iteration, the sidelength doubles...}
 \State $quarter \leftarrow 4*quarter$\Comment{ ...and the amount of points quadruples}
-\EndWhile
 \EndWhile
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
 
 
-\subsection{Laufzeitanalyse und Vergleich}
-Hier: zeigen dass die Laufzeit pro punkt konstant ist bei unserer zweiten Method
-
-
-
-%Für die Erzeugung der Koordinaten der Moore Kurve eines gegebenen Grades gibt es verschiedene Herangehensweisen. Allen im Folgenden dargestellten Ansätzen liegt die Tatsache zugrunde, dass die Moore Kurve des Grads n ($ \forall  n \geq 2$) aus 4 rotierten, gespiegelten, verschobenen und dann zusammengefügten Kopien der weitaus besser bekannten Hilbert Kurve zusammengesetzt werden kann. (siehe Bild 1) 
-
-%Ein Algorithmus, der für gegebenen Grad $n$ und Index $i$ ein Koordinatentupel $(x, y)$, das die Lage des $i$-ten Punktes beschreibt, als Ausgabe liefert, kann also naiv folgendermaßen implementiert werden:
+\subsection{Theoretische Laufzeitanalyse und Vergleich}
+Für Algorithmus \ref{hilbert:iterative} lässt sich schnell sehen, dass der Aufwand für die Berechnung eines Punkts vom Grad der Kurve abhängt: In der computeHilberCoord($index, degree$) Unterfunktion wird eine Schleife $log_2(2^{degree})-1 = degree -1$ mal durchlaufen. Da der Aufwand der Operationen innerhalb der Schleife konstant ist, steigt der Aufwand für die Berechnung eines einzelnen Punkts bei Algorithmus \ref{hilbert:iterative} also linear mit dem Grad der Kurve.
+\newline
+Für Algorithmus \ref{moore:batch} lässt sich zeigen, dass der durschnittliche Aufwand für die Berechnung eines Punktes konstant ist, unabhängig vom Grad der Kurve. \\
+Algorithmus \ref{moore:batch} besteht aus dem einmaligen Aufruf der Hilbert-Unterfunktion und dann dem Verschieben der erhaltenen Punkte zur Erzeugung der Moore Kurve. \\
+In der Hilbert Unterfunktion gibt es zwei ineinander verschachtelte Schleifen: eine, die die Indexvariable $j$ von $2$ bis inklusiv  $degree -1$ durchläuft (Denn die Hilbert Unterfunktion wird ja mit $degree-1$ aufgerufen) und die innere Schleife, bei der die Punkte des letzten Grades kopiert und verschoben werden. \\ 
+Diese innere Schleife wird $quarter = 4^{j-1}$ mal durchlaufen, denn es müssen immer alle Punkte der Kurve des Grads $j-1$ kopiert und verschoben werden. Diese innere Schleife hat konstanten Aufwand $c$. In ihr wird ein Punkt aus dem Speicher  geladen, die Koordinaten werden manipuliert und an 4 Stellen wieder in den Speicher geschrieben. (Die Annahme der Konstanz ist hier natürlich theoretisch: sie berücksichtigt keine Zeitunterschiede durch Caching oder RAM-Limits, sondern geht von einem idealisierten Maschinenmodell ohne die Probleme des Von-Neumann-Bottlenecks aus)\\
+Nach Durchlaufen der Hilbert Unterfunktion werden in der Moore Funktion dann noch einmal  $4^{degree-1}$ Punkte kopiert und verschoben. \\ Der Aufwand für die Berechnung der Punkte der Moore Kurve des Grads n $Op(n)$ kann also folgendermaßen rekursiv definiert werden: \ \\
+\[\uproman{1}: Op(n) = Op(n-1) + 4^{n-1}*\cdot\]
+\[\uproman{2}: Op(1) = c\] \ \\ 
+Diese rekursive Gleichung kann nun aufgelöst werden:  \ \\ 
+\begin{align*}
+  Op(n) &= Op(n-1) + 4^{n-1}\cdot c\\
+    &= Op(n-2) + 4^{n-2}\cdot c + 4^{n-1}\cdot c \\
+    &= c\cdot(4^{0} + ... + 4^{n-2} + 4^{n-1}) \\
+    &= c\cdot\sum_{i=0}^{n-1} 4^{i}\\
+    &= c\cdot\frac{1}{3}(4^n-1)\\
+\end{align*}
+Eine Kurve von Grad $n$ hat Seitenlänge $2^n$ und somit $4^n$ Punkte. Der durchschnittliche Aufwand pro Punkt $avg\_Cost(n)$ lässt sich also wie folgt berechnen: \ \\
+\[avg\_Cost(n) = \frac{Op(n)}{4^n} = c \cdot \left(\frac{4^n}{3 \cdot 4^n} - \frac{1}{3 \cdot 4^n}\right) = \frac{1}{3}c - c \cdot \frac{1}{3 \cdot 4^n}\] 
+\[\Rightarrow \lim_{n\to\infty} avg\_Cost(n) = \lim_{n\to\infty} \frac{Op(n)}{4^n} = \frac{1}{3}c\]  \ \\ 
+Der durchschnittliche Rechenaufwand pro Punkt konvergiert also zu einem konstanten Wert. Das heißt, dass sich der absolute Aufwand bei Erhöhung des Grads um eins ungefähr um den Faktor vier erhöht, der durchschnittliche Aufwand pro Punkt aber gleich bleibt, da sich die Anzahl der Punkte mit Erhöhung des Grads ebenso vervierfacht.
 
 % TODO: Je nach Aufgabenstellung einen der Begriffe wählen
-\section{Korrektheit/Genauigkeit}
+\section{Korrektheit}
+Im Gegensatz zu Aufgabenstellungen, die Floating-Point Berechnungen enthalten oder im Bereich der Kryptographie liegen, ist in unserem Fall eine Überprüfung der Korrektheit unserer Lösung zumindest in Graden <10 allein schon durch das Betrachten der visuellen Repräsentation der Koordinaten im vom Rahmenprogramm erzeugten .svg File möglich. Dass unser Lösung korrekt ist, zeigen außerdem die oben dargelegten Algorithmen, die theoretisch für beliebige $n>0$ funktionieren.
+
+%Ist das zu dreist???
 
 
 \section{Performanzanalyse}
