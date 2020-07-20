@@ -23,22 +23,16 @@ struct tuple rotate(struct tuple coord, uint32_t length, uint32_t top, uint32_t 
 
 struct tuple hilbert_coord_at_index(uint64_t index, uint64_t degree) {
     struct tuple coord = {.x=0, .y=0};
-    uint64_t max_iterations = (uint64_t) 2 << (2 * degree - 1);
+    uint64_t sidelength = (uint64_t) 2 << (degree - 1);
 
-    for (uint64_t i = 1; i < max_iterations; i *= 2) {  // i *= 2,  simulates a binary shit to the left
-        uint64_t right = (uint64_t) 1 & (index /2);    // to decide what Quadrant look up the 2 least significant Bits of i, for ex. 7 = 0b01(11)
-        uint64_t top = (uint64_t) 1 & (index ^ right);  // first see if on left or right Half by checking the first of those deciding Bits
-        // secondly check the second of those two if in the right or left corner
-        coord = rotate(coord, i, top, right);           // 00 -> bottom-left
-        if (right) coord.x += i;                        // 01 -> top-left
-        if (top) coord.y += i;                          // 10 -> top-right
-        // 11 -> bottom-right
+    for (uint64_t i = 1; i < sidelength; i *= 2) {  // i *= 2,  sidelength starts at 1 and is doubled with every iteration
+	// to decide what Quadrant look up the 2 least significant Bits of i, for ex. 7 = 0b01(11)
+        uint64_t right = (uint64_t) 1 & (index /2);     // first see if on left or right Half by checking the first of those deciding Bits 1-> right, 0-> left
+        uint64_t top = (uint64_t) 1 & (index ^ right);  // secondly check if bits are same or different: same -> bottom, different -> top
+        coord = rotate(coord, i, top, right);           // rotate according to previously determined quadrant ( by looking at last two bits) 
+        if (right) coord.x += i;                        //if on the right translate by current sidelength (=i) to the right
+        if (top) coord.y += i;                          //if on the top translate by current sidelength (=i) upwards
         index >>= (uint64_t) 2;
-    }
-
-    if (degree % 2 != 0) {
-        struct tuple new = {.x=coord.y, .y=coord.x};
-        return new;
     }
     return coord;
 }
