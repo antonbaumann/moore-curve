@@ -116,7 +116,7 @@ Es gibt rekursive Algorithmen für die Erzeugung der Hilbert Kurve, diese klamme
 \subsection{Erzeugung der Hilbert Kurve: iterativer Punkt-für-Punkt Ansatz}
 Im Folgenden soll ein Algorithmus dargestellt werden, der für gegebenen Index i und Grad n die Koordinaten des korrespondierenden Punktes an der Stelle i der Moore Kurve berechnet.
 Geht man davon aus, schon einen solchen funktionierenden Algorithmus für die Hilbert Kurve zu haben, so muss nur der Quadrant des Punktes bestimmt werden, dann der entsprechende Punkt der Hilbert Kurve errechnet und je nach Quadrant verschoben, gespiegelt oder rotiert werden. Dies wird in Abbildung \ref{HilbertZuMoore} grafisch veranschaulicht und im Algorithmus \ref{moore:iterative} skizziert.
-
+\newline
 \begin{figure}[h]
 \centering
 \def\svgwidth{240pt}
@@ -125,10 +125,6 @@ Geht man davon aus, schon einen solchen funktionierenden Algorithmus für die Hi
 \label{HilbertZuMoore}
 \end{figure}
 \ \\
-Ab hier: Erklärung des iterativen Algorithmus zur Hilbert Erzeugung...
-\\--> Von der Website mit den Bits etc etc 
-\ \\
-
 \begin{algorithm}[H]
 \begin{algorithmic}
 \caption{Compute coordinates of point on Moore curve}
@@ -162,18 +158,41 @@ Ab hier: Erklärung des iterativen Algorithmus zur Hilbert Erzeugung...
 \end{algorithmic}
 \end{algorithm}
 
+Damit Algorithmus \ref{moore:iterative} funktioniert, fehlt noch eine Methode, die für gegebenen Index $i$ und Grad $n$ die Koordinaten des entsprechenden Punktes auf der Hilbert Kurve zurückgibt. Abbildung \ref{fig:hilbertBuildup} zeigt, wie das funktioniert: Jeder Punkt beginnt mit den Koordinatnen $(0, 0)$. Wird der Index in Binärdarstellung umgewandelt, so können von hinten beginnend immer zwei Stellen angesehen werden und dann nach dem in der Graphik dargestellten Entscheidungsmuster die Koordinaten durch Spiegelung und Verschiebung verändert werden. Durch iterative Ausführung und mit jeder Iteration einer Vergrößerung des Offsets können so die Koordinaten jedes Punktes bestimmt werden. Algorithmus \ref{hilbert:iterative} zeigt eine mögliche Formalisierung.
+\textbf{TODO Hier}
+
+
+\begin{figure}[H] 
+    \centering
+    \subfloat{{\includegraphics[width=0.69\textwidth]{HilbertToHilbert} }}%
+    \caption{Bottom-up Errechnung der Koordinaten eines Punkts der Hilbert Kurve}%
+    \label{fig:hilbertBuildup}%
+\end{figure}
+
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+\caption{Compute coordinates of given point on Hilbert curve}
+\label{hilbert:iterative}
+\Function{computeHilbertCoord}{$index$, $degree$}
+	\State $sidelength \leftarrow 2^{degree}$
+	\State $i \leftarrow 1$
+	\State $coord \leftarrow (0, 0)$
+	\While {$i < sidelength$}
+		\State $i \leftarrow 2i$\Comment{sidelength doubles with every iteration}
+	\EndWhile
+	\State \Return $coord$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
 
 
 
-
-
-
-\subsection{Erzeugung der Hilbert Kurve: Bottom-up Ansatz}
+\subsection{Erzeugung der Hilbert Kurve: Effizienterer Reuse-Ansatz}
 Der oben dargestellte Algorithmus hat den Vorteil, für einen gegebenen Index und Grad die Koordinaten des korrespondierenden Punktes ausrechnen zu können, ohne dafür die gesamte Kurve erzeugen zu müssen und dann die Koordinaten an der Stelle des Index auszulesen.\\ 
 Soll allerdings die gesamte Kurve erstellt werden, also x-Werte und y-Werte für alle Punkte errechnet werden, so ist der iterative Aufruf des oben gezeigten Algorithmus für jeden Index sehr ineffizient.\\
 Ebenso wie die Moore Kurve des Grads $n$ aus vier Kopien der Hilbert Kurve des Grads n aufgebaut werden kann, so kann auch die Hilbert Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads $n-1$ erzeugt werden (Abbildung \ref{HilbertZuHilbert}).
-
 \begin{figure}[h]
 \centering
 \def\svgwidth{240pt}
@@ -181,10 +200,9 @@ Ebenso wie die Moore Kurve des Grads $n$ aus vier Kopien der Hilbert Kurve des G
 \caption{Transformation von Hilbert Kurve des Grads n-1 zu Hilbert Kurve des Grads n}
 \label{HilbertZuHilbert}
 \end{figure}
-
-Man kann also bei der Erzeugung der Hilbert Kurve ähnlich vorgehen wie bei Algorithmus \ref{moore:iterative}: Mit gegebenen Punkten der Hilbert Kurve des Grads n-1 lassen sich alle Punkte der Hilbert Kurve des Grads n erzeugen.
-Die Spiegelungen, Rotationen und Translationen für die jeweiligen Quadranten sind natürlich anders als in Algorithmus \ref{moore:iterative}.
-Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern ohne die gesamte Kurve zu berechnen, andererseits ist dafür die Berechnung aller Punkte der Kurve insgesamt bei weitem effizienter als der iterative Aufruf des Punkt-zu-Punkt Ansatzes. Algorithmus \ref{moore:batch} zeigt, wie zunächst die Hilbert Kurve bis Grad n-1 aufgebaut und daraus dann die Moore Kurve des Grads n erzeugt wird. Für die Nachvollziehbarkeit sind Abbildung \ref{HilbertZuHilbert} und \ref{HilbertZuMoore} essentiell.
+Man kann also bei der Erzeugung der Hilbert Kurve ähnlich vorgehen wie bei Algorithmus \ref{moore:iterative}: Mit gegebenen Punkten der Hilbert Kurve des Grads $n-1$ lassen sich alle Punkte der Hilbert Kurve des Grads $n$ erzeugen. 
+Die Spiegelungen, Rotationen und Translationen für die jeweiligen Quadranten sind natürlich anders als in Algorithmus \ref{moore:iterative}. \\
+Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern ohne die gesamte Kurve zu berechnen, andererseits ist dafür die Berechnung aller Punkte der Kurve insgesamt bei weitem effizienter als der iterative Aufruf des Punkt-zu-Punkt Ansatzes, da schon durchgeführte Berechnungen wiederverwertet werden. Algorithmus \ref{moore:batch} zeigt, wie zunächst die Hilbert Kurve bis Grad n-1 aufgebaut und daraus dann die Moore Kurve des Grads n erzeugt wird. Für die Nachvollziehbarkeit sind Abbildung \ref{HilbertZuHilbert} und \ref{HilbertZuMoore} essentiell.
 
 \begin{algorithm}[H]
 \begin{algorithmic}
@@ -248,9 +266,10 @@ Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern 
 \end{algorithm}
 
 
-\subsection{Laufzeitanalyse und Vergleich}
-Hier: zeigen dass die Laufzeit pro punkt konstant ist bei unserer zweiten Method
-\\Es fehlt noch : Laufzeit von ineffizientem Hilbert Algorithmus
+\subsection{Theoretische Laufzeitanalyse und Vergleich}
+\textbf{Hier: zeigen dass die Laufzeit pro punkt konstant ist bei unserer zweiten Method
+\\Es fehlt noch : Laufzeit von ineffizientem Hilbert Algorithmus}
+
 Für Algorithmus \ref{moore:batch} lässt sich zeigen, dass der durschnittliche Aufwand für die Berechnung eines Punktes konstant ist, unabhängig vom Grad der Kurve. \\
 Algorithmus \ref{moore:batch} besteht aus dem einmaligen Aufruf der Hilbert-Unterfunktion und dann dem Verschieben der erhaltenen Punkte zur Erzeugung der Moore Kurve. In der Hilbert Unterfunktion gibt es zwei ineinander verschachtelte Schleifen: eine, die die Indexvariable $j$ von $2$ bis inklusiv  $degree -1$ durchläuft (Denn die Hilbert Unterfunktion wird ja mit $degree-1$ aufgerufen) und die innere Schleife, bei der die Punkte des letzten Grades kopiert und verschoben werden. Diese innere Schleife wird $quarter = 4^{j-1}$ mal durchlaufen, denn es müssen immer alle Punkte der Kurve des Grads $j-1$ kopiert und verschoben werden. Diese innere Schleife hat konstanten Aufwand $c$.In ihr wird ein Punkt aus dem Speicher  geladen, die Koordinaten werden manipuliert und an 4 Stellen wieder in den Speicher geschrieben. (Die Annahme der Konstanz berücksichtigt hier natürlich keine Zeitunterschiede durch Caching oder RAM-Limits, sondern geht von einer idealen Maschine aus(\textbf{BEGRFF?? siehe GAD})
 Nach Durchlaufen der Hilbert Unterfunktion werden in der Moore Funktion dann noch einmal  $4^{degree-1}$ Punkte kopiert und verschoben. \\ Der Aufwand für die Berechnung der Punkte der Moore Kurve des Grads n $Op(n)$ kann also folgendermaßen rekursiv definiert werden: \ \\
@@ -269,12 +288,9 @@ Eine Kurve von Grad $n$ hat Seitenlänge $2^n$ und somit $4^n$ Punkte. Der durch
 \[\Rightarrow \lim_{n\to\infty} avg\_Cost(n) = \lim_{n\to\infty} \frac{Op(n)}{4^n} = \frac{1}{3}c\]  \ \\ 
 Der durchschnittliche Rechenaufwand pro Punkt konvergiert also zu einem konstanten Wert. Das heißt, dass sich der absolute Aufwand bei Erhöhung des Grads um eins ungefähr um den Faktor vier erhöht, der durchschnittliche Aufwand pro Punkt aber gleich bleibt, da sich die Anzahl der Punkte mit Erhöhung des Grads ebenso vervierfacht.
 
-%Für die Erzeugung der Koordinaten der Moore Kurve eines gegebenen Grades gibt es verschiedene Herangehensweisen. Allen im Folgenden dargestellten Ansätzen liegt die Tatsache zugrunde, dass die Moore Kurve des Grads n ($ \forall  n \geq 2$) aus 4 rotierten, gespiegelten, verschobenen und dann zusammengefügten Kopien der weitaus besser bekannten Hilbert Kurve zusammengesetzt werden kann. (siehe Bild 1) 
-
-%Ein Algorithmus, der für gegebenen Grad $n$ und Index $i$ ein Koordinatentupel $(x, y)$, das die Lage des $i$-ten Punktes beschreibt, als Ausgabe liefert, kann also naiv folgendermaßen implementiert werden:
-
 % TODO: Je nach Aufgabenstellung einen der Begriffe wählen
-\section{Korrektheit/Genauigkeit}
+\section{Korrektheit}
+Im Gegensatz zu Aufgabenstellungen, die Floating-Point Berechnungen enthalten oder im Bereich der Kryptographie liegen, ist in unserem Fall eine Überprüfung der Korrektheit unserer Lösung zumindest in Graden <10 allein schon durch das Betrachten der visuellen Repräsentation der Koordinaten im vom Rahmenprogramm erzeugten .svg File möglich. Dass unser Lösung korrekt ist, zeigen außerdem die oben dargelegten Algorithmen, die theoretisch für beliebige $n>0$ funktionieren.
 
 
 \section{Performanzanalyse}
