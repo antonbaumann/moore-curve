@@ -247,6 +247,7 @@ All dies kann in unserer Herangehensweise jedoch nur den konstanten Aufwand pro 
 \subsection{Anhang}
 
 \begin{algorithm}[h]
+\scriptsize
 \begin{algorithmic}
 \caption{Berechne Koordinaten eines Punktes auf Moore Kurve}
 \label{moore:iterative}
@@ -267,29 +268,27 @@ All dies kann in unserer Herangehensweise jedoch nur den konstanten Aufwand pro 
 \end{algorithm}
 
 \begin{algorithm}[h]
+\scriptsize
 \begin{algorithmic}
 \caption{Berechne Koordinaten eines gegebenen Punkts auf der Hilbert Kurve}
 \label{hilbert:iterative}
 \Function{berechneHilbertKoordinate}{$index$, $degree$}
 	\State $sidelength \leftarrow 2^{degree}$
 	\State $i \leftarrow 1$
-	\State $coord \leftarrow (0, 0)$
 	\While {$i < sidelength$}
 		\State ermittle Quadrant q $q \in \{A, B, C, D\}$ mit den letzten zwei Bits von $index$:
 		\State $A \iff '00'$, $B \iff '01'$, $C \iff '10'$, $D \iff '11'$
 		\If{$q \in \{A, D\}$}
 			\If{$q = D$}
-			\State $tmp \leftarrow coord.y$\Comment{spiegle an $y = i-1-x$ Achse}
-			\State $coord.y \leftarrow i - 1 - coord.x$
-			\State $coord.x \leftarrow i - 1 - tmp$	
+			\State spiegle an $y = i-1-x$ 
 			\Else 
-			\State $swap(coord.x, coord.y)$\Comment{spiegle an $y=x$ Achse/Winkelhalbierender}
+			\State spiegle an $y=x$ Achse/Winkelhalbierender
 			\EndIf
 		\Else 
-		\State $coord.y \leftarrow coord.y + i$ \Comment{verschiebe nach oben, denn $q \in \{B, C\}$}
+		\State verschiebe nach oben, denn $q \in \{B, C\}$
 		\EndIf
 		\If{$q \in \{C, D\}$}
-		\State $coord.x \leftarrow coord.x + i$ \Comment{verschiebe nach rechts}
+		\State verschiebe nach rechts
 		\EndIf
 		\State $index \leftarrow \frac{index}{4}$ \Comment{zweimaliger rechts-Bitshift um nächste 2 Bits anzusehen}
 		\State $i \leftarrow 2i$\Comment{Die Seitenlänge verdoppelt sich mit jeder Iteration}
@@ -301,6 +300,7 @@ All dies kann in unserer Herangehensweise jedoch nur den konstanten Aufwand pro 
 
 
 \begin{algorithm}[h]
+\scriptsize
 \begin{algorithmic}
 \caption{Berechne alle Punkte der Moore Kurve}
 \label{moore:batch}
