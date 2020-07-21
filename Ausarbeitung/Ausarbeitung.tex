@@ -5,6 +5,7 @@
 \usepackage{algpseudocode}
 \usepackage{amsmath,amsthm}
 \usepackage{amssymb}
+\usepackage[section]{placeins}
 \usepackage[font=small,labelfont=bf]{caption}
 \newcommand{\uproman}[1]{\uppercase\expandafter{\romannumeral#1}}
 \newcommand{\lowroman}[1]{\romannumeral#1\relax}
@@ -101,31 +102,10 @@ Geht man davon aus, schon einen solchen funktionierenden Algorithmus für die Hi
 \caption{Transformation von Hilbert Kurve des Grads n-1 zu Moore Kurve des Grads n}
 \label{HilbertZuMoore}
 \end{figure}
-\begin{algorithm}[H]
-\begin{algorithmic}
-\caption{Berechne Koordinaten eines Punktes auf Moore Kurve}
-\label{moore:iterative}
-\Function{berechneMooreKoordinate}{$index$, $degree$}
-	\State finde Quadrant $q$ des Punkts q heraus ($q \in \{A, B, C, D\}$)
-	\State $tuple \leftarrow$ berechneHilbertKoordinate($index$, $degree-1$)
-	\If {$q = A$} 
-		\State rotiere A um 90$^{\circ} \circlearrowleft$
-	\ElsIf{$q = B$}
-		\State rotiere A um 90$^{\circ}\circlearrowleft$ und verschiebe nach oben
-	\ElsIf{$q = C$}
-		\State rotiere A um 90$^{\circ}\circlearrowright$ und verschiebe nach oben und nach rechts
-	\ElsIf{$q = D$} 
-		\State rotiere A um  90$^{\circ} \circlearrowright$ und verschiebe nach rechts
-	\EndIf
-\EndFunction
-\Function{berechneHilbertKoordinate}{$index$, $degree$}
-	\State [...]
-\EndFunction
-\end{algorithmic}
-\end{algorithm}
+
 Damit Algorithmus \ref{moore:iterative} funktioniert, fehlt noch eine Methode, die für gegebenen Index $i$ und Grad $n$ die Koordinaten des entsprechenden Punktes auf der Hilbert Kurve zurückgibt. Abbildung \ref{fig:hilbertBuildup} zeigt, wie das funktioniert: Jeder Punkt beginnt mit den Koordinatnen $(0, 0)$. Wird der Index in Binärdarstellung umgewandelt, so können von hinten beginnend immer zwei Stellen angesehen werden und dann nach dem in der Graphik dargestellten Entscheidungsmuster die Koordinaten durch Spiegelung und Verschiebung verändert werden. Durch iterative Ausführung und mit jeder Iteration einer Vergrößerung des Offsets können so die Koordinaten jedes Punktes bestimmt werden. Algorithmus \ref{hilbert:iterative} zeigt eine mögliche Formalisierung.
 
-\begin{figure}[H] 
+\begin{figure}[h] 
     \centering
     \subfloat{{\includegraphics[width=1.0\textwidth]{HilbertToHilbert} }}%
     \caption{Bottom-up Errechnung der Koordinaten eines Punkts der Hilbert Kurve, Beispiel für Punkt mit Index 54 und HIlbert Kurve des Grads 3}%
@@ -133,7 +113,160 @@ Damit Algorithmus \ref{moore:iterative} funktioniert, fehlt noch eine Methode, d
 \end{figure}
 
 
-\begin{algorithm}[H]
+
+
+
+
+\FloatBarrier
+\subsection{Erzeugung der Hilbert Kurve: Dynamischer Ansatz}
+Der oben dargestellte Algorithmus hat den Vorteil, für einen gegebenen Index und Grad die Koordinaten des korrespondierenden Punktes ausrechnen zu können, ohne dafür die gesamte Kurve erzeugen zu müssen und dann die Koordinaten an der Stelle des Index auszulesen.\\ 
+Soll allerdings die gesamte Kurve erstellt werden, also x-Werte und y-Werte für alle Punkte errechnet werden, so ist der iterative Aufruf des oben gezeigten Algorithmus für jeden Index sehr ineffizient.\\
+Ebenso wie die Moore Kurve des Grads $n$ aus vier Kopien der Hilbert Kurve des Grads n aufgebaut werden kann, kann auch die Hilbert Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads $n-1$ erzeugt werden (Abbildung \ref{HilbertZuHilbert}).
+\begin{figure}[h]
+\centering
+\def\svgwidth{240pt}
+\input{images/HilbertZuHilbertVektorG.pdf_tex}
+\caption{Transformation von Hilbert Kurve des Grads n-1 zu Hilbert Kurve des Grads n}
+\label{HilbertZuHilbert}
+\end{figure}
+Man kann also bei der Erzeugung der Hilbert Kurve ähnlich vorgehen wie bei Algorithmus \ref{moore:iterative}: Mit gegebenen Punkten der Hilbert Kurve des Grads $n-1$ lassen sich alle Punkte der Hilbert Kurve des Grads $n$ erzeugen. 
+Die Spiegelungen, Rotationen und Translationen für die jeweiligen Quadranten sind natürlich anders als in Algorithmus \ref{moore:iterative}. \\
+Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern ohne die gesamte Kurve zu berechnen, andererseits ist dafür die Berechnung aller Punkte der Kurve insgesamt bei weitem effizienter als der iterative Aufruf des Punkt-zu-Punkt Ansatzes, da schon durchgeführte Berechnungen wiederverwertet werden. Algorithmus \ref{moore:batch} zeigt, wie zunächst die Hilbert Kurve bis Grad $n-1$ aufgebaut und daraus dann die Moore Kurve des Grads $n$ erzeugt wird. Für die Nachvollziehbarkeit sind Abbildung \ref{HilbertZuMoore} und \ref{HilbertZuHilbert} essentiell.
+
+
+\FloatBarrier
+\subsection{Theoretische Laufzeitanalyse und Vergleich}
+Bei Algorithmus \ref{hilbert:iterative} sieht man, dass der Aufwand für die Berechnung eines Punkts vom Grad der Kurve abhängt: In der $berechneHilbertKoordinate(index, degree)$ Unterfunktion wird eine Schleife $log_2(2^{degree})-1 = degree -1$ mal durchlaufen. Da der Aufwand der Operationen innerhalb der Schleife konstant ist, steigt der Aufwand für die Berechnung eines einzelnen Punkts bei Algorithmus \ref{hilbert:iterative} also linear mit dem Grad der Kurve.
+\newline
+Für Algorithmus \ref{moore:batch} lässt sich zeigen, dass der durschnittliche Aufwand für die Berechnung eines Punktes konstant ist, unabhängig vom Grad der Kurve. \\
+Algorithmus \ref{moore:batch} besteht aus dem einmaligen Aufruf der Hilbert-Unterfunktion und dann dem Verschieben der erhaltenen Punkte zur Erzeugung der Moore Kurve. \\
+In der Hilbert Unterfunktion gibt es zwei ineinander verschachtelte Schleifen: eine, die die Indexvariable $j$ von $2$ bis inklusiv  $degree -1$ durchläuft (Denn die Hilbert Unterfunktion wird ja mit $degree-1$ aufgerufen) und die innere Schleife, bei der die Punkte des letzten Grades kopiert und verschoben werden. \\ 
+Diese innere Schleife wird $quarter = 4^{j-1}$ mal durchlaufen, denn es müssen immer alle Punkte der Kurve des Grads $j-1$ kopiert und verschoben werden. Diese innere Schleife hat konstanten Aufwand $c$. In ihr wird ein Punkt aus dem Speicher  geladen, die Koordinaten werden manipuliert und an 4 Stellen wieder in den Speicher geschrieben. (Die Annahme der Konstanz ist hier natürlich theoretisch: sie berücksichtigt keine Zeitunterschiede durch Caching oder RAM-Limits, sondern geht von einem idealisierten Maschinenmodell ohne die Probleme des Von-Neumann-Bottlenecks aus)\\
+Nach Durchlaufen der Hilbert Unterfunktion werden in der Moore Funktion dann noch einmal  $4^{degree-1}$ Punkte kopiert und verschoben. \\ Der Aufwand für die Berechnung der Punkte der Moore Kurve des Grads n $Op(n)$ kann also folgendermaßen rekursiv definiert werden: \ \\
+\[\uproman{1}: Op(n) = Op(n-1) + 4^{n-1}*\cdot\]
+\[\uproman{2}: Op(1) = c\] \ \\ 
+Diese rekursive Gleichung kann nun aufgelöst werden:  \ \\ 
+\begin{align*}
+  Op(n) &= Op(n-1) + 4^{n-1}\cdot c\\
+    &= Op(n-2) + 4^{n-2}\cdot c + 4^{n-1}\cdot c \\
+    &= c\cdot(4^{0} + ... + 4^{n-2} + 4^{n-1}) \\
+    &= c\cdot\sum_{i=0}^{n-1} 4^{i}\\
+    &= c\cdot\frac{1}{3}(4^n-1)\\
+\end{align*}
+Eine Kurve von Grad $n$ hat Seitenlänge $2^n$ und somit $4^n$ Punkte. Der durchschnittliche Aufwand pro Punkt $avg\_Cost(n)$ lässt sich also wie folgt berechnen: \ \\
+\[avg\_Cost(n) = \frac{Op(n)}{4^n} = c \cdot \left(\frac{4^n}{3 \cdot 4^n} - \frac{1}{3 \cdot 4^n}\right) = \frac{1}{3}c - c \cdot \frac{1}{3 \cdot 4^n}\] 
+\[\Rightarrow \lim_{n\to\infty} avg\_Cost(n) = \lim_{n\to\infty} \frac{Op(n)}{4^n} = \frac{1}{3}c\]  \ \\ 
+Der durchschnittliche Rechenaufwand pro Punkt konvergiert also zu einem konstanten Wert. Das heißt, dass sich der absolute Aufwand bei Erhöhung des Grads um eins ungefähr um den Faktor vier erhöht, der durchschnittliche Aufwand pro Punkt aber gleich bleibt, da sich die Anzahl der Punkte mit Erhöhung des Grads ebenso vervierfacht.
+
+% TODO: Je nach Aufgabenstellung einen der Begriffe wählen
+\section{Korrektheit}
+Im Gegensatz zu Aufgabenstellungen, die Floating-Point Berechnungen enthalten oder im Bereich der Kryptographie liegen, ist in unserem Fall eine Überprüfung der Korrektheit unserer Lösung zumindest in Graden <10 allein schon durch das Betrachten der visuellen Repräsentation der Koordinaten im vom Rahmenprogramm erzeugten .svg File möglich. Automatisierte Tests können lediglich die erzeugten Koordinaten mit von einer anderen Implementierung erzeugten Koordinaten abgleichen und feststellen, ob diese identisch sind, was nur bei einer bewiesen korrekten Vergleichsimplementierung aussagekräftig ist oder große Mengen an im Vorhinein gespeicherten Punktdaten erfordert.
+Der Nachweis der Korrektheit der Algorithmen ist also zunächst nur durch detailliertes Nachvollziehen ihrer Funktionsweise möglich, kann aber in niedrigeren Graden sehr gut visuell überprüft werden.
+
+\FloatBarrier
+\section{Performanzanalyse}
+Um das Laufzeitzeitverhalten unserer Implementierung der Moore-Kurve zu überprüfen und beurteilen, haben wir Benchmarks folgender vier Implementierungen auf einem MaxBook Pro mit einem 3,1 Ghz Dual-Core Intel i7 und 16 Gb 1867 Mhz DDR3 RAM durchgeführt.
+
+\begin{center}
+    \begin{tabular}{| r | r | r | r | r | r | r |}
+    \hline
+    Grad \textit{n} & \# Punkte & Speicher & \textit{asm\_avx} & \textit{asm} & \textit{c\_batch} & \textit{c\_iter}  \\ \hline
+    3 & 64 & 512 B  & 27 ns & 23 ns & 67 ns & 564 ns \\  \hline
+    6 & 4096 & 32 KiB  & 601 ns & 1213 ns & 6524 ns & 106 $\mu s$ \\  \hline
+    9 & 26144 & 2048 KiB  & 179 $\mu s$ & 289 $\mu s$ & 830 $\mu s$ & 9436 $\mu s$  \\  \hline
+    12 & 16,78 * 1e6 & 128 MiB & 21,5 ms & 24,5 ms & 94,3 ms & 705,6 ms \\ \hline
+    15 & 1,07 * 1e9 & 8 GiB & 1575,9 ms & 1607,4 ms & 7108,1 ms & 50759 ms \\ \hline
+    16 & 4,29 * 1e9 & 32 GiB & 108,3 s & 125,7 s & 175,9 s & 442,8 s \\ \hline
+    \end{tabular}
+\end{center}
+
+\begin{figure}[htbp] 
+    \centering
+    \subfloat[alle Implementierungen]{{\includegraphics[width=0.45\textwidth]{laufzeit_alle_1-9.png} }}%
+    \qquad
+    \subfloat[ohne \textit{c\_iter}]{{\includegraphics[width=0.45\textwidth]{laufzeit_ohne_iter.png} }}%
+    \caption{Laufzeitverhalten der vier Implementierungen bis Grad 6}%
+    \label{fig:Laufzeitvergleich}%
+ \end{figure}
+ 
+ \FloatBarrier
+ \subsection{Iterative Berechnung der Moore-Koordinaten}
+Aus Abb. \ref{fig:Laufzeitvergleich} geht klar hervor, dass die iterative Berechnung der Moore-Koordinaten (wie in Sektion 2 beschrieben) deutlich ineffizienter ist als die anderen Implementierungen. Ein Vorteil dieser Variante ist zwar, dass sie nur sehr wenige Speicherzugriffe benötigt, da alle Berechnungen in den Registern durchgeführt werden können und nur das Endergebnis in den Speicher geschrieben wird. Durch das rein iterative Vorgehen kann dieser Algorithmus jedoch nicht sinnvoll auf Datenebene parallelisiert werden. Auch kann der dynamische Ansatz, von dem die übrigen Implementierungen profitieren, hier nicht angewandt werden. Im folgenden liegt daher der Fokus auf den restlichen Implementierungen.
+
+\subsection{Vergleich Assembler- mit Referenzprogramm}
+Die Implementierungen \textit{c\_ batch}, \textit{asm\_avx} und \textit{asm} ... siehe Section 3 ... \newline
+An Abb. \ref{fig:Laufzeitvergleich}.b und den Benchmarkwerten kann man erkennen, dass die Assembler Implementierungen deutlich performanter sind als die C-Referenzimplementierung. Für Grad 6 ist die Assembler-Implementierung, welche 128-bit Register benutzt, drei mal schneller als das C-Programm. Dies ist darin begründet, dass sich die dynamische Berechnung der Hilberkurve optimal durch SIMD parallelisieren lässt. Somit können einige Koordinaten gleichzeitig innerhalb einer Operation verarbeitet werden. Die Anzahl der Punkte, die in ein SIMD-Register passen ist abhängig vom Datentypen der Koodinaten und der Größe der Vektorregister. Wir haben uns entschieden, von der in der Aufgabenstellung vorgegebenen Signatur \texttt{moore(uint64\_t degree, uint64\_t *x, uint64\_t *y)} abzuweichen und 32 bit Integer zu benutzen. Der maximale darstellbare Wert verringert sich dadurch zwar auf $2^{32}-1$, jedoch werden größere Werte erst ab einem $n > 32$ benötigt. Der Speicherbedarf einer Moore Kurve mit Grad 33 betrüge $4^{33} \cdot 2 \cdot 4 \text{ Bytes } \approx 590 \cdot 10^{18} \text{ Bytes}$, wenn man alle Koordinaten als 32 bit unsigned Integers darstellen könnte und das Doppelte bei Benutzung von 64 bit Integern. 
+\newline
+Durch die Reduzierung auf 32 bit Intger können nun bei Verwenung von 128 bit Vektorregistern vier und bei 258 bit Registern acht Werte gleichzeitig verarbeitet werden (siehe Abb. 2).
+
+\begin{figure}[h] 
+    \centering
+    \subfloat{{\includegraphics[width=0.4\textwidth]{hilbert_transformation.png} }}%
+    \caption{Parallelisierung durch SIMD}%
+    \label{fig:SIMD}%
+\end{figure}
+
+Durch Disassemblieren der mit \texttt{-march=native -O3} kompilierten Binärdatei festgestellt haben, dass der Compiler den C Code nicht vektorisiert. Daher war unsere anfängliche Vermutung, dass \textit{asm\_128} etwa vier mal so schnell ist wie unsere C-Implementierung und \textit{asm\_256} in der Hälfte der Zeit von \textit{asm\_128} terminiert.
+
+\begin{figure}[h] 
+    \centering
+    \subfloat[Speedup Assembler- ggü. C-Implementierung]{{\includegraphics[width=0.45\textwidth]{speedup_base_c.png} }}%
+    \qquad
+    \subfloat[Speedup \textit{asm\_256} ggü. \textit{asm\_128}]{{\includegraphics[width=0.45\textwidth]{speedup_base_asm_128.png} }}%
+    \caption{Laufzeitvergleich C/ASM}%
+    \label{fig:Laufzeitvergleich Speedup}%
+ \end{figure}
+ 
+ Abb. \ref{fig:Laufzeitvergleich Speedup}.a bestätigt den ersten Teil unserer Vermutung. Zwischen Grad 4 und 15 ist die \textit{asm\_128} Implementierung 2,8 bis 5,3 mal schneller als die Referenzimplementierung in C. Der zweite Teil trifft nur teilweise zu. Wie in Abb. \ref{fig:Laufzeitvergleich Speedup}.b zu sehen ist, profitieren vor allem Grade zwischen 6 und 10 von den größeren Vektorregistern. Bei größeren Graden bietet die Verwendung von AVX-Registern keine signifikante Performanzsteigerung.
+ \FloatBarrier
+\subsection{Cache Effizienz}
+Abb. \ref{fig:Laufzeitvergleich Speedup}.a wirft die Frage auf, weshalb die Assembler Implementierug bei Grad 6 besonders performant ist. Dies lässt sich vermutlich damit beantworten, dass die Moore Kurve sechsten Grades genau \textit{32 KiB} an Speicher benötigt und die Größe des L1 Caches der Maschine auf der getestet wurde \textit{32 KiB} beträgt. Um diese Annahme zu überprüfen wurde das Programm mit dem MacOS Tool \textit{Instruments} auf Cache-Misses (insbesondere L1) überprüft, mit dem Ergebnis, dass 6 der höchste Grad ist, bei dem noch nahezu keine L1 Misses auftreten.
+
+\begin{figure}[h] 
+    \centering
+    \subfloat[Grad 1 - 15]{{\includegraphics[width=0.45\textwidth]{ns_per_coord_1-15.png} }}%
+    \qquad
+    \subfloat[Grad 1 - 16]{{\includegraphics[width=0.45\textwidth]{ns_per_coord_1-16.png} }}%
+    \caption{Nanosekunden pro Punkt der Moore Kurve}%
+    \label{fig:Laufzeitvergleich Skaliert}%
+ \end{figure}
+ 
+ Der Vollständigkeit halber muss noch der Effizienzeinbruch bei Grad 16 angesprochen werden. Dieser ist damit zu erklären, dass die Speicheranforderung für die Berechnung der Moore Kurve auf 32GiB steigt. Da unser Computer nur 16 GiB an Arbeitsspeicher zur Verfügung stellt, müssen nun häufig Speicherseiten auf die Festplatte ausgelagert werden, was zu starken Performanzeinbußen führt.
+
+
+\FloatBarrier
+\section{Zusammenfassung und Ausblick}
+
+Selten gibt es einen Punkt, ab dem man mit Sicherheit die Möglichkeit weiterer Performanceoptimierungen eines Programms ausschließen kann. Besonders beim Schreiben von Assemblycode können so viele Faktoren wie ein simpler Tausch der Reihenfolge zweier Befehle die Schnelligkeit des Programms beeinflussen, sodass die Annahme eines voll optimierten Programms nie getroffen werden kann. \\
+Nach wachsender Einarbeitung in die Thematik und Entwicklung und ständiger Verbesserung unserer Algorithmen fallen uns zu diesem Zeitpunkt noch weitere mögliche Wege der Optimierung ein.\\
+Unsere Benutzung von 32-Bit Integern statt 64-Bit-Integern zur Darstellung der Koordinaten hat zu einer höheren Parallelisierbarkeit des Programms geführt. Mit hoher Wahrscheinlichkeit kann für Grade $\leq 16$ die dynamische Anpassung der Datenbreite auf 16 Bit zu einem weiteren Performancegewinn führen. In Verbindung mit der Benutzung noch breiterer Register, zum Beispiel 512 Bit AVX Registern können Berechnungen noch stärker parallelisiert werden, wobei sich die  Limitierung derartiger Optimierungen schon bei der Erhöhung von 128 Bit auf 256 Bit gezeigt hat, mit teilweise kaum besserer Perfomanz trotz breiterer Register. \\
+Auch das Experimentieren mit einer veränderten Datenstruktur, also dass $x$ und $y$ Koordinaten zum Beispiel nebeneinander im gleichen Array stehen, könnte in bestimmten Fällen die Performance durch eine verbesserte Reihenfolge von Lade- und Schreibbefehlen auf den Speicher erhöhen. \\
+All dies kann in unserer Herangehensweise jedoch nur den konstanten Aufwand pro Punkt verringern. Dass die Laufzeit des Algorithmus mit Erhöhung des Grads exponentiell steigt, ändert auch eine Verringerung dieser Konstante nicht und ist durch die exponentiell wachsende Punktanzahl bedingt.
+\newpage
+\FloatBarrier
+\subsection{Anhang}
+
+\begin{algorithm}[h]
+\begin{algorithmic}
+\caption{Berechne Koordinaten eines Punktes auf Moore Kurve}
+\label{moore:iterative}
+\Function{berechneMooreKoordinate}{$index$, $degree$}
+	\State finde Quadrant $q$ des Punkts q heraus ($q \in \{A, B, C, D\}$)
+	\State $tuple \leftarrow$ berechneHilbertKoordinate($index$, $degree-1$)
+	\If {$q = A$} rotiere A um 90$^{\circ} \circlearrowleft$
+	\ElsIf{$q = B$} rotiere A um 90$^{\circ}\circlearrowleft$ und verschiebe nach oben
+		
+	\ElsIf{$q = C$} rotiere A um 90$^{\circ}\circlearrowright$ und verschiebe nach oben und nach rechts
+	\ElsIf{$q = D$} rotiere A um  90$^{\circ} \circlearrowright$ und verschiebe nach rechts
+	\EndIf
+\EndFunction
+\Function{berechneHilbertKoordinate}{$index$, $degree$}
+	\State [...]
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
 \begin{algorithmic}
 \caption{Berechne Koordinaten eines gegebenen Punkts auf der Hilbert Kurve}
 \label{hilbert:iterative}
@@ -167,23 +300,7 @@ Damit Algorithmus \ref{moore:iterative} funktioniert, fehlt noch eine Methode, d
 \end{algorithm}
 
 
-
-
-\subsection{Erzeugung der Hilbert Kurve: Dynamischer Ansatz}
-Der oben dargestellte Algorithmus hat den Vorteil, für einen gegebenen Index und Grad die Koordinaten des korrespondierenden Punktes ausrechnen zu können, ohne dafür die gesamte Kurve erzeugen zu müssen und dann die Koordinaten an der Stelle des Index auszulesen.\\ 
-Soll allerdings die gesamte Kurve erstellt werden, also x-Werte und y-Werte für alle Punkte errechnet werden, so ist der iterative Aufruf des oben gezeigten Algorithmus für jeden Index sehr ineffizient.\\
-Ebenso wie die Moore Kurve des Grads $n$ aus vier Kopien der Hilbert Kurve des Grads n aufgebaut werden kann, kann auch die Hilbert Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads $n-1$ erzeugt werden (Abbildung \ref{HilbertZuHilbert}).
-\begin{figure}[h]
-\centering
-\def\svgwidth{240pt}
-\input{images/HilbertZuHilbertVektorG.pdf_tex}
-\caption{Transformation von Hilbert Kurve des Grads n-1 zu Hilbert Kurve des Grads n}
-\label{HilbertZuHilbert}
-\end{figure}
-Man kann also bei der Erzeugung der Hilbert Kurve ähnlich vorgehen wie bei Algorithmus \ref{moore:iterative}: Mit gegebenen Punkten der Hilbert Kurve des Grads $n-1$ lassen sich alle Punkte der Hilbert Kurve des Grads $n$ erzeugen. 
-Die Spiegelungen, Rotationen und Translationen für die jeweiligen Quadranten sind natürlich anders als in Algorithmus \ref{moore:iterative}. \\
-Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern ohne die gesamte Kurve zu berechnen, andererseits ist dafür die Berechnung aller Punkte der Kurve insgesamt bei weitem effizienter als der iterative Aufruf des Punkt-zu-Punkt Ansatzes, da schon durchgeführte Berechnungen wiederverwertet werden. Algorithmus \ref{moore:batch} zeigt, wie zunächst die Hilbert Kurve bis Grad $n-1$ aufgebaut und daraus dann die Moore Kurve des Grads $n$ erzeugt wird. Für die Nachvollziehbarkeit sind Abbildung \ref{HilbertZuMoore} und \ref{HilbertZuHilbert} essentiell.
-\begin{algorithm}[H]
+\begin{algorithm}[h]
 \begin{algorithmic}
 \caption{Berechne alle Punkte der Moore Kurve}
 \label{moore:batch}
@@ -224,117 +341,6 @@ Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern 
 \end{algorithmic}
 \end{algorithm}
 
-
-\subsection{Theoretische Laufzeitanalyse und Vergleich}
-Bei Algorithmus \ref{hilbert:iterative} sieht man, dass der Aufwand für die Berechnung eines Punkts vom Grad der Kurve abhängt: In der $berechneHilbertKoordinate(index, degree)$ Unterfunktion wird eine Schleife $log_2(2^{degree})-1 = degree -1$ mal durchlaufen. Da der Aufwand der Operationen innerhalb der Schleife konstant ist, steigt der Aufwand für die Berechnung eines einzelnen Punkts bei Algorithmus \ref{hilbert:iterative} also linear mit dem Grad der Kurve.
-\newline
-Für Algorithmus \ref{moore:batch} lässt sich zeigen, dass der durschnittliche Aufwand für die Berechnung eines Punktes konstant ist, unabhängig vom Grad der Kurve. \\
-Algorithmus \ref{moore:batch} besteht aus dem einmaligen Aufruf der Hilbert-Unterfunktion und dann dem Verschieben der erhaltenen Punkte zur Erzeugung der Moore Kurve. \\
-In der Hilbert Unterfunktion gibt es zwei ineinander verschachtelte Schleifen: eine, die die Indexvariable $j$ von $2$ bis inklusiv  $degree -1$ durchläuft (Denn die Hilbert Unterfunktion wird ja mit $degree-1$ aufgerufen) und die innere Schleife, bei der die Punkte des letzten Grades kopiert und verschoben werden. \\ 
-Diese innere Schleife wird $quarter = 4^{j-1}$ mal durchlaufen, denn es müssen immer alle Punkte der Kurve des Grads $j-1$ kopiert und verschoben werden. Diese innere Schleife hat konstanten Aufwand $c$. In ihr wird ein Punkt aus dem Speicher  geladen, die Koordinaten werden manipuliert und an 4 Stellen wieder in den Speicher geschrieben. (Die Annahme der Konstanz ist hier natürlich theoretisch: sie berücksichtigt keine Zeitunterschiede durch Caching oder RAM-Limits, sondern geht von einem idealisierten Maschinenmodell ohne die Probleme des Von-Neumann-Bottlenecks aus)\\
-Nach Durchlaufen der Hilbert Unterfunktion werden in der Moore Funktion dann noch einmal  $4^{degree-1}$ Punkte kopiert und verschoben. \\ Der Aufwand für die Berechnung der Punkte der Moore Kurve des Grads n $Op(n)$ kann also folgendermaßen rekursiv definiert werden: \ \\
-\[\uproman{1}: Op(n) = Op(n-1) + 4^{n-1}*\cdot\]
-\[\uproman{2}: Op(1) = c\] \ \\ 
-Diese rekursive Gleichung kann nun aufgelöst werden:  \ \\ 
-\begin{align*}
-  Op(n) &= Op(n-1) + 4^{n-1}\cdot c\\
-    &= Op(n-2) + 4^{n-2}\cdot c + 4^{n-1}\cdot c \\
-    &= c\cdot(4^{0} + ... + 4^{n-2} + 4^{n-1}) \\
-    &= c\cdot\sum_{i=0}^{n-1} 4^{i}\\
-    &= c\cdot\frac{1}{3}(4^n-1)\\
-\end{align*}
-Eine Kurve von Grad $n$ hat Seitenlänge $2^n$ und somit $4^n$ Punkte. Der durchschnittliche Aufwand pro Punkt $avg\_Cost(n)$ lässt sich also wie folgt berechnen: \ \\
-\[avg\_Cost(n) = \frac{Op(n)}{4^n} = c \cdot \left(\frac{4^n}{3 \cdot 4^n} - \frac{1}{3 \cdot 4^n}\right) = \frac{1}{3}c - c \cdot \frac{1}{3 \cdot 4^n}\] 
-\[\Rightarrow \lim_{n\to\infty} avg\_Cost(n) = \lim_{n\to\infty} \frac{Op(n)}{4^n} = \frac{1}{3}c\]  \ \\ 
-Der durchschnittliche Rechenaufwand pro Punkt konvergiert also zu einem konstanten Wert. Das heißt, dass sich der absolute Aufwand bei Erhöhung des Grads um eins ungefähr um den Faktor vier erhöht, der durchschnittliche Aufwand pro Punkt aber gleich bleibt, da sich die Anzahl der Punkte mit Erhöhung des Grads ebenso vervierfacht.
-
-% TODO: Je nach Aufgabenstellung einen der Begriffe wählen
-\section{Korrektheit}
-Im Gegensatz zu Aufgabenstellungen, die Floating-Point Berechnungen enthalten oder im Bereich der Kryptographie liegen, ist in unserem Fall eine Überprüfung der Korrektheit unserer Lösung zumindest in Graden <10 allein schon durch das Betrachten der visuellen Repräsentation der Koordinaten im vom Rahmenprogramm erzeugten .svg File möglich. Automatisierte Tests können lediglich die erzeugten Koordinaten mit von einer anderen Implementierung erzeugten Koordinaten abgleichen und feststellen, ob diese identisch sind, was nur bei einer bewiesen korrekten Vergleichsimplementierung aussagekräftig ist oder große Mengen an im Vorhinein gespeicherten Punktdaten erfordert.
-Der Nachweis der Korrektheit der Algorithmen ist also zunächst nur durch detailliertes Nachvollziehen ihrer Funktionsweise möglich, kann aber in niedrigeren Graden sehr gut visuell überprüft werden.
-
-
-\section{Performanzanalyse}
-Um das Laufzeitzeitverhalten unserer Implementierung der Moore-Kurve zu überprüfen und beurteilen, haben wir Benchmarks folgender vier Implementierungen auf einem MaxBook Pro mit einem 3,1 Ghz Dual-Core Intel i7 und 16 Gb 1867 Mhz DDR3 RAM durchgeführt.
-
-\begin{center}
-    \begin{tabular}{| r | r | r | r | r | r | r |}
-    \hline
-    Grad \textit{n} & \# Punkte & Speicher & \textit{asm\_avx} & \textit{asm} & \textit{c\_batch} & \textit{c\_iter}  \\ \hline
-    3 & 64 & 512 B  & 27 ns & 23 ns & 67 ns & 564 ns \\  \hline
-    6 & 4096 & 32 KiB  & 601 ns & 1213 ns & 6524 ns & 106 $\mu s$ \\  \hline
-    9 & 26144 & 2048 KiB  & 179 $\mu s$ & 289 $\mu s$ & 830 $\mu s$ & 9436 $\mu s$  \\  \hline
-    12 & 16,78 * 1e6 & 128 MiB & 21,5 ms & 24,5 ms & 94,3 ms & 705,6 ms \\ \hline
-    15 & 1,07 * 1e9 & 8 GiB & 1575,9 ms & 1607,4 ms & 7108,1 ms & 50759 ms \\ \hline
-    16 & 4,29 * 1e9 & 32 GiB & 108,3 s & 125,7 s & 175,9 s & 442,8 s \\ \hline
-    \end{tabular}
-\end{center}
-
-\begin{figure}[htbp] 
-    \centering
-    \subfloat[alle Implementierungen]{{\includegraphics[width=0.45\textwidth]{laufzeit_alle_1-9.png} }}%
-    \qquad
-    \subfloat[ohne \textit{c\_iter}]{{\includegraphics[width=0.45\textwidth]{laufzeit_ohne_iter.png} }}%
-    \caption{Laufzeitverhalten der vier Implementierungen bis Grad 6}%
-    \label{fig:Laufzeitvergleich}%
- \end{figure}
- 
- \subsection{Iterative Berechnung der Moore-Koordinaten}
-Aus Abb. \ref{fig:Laufzeitvergleich} geht klar hervor, dass die iterative Berechnung der Moore-Koordinaten (wie in Sektion 2 beschrieben) deutlich ineffizienter ist als die anderen Implementierungen. Ein Vorteil dieser Variante ist zwar, dass sie nur sehr wenige Speicherzugriffe benötigt, da alle Berechnungen in den Registern durchgeführt werden können und nur das Endergebnis in den Speicher geschrieben wird. Durch das rein iterative Vorgehen kann dieser Algorithmus jedoch nicht sinnvoll auf Datenebene parallelisiert werden. Auch kann der dynamische Ansatz, von dem die übrigen Implementierungen profitieren, hier nicht angewandt werden. Im folgenden liegt daher der Fokus auf den restlichen Implementierungen.
-
-\subsection{Vergleich Assembler- mit Referenzprogramm}
-Die Implementierungen \textit{c\_ batch}, \textit{asm\_avx} und \textit{asm} ... siehe Section 3 ... \newline
-An Abb. \ref{fig:Laufzeitvergleich}.b und den Benchmarkwerten kann man erkennen, dass die Assembler Implementierungen deutlich performanter sind als die C-Referenzimplementierung. Für Grad 6 ist die Assembler-Implementierung, welche 128-bit Register benutzt, drei mal schneller als das C-Programm. Dies ist darin begründet, dass sich die dynamische Berechnung der Hilberkurve optimal durch SIMD parallelisieren lässt. Somit können einige Koordinaten gleichzeitig innerhalb einer Operation verarbeitet werden. Die Anzahl der Punkte, die in ein SIMD-Register passen ist abhängig vom Datentypen der Koodinaten und der Größe der Vektorregister. Wir haben uns entschieden, von der in der Aufgabenstellung vorgegebenen Signatur \texttt{moore(uint64\_t degree, uint64\_t *x, uint64\_t *y)} abzuweichen und 32 bit Integer zu benutzen. Der maximale darstellbare Wert verringert sich dadurch zwar auf $2^{32}-1$, jedoch werden größere Werte erst ab einem $n > 32$ benötigt. Der Speicherbedarf einer Moore Kurve mit Grad 33 betrüge $4^{33} \cdot 2 \cdot 4 \text{ Bytes } \approx 590 \cdot 10^{18} \text{ Bytes}$, wenn man alle Koordinaten als 32 bit unsigned Integers darstellen könnte und das Doppelte bei Benutzung von 64 bit Integern. 
-\newline
-Durch die Reduzierung auf 32 bit Intger können nun bei Verwenung von 128 bit Vektorregistern vier und bei 258 bit Registern acht Werte gleichzeitig verarbeitet werden (siehe Abb. 2).
-
-\begin{figure}[htbp] 
-    \centering
-    \subfloat{{\includegraphics[width=0.69\textwidth]{hilbert_transformation.png} }}%
-    \caption{Parallelisierung durch SIMD}%
-    \label{fig:SIMD}%
-\end{figure}
-
-Durch Disassemblieren der mit \texttt{-march=native -O3} kompilierten Binärdatei festgestellt haben, dass der Compiler den C Code nicht vektorisiert. Daher war unsere anfängliche Vermutung, dass \textit{asm\_128} etwa vier mal so schnell ist wie unsere C-Implementierung und \textit{asm\_256} in der Hälfte der Zeit von \textit{asm\_128} terminiert.
-
-\begin{figure}[htbp] 
-    \centering
-    \subfloat[Speedup Assembler- ggü. C-Implementierung]{{\includegraphics[width=0.45\textwidth]{speedup_base_c.png} }}%
-    \qquad
-    \subfloat[Speedup \textit{asm\_256} ggü. \textit{asm\_128}]{{\includegraphics[width=0.45\textwidth]{speedup_base_asm_128.png} }}%
-    \caption{Laufzeitvergleich C/ASM}%
-    \label{fig:Laufzeitvergleich Speedup}%
- \end{figure}
- 
- Abb. \ref{fig:Laufzeitvergleich Speedup}.a bestätigt den ersten Teil unserer Vermutung. Zwischen Grad 4 und 15 ist die \textit{asm\_128} Implementierung 2,8 bis 5,3 mal schneller als die Referenzimplementierung in C. Der zweite Teil trifft nur teilweise zu. Wie in Abb. \ref{fig:Laufzeitvergleich Speedup}.b zu sehen ist, profitieren vor allem Grade zwischen 6 und 10 von den größeren Vektorregistern. Bei größeren Graden bietet die Verwendung von AVX-Registern keine signifikante Performanzsteigerung.
- 
-\subsection{Cache Effizienz}
-Abb. \ref{fig:Laufzeitvergleich Speedup}.a wirft die Frage auf, weshalb die Assembler Implementierug bei Grad 6 besonders performant ist. Dies lässt sich vermutlich damit beantworten, dass die Moore Kurve sechsten Grades genau \textit{32 KiB} an Speicher benötigt und die Größe des L1 Caches der Maschine auf der getestet wurde \textit{32 KiB} beträgt. Um diese Annahme zu überprüfen wurde das Programm mit dem MacOS Tool \textit{Instruments} auf Cache-Misses (insbesondere L1) überprüft, mit dem Ergebnis, dass 6 der höchste Grad ist, bei dem noch nahezu keine L1 Misses auftreten.
-
-\begin{figure}[htbp] 
-    \centering
-    \subfloat[Grad 1 - 15]{{\includegraphics[width=0.45\textwidth]{ns_per_coord_1-15.png} }}%
-    \qquad
-    \subfloat[Grad 1 - 16]{{\includegraphics[width=0.45\textwidth]{ns_per_coord_1-16.png} }}%
-    \caption{Nanosekunden pro Punkt der Moore Kurve}%
-    \label{fig:Laufzeitvergleich Skaliert}%
- \end{figure}
- 
- Der Vollständigkeit halber muss noch der Effizienzeinbruch bei Grad 16 angesprochen werden. Dieser ist damit zu erklären, dass die Speicheranforderung für die Berechnung der Moore Kurve auf 32GiB steigt. Da unser Computer nur 16 GiB an Arbeitsspeicher zur Verfügung stellt, müssen nun häufig Speicherseiten auf die Festplatte ausgelagert werden, was zu starken Performanzeinbußen führt.
-
-
-
-\section{Zusammenfassung und Ausblick}
-
-Selten gibt es einen Punkt, ab dem man mit Sicherheit die Möglichkeit weiterer Performanceoptimierungen eines Programms ausschließen kann. Besonders beim Schreiben von Assemblycode können so viele Faktoren wie ein simpler Tausch der Reihenfolge zweier Befehle die Schnelligkeit des Programms beeinflussen, sodass die Annahme eines voll optimierten Programms nie getroffen werden kann. \\
-Nach wachsender Einarbeitung in die Thematik und Entwicklung und ständiger Verbesserung unserer Algorithmen fallen uns zu diesem Zeitpunkt noch weitere mögliche Wege der Optimierung ein.\\
-Unsere Benutzung von 32-Bit Integern statt 64-Bit-Integern zur Darstellung der Koordinaten hat zu einer höheren Parallelisierbarkeit des Programms geführt. Mit hoher Wahrscheinlichkeit kann für Grade $\leq 16$ die dynamische Anpassung der Datenbreite auf 16 Bit zu einem weiteren Performancegewinn führen. In Verbindung mit der Benutzung noch breiterer Register, zum Beispiel 512 Bit AVX Registern können Berechnungen noch stärker parallelisiert werden, wobei sich die  Limitierung derartiger Optimierungen schon bei der Erhöhung von 128 Bit auf 256 Bit gezeigt hat, mit teilweise kaum besserer Perfomanz trotz breiterer Register. \\
-Auch das Experimentieren mit einer veränderten Datenstruktur, also dass $x$ und $y$ Koordinaten zum Beispiel nebeneinander im gleichen Array stehen, könnte in bestimmten Fällen die Performance durch eine verbesserte Reihenfolge von Lade- und Schreibbefehlen auf den Speicher erhöhen. \\
-All dies kann in unserer Herangehensweise jedoch nur den konstanten Aufwand pro Punkt verringern. Dass die Laufzeit des Algorithmus mit Erhöhung des Grads exponentiell steigt, ändert auch eine Verringerung dieser Konstante nicht und ist durch die exponentiell wachsende Punktanzahl bedingt.
-
-%Um unsere Laufzeit zu verbessern würden wir vorschlagen, dass man unser Programm auf einem Rechner laufen lassen sollte der über mehr Arbeitsspeicher und größeren Cache verfügt, damit man Kurven von größeren Grad mit weniger Page-Faults und Cache Misses berechnen kann, was zur kürzeren Laufzeit führen würde.
-%Ein weiterer Vorschlag von unserer Seite sei die Datenstruktur auf der wir arbeiten so anzupassen. Zur zeit arbeiten wir auf zwei Arrays einem X-Array und Y-Array diese liegen nacheinander im Speicher, unsere Idee ist, die Arrays folgend zu kombinieren XY-Array: x1,y1,x2,y2,….,xn,yn
-%sodass man kleinere Sprünge macht beim hin und her kopieren. 
 
 
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
