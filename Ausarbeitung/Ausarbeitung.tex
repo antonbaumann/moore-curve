@@ -240,7 +240,6 @@ Nach wachsender Einarbeitung in die Thematik und Entwicklung und ständiger Verb
 Unsere Benutzung von 32-Bit Integern statt 64-Bit-Integern zur Darstellung der Koordinaten hat zu einer höheren Parallelisierbarkeit des Programms geführt. Mit hoher Wahrscheinlichkeit kann für Grade $\leq 16$ die dynamische Anpassung der Datenbreite auf 16 Bit zu einem weiteren Performancegewinn führen. In Verbindung mit der Benutzung noch breiterer Register, zum Beispiel 512 Bit AVX Registern können Berechnungen noch stärker parallelisiert werden, wobei sich die  Limitierung derartiger Optimierungen schon bei der Erhöhung von 128 Bit auf 256 Bit gezeigt hat, mit teilweise kaum besserer Perfomanz trotz breiterer Register. \\
 Auch das Experimentieren mit einer veränderten Datenstruktur, also dass $x$ und $y$ Koordinaten zum Beispiel nebeneinander im gleichen Array stehen, könnte in bestimmten Fällen die Performance durch eine verbesserte Reihenfolge von Lade- und Schreibbefehlen auf den Speicher erhöhen. \\
 All dies kann in unserer Herangehensweise jedoch nur den konstanten Aufwand pro Punkt verringern. Dass die Laufzeit des Algorithmus mit Erhöhung des Grads exponentiell steigt, ändert auch eine Verringerung dieser Konstante nicht und ist durch die exponentiell wachsende Punktanzahl bedingt.
-\newpage
 \FloatBarrier
 \subsection{Anhang}
 
