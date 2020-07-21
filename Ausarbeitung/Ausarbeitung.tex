@@ -310,20 +310,20 @@ Um das Laufzeitzeitverhalten unserer Implementierung der Moore-Kurve zu √ºberpr√
     \begin{tabular}{| r | r | r | r | r | r | r |}
     \hline
     Grad \textit{n} & \# Punkte & Speicher & \textit{asm\_avx} & \textit{asm} & \textit{c\_batch} & \textit{c\_iter}  \\ \hline
-    3 & 64 & 512 B  & 27 ns & 23 ns & 67 ns & 1796 ns \\  \hline
-    6 & 4096 & 32 KiB  & 601 ns & 1213 ns & 6524 ns & 219 $\mu s$ \\  \hline
-    9 & 26144 & 2048 KiB  & 179 $\mu s$ & 289 $\mu s$ & 830 $\mu s$ & 16562 $\mu s$  \\  \hline
-    12 & 16,78 * 1e6 & 128 MiB & 21,5 ms & 24,5 ms & 94,3 ms & 1303,1 ms \\ \hline
-    15 & 1,07 * 1e9 & 8 GiB & 1575,9 ms & 1607,4 ms & 7108,1 ms & 92985,2 ms \\ \hline
-    16 & 4,29 * 1e9 & 32 GiB & 108,3 s & 125,7 s & 175,9 s & 718,1 s \\ \hline
+    3 & 64 & 512 B  & 27 ns & 23 ns & 67 ns & 564 ns \\  \hline
+    6 & 4096 & 32 KiB  & 601 ns & 1213 ns & 6524 ns & 106 $\mu s$ \\  \hline
+    9 & 26144 & 2048 KiB  & 179 $\mu s$ & 289 $\mu s$ & 830 $\mu s$ & 9436 $\mu s$  \\  \hline
+    12 & 16,78 * 1e6 & 128 MiB & 21,5 ms & 24,5 ms & 94,3 ms & 705,6 ms \\ \hline
+    15 & 1,07 * 1e9 & 8 GiB & 1575,9 ms & 1607,4 ms & 7108,1 ms & 50759 ms \\ \hline
+    16 & 4,29 * 1e9 & 32 GiB & 108,3 s & 125,7 s & 175,9 s & 442,8 s \\ \hline
     \end{tabular}
 \end{center}
 
 \begin{figure}[htbp] 
     \centering
-    \subfloat[alle Implementierungen]{{\includegraphics[width=0.45\textwidth]{laufzeitvergleich_1-6_alle_impl.png} }}%
+    \subfloat[alle Implementierungen]{{\includegraphics[width=0.45\textwidth]{laufzeit_alle_1-9.png} }}%
     \qquad
-    \subfloat[ohne \textit{c\_iter}]{{\includegraphics[width=0.45\textwidth]{laufzeitvergleich_1-6_fast.png} }}%
+    \subfloat[ohne \textit{c\_iter}]{{\includegraphics[width=0.45\textwidth]{laufzeit_ohne_iter.png} }}%
     \caption{Laufzeitverhalten der vier Implementierungen bis Grad 6}%
     \label{fig:Laufzeitvergleich}%
  \end{figure}
