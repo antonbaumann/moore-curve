@@ -27,55 +27,38 @@
 \maketitle
 
 \section{Einleitung}
-
+\subsection{Abstract}
 Um die in der Vorlesung erlangten Kenntnisse zu vertiefen, wird vom Lehrstuhl für Rechnerarchitektur und Parallele Systeme ein Semester begleitendes Praktikum angeboten.\\
 Im Rahmen dieses Rechnerarchitektur Praktikums hat sich unsere Gruppe mit dem Thema der Moore Kurve auseinandergesetzt. Die Moore Kurve ist eine von dem Mathematiker Eliakim Hastings Moore (1862-1932) entwickelte raumfüllende Kurve. Sie basiert auf der Hilbert Kurve und findet oft Anwendung in Bildverarbeitung und Datendarstellung. Unsere erste Aufgabe war es einen Algorithmus in Assembler zu entwickeln, der die Moore Kurve beliebigen Grades erstellt und in einer Datei abbildet. Die zweite Aufgabe war es zu beantworten, ob es möglich ist einen beliebigen Punkt der Kurve in konstanter Zeit unabhängig vom Grad zu berechnen.
-\begin{figure}[h]
-\centering
-    \includegraphics[width=12cm, height=4cm]{Peano}\\ %cite
-    \caption{Die drei ersten Iterationen der Peano Kurve}
-    \label{fig:Peano}
-\end{figure}
-Generell ist eine raumfüllenden Kurve (Englisch: space-filling curve oder auch SFC) eine "Linie" die von einem Eindimensionalen Raum auf ein N-Dimensionalen Raum abbildet. Einfachheitshalber beschränken wir uns aber auf zweidimensionalen und ein Beispiel im dreidimensionalen Raum. Die Besonderheit dieser Kurve liegt darin, dass sie jeden Punkt des Einheitsquadrats passiert. Genauer gesagt, wenn n für den Grad der Kurve steht und $\lim_{n\to\infty}$, dann wird eine gegebene Fläche durch so eine Kurve gefüllt.\\
-Die erste SFC wurde von einem Italienischen Mathematiker Giuseppe Peano in 1890 entwickelt. (Siehe Abb. \ref{fig:Peano})
-\newpage
-Die Motivation für solch eine Erkenntnis bekam er durch einen weitern  renommierten Mathematiker Georg Cantor der wenige Jahre zuvor bewiesen hatte, dass die Mengen der natürlichen Zahlen und die der positiven rationalen Zahlen gleich mächtig sind (Cantors erstes diagonal Argument, Abb. \ref{fig:Cantor}). 
-Durch das verallgemeinern des Cantorischen Diagonalarguments kann man zeigen, dass es eindimensionale Objekte gibt, \\ die zweidimensionale füllen können. Eine raumfüllende Kurve ist also eine surjektive Abbildung, die von einem Einheitsintervall in ein Einheitsquadrat abbildet.
-\begin{figure}[h]
-\centering
-     \includegraphics[width=5cm, height=5cm]{Cantor}
-    \caption{Cantorische Paarungsfunktion}
-    \label{fig:Cantor}
-\end{figure}
-Die Hilbert Kurve, die von dem gleichnamigen Mathematiker David Hilbert in 1891 entwickelt wurde ist eine einfachere Version, die das Einheitsquadrat in 4 Teile anstatt 9 partitioniert. Diese Quadranten beinhalten dann die Hilbert Kurve vom Grad $n - 1$. Betrachtet man zum Beispiel die mittlere Abbildung in Abb. \ref{fig:hilbertCurve}, die Hilbert Kurve zweiten Grades, so bemerkt man, dass sie vier mal die Kurve vom Grad 1 beinhaltet, die rotiert oder gespiegelt wurde und an den End- bzw. Startpunkten verbunden wurden.
-\begin{figure}[h]
-\centering
-   \includegraphics[width=12cm, height=4cm]{Hilbert}
-    \caption{Die drei ersten Iterationen der Hilbert Kurve}
-    \label{fig:hilbertCurve}
-\end{figure}
 
-\newpage %Autor der Moore Kurve ist im Abstract erwähnt fehlt datum leider
-Wie bereits erwähnt ist die Moore Kurve eine Variation der Hilbert Kurve. Die ersten Grade der Moore- und Hilbert-Kurve sind äquivalent. Dabei ergeben sich die weiteren Iterationen der Moore Kurve, durch die Zusammensetzung der Hilbert Kurve vom Grad $n - 1$.  Es werden also 4 Kopien der Hilbert Kurve des Grads $n-1$ zur Moore Kurve des Grads $n$ zusammengesetzt (Nach Rotation, Spiegelung und Verschiebung). \textbf{hier noch eine Illustration??}
-Entscheidender Unterschied der Moore Kurve zur Hilbert Kurve ist, dass sich ihre Anfangs- und Endpunkte im Gegensatz zur Hilbert Kurve nebeneinander befinden.
+\subsection{Charakterisierung der Moore-Kurve und weiteren raumfüllenden Kurven}
+Generell ist eine raumfüllenden Kurve (Englisch: space-filling curve oder auch SFC) eine "Linie" die von einem Eindimensionalen Raum auf ein N-Dimensionalen Raum abbildet. Einfachheitshalber beschränken wir uns aber auf zweidimensionalen und ein Beispiel im dreidimensionalen Raum. Die Besonderheit dieser Kurve liegt darin, dass sie jeden Punkt des Einheitsquadrats passiert. Genauer gesagt, wenn n für den Grad der Kurve steht und $\lim_{n\to\infty}$, dann wird eine gegebene Fläche durch so eine Kurve gefüllt.\\
+Die erste SFC wurde von einem Italienischen Mathematiker Giuseppe Peano in 1890 entwickelt.
+\\
+Die Motivation für solch eine Erkenntnis bekam er durch einen weitern  renommierten Mathematiker Georg Cantor der wenige Jahre zuvor bewiesen hatte, dass die Mengen der natürlichen Zahlen und die der positiven rationalen Zahlen gleich mächtig sind (Cantors erstes diagonal Argument)%cite ? 
+Durch das verallgemeinern des Cantorischen Diagonalarguments kann man zeigen, dass es eindimensionale Objekte gibt, \\ die zweidimensionale füllen können. Eine raumfüllende Kurve ist also eine surjektive Abbildung, die von einem Einheitsintervall in ein Einheitsquadrat abbildet.
+Die Hilbert Kurve, die von dem gleichnamigen Mathematiker David Hilbert in 1891 entwickelt wurde ist eine einfachere Version, die das Einheitsquadrat in 4 Teile anstatt 9 partitioniert. Diese Quadranten beinhalten dann die Hilbert Kurve vom Grad $n - 1$. \\Betrachtet man zum Beispiel die mittlere Hilbert-Kurve in Abb. \ref{fig:mooreCurve}, die den zweiten Grad hat. So bemerkt man, dass sie vier mal die Kurve vom Grad 1 beinhaltet, die rotiert oder gespiegelt wurde und an den End- bzw. Startpunkten verbunden wurden.
 \begin{figure}[h]
 \centering
-      \includegraphics[width=12cm, height=4cm]{Moore}
-    \caption{Die drei ersten Iterationen der Moore Kurven}
+    \includegraphics[width=8cm, height=5cm]{Moore_and_Hilbert}
+    \caption{Die drei ersten Iterationen der Hilbert- und Moore Kurve}
     \label{fig:mooreCurve}
 \end{figure}
-Außerdem gehört die Moore Kurve (Peano und Hilbert ebenfalls) einer Unterkategorie der SFC an, die man FASS Kurven nennt. (FASS: „space-filling, self-avoiding, simple and self-similar“).\\
+Wie bereits erwähnt ist die Moore Kurve eine Variation der Hilbert Kurve. Die ersten Grade der Moore- und Hilbert-Kurve sind äquivalent. Dabei ergeben sich die weiteren Iterationen der Moore Kurve, durch die Zusammensetzung der Hilbert Kurve vom Grad $n - 1$.  Es werden also 4 Kopien der Hilbert Kurve des Grads $n-1$ zur Moore Kurve des Grads $n$ zusammengesetzt (Nach Rotation, Spiegelung und Verschiebung). \textbf{hier noch eine Illustration??}
+Entscheidender Unterschied der Moore Kurve zur Hilbert Kurve ist, dass sich ihre Anfangs- und Endpunkte im Gegensatz zur Hilbert Kurve nebeneinander befinden.
+\\
+Außerdem gehört die Moore Kurve (Peano und Hilbert ebenfalls) einer Unterkategorie der SFC an, die man FASS Kurven nennt. (FASS: „space-filling, self-avoiding, simple and self-similar“).
 Dies birgt wichtige Eigenschaften, weshalb sie in der Praxis Verwendung findet. Zu einem die Kurve ist selbstausweichend, das bedeutet jeder Punkt ist exakt festgelegt, also wird er nur einmal durchlaufen. Hinzu behält die Kurve die Lokalität der Punkte bei. Das bedeutet, sind die Punkte nah beinander im eindimensionalen Einheitsintervall, so sind sie es ebenfalls in der Kurve. (siehe Abb. \ref{fig:locality}) % http://blog.christianperone.com/2015/08/googles-s2-geometry-on-the-sphere-cells-and-hilbert-curve/
 \begin{figure}[h]
 \centering
-      \includegraphics[width=8cm, height=6cm]{Locality}
-    \caption{Graphik um die Eigenschaft der Lokalität zu verdeutlichen} % for spatial DB = raumbezogene Datenbank
+      \includegraphics[width=6cm, height=4cm]{Locality}
+    \caption{Graphik um die Eigenschaft der Lokalität zu verdeutlichen}
     \label{fig:locality}
 \end{figure}
-In raumbezogenen Anwendungen kommt es oft vor, dass raumfüllende Kurven verwendet werden, um effizient geographische Daten, die in eindimensionaler oder zweidimensionaler Form vorhanden sind, in eindimensionale Daten umzuwandeln. \\Dafür wird das Gebiet in Zellen aufgeteilt. Diese dienen einer kompakten Darstellung der bestimmten Region. Um diese Zellen schnell "ansprechen"' zu können, werden sie indexiert. Dabei ist es erwünscht, dass geographische Nähe, also Nähe in 2 Dimensionen von Bilddaten auch auf der Abbildung in den eindimensionalen Raum erhalten bleibt, da sich so nebeneinander liegende Bilddaten auch nebeneinander im Speicher befinden und effizienter geladen werden können.
+\newpage
+In raumbezogenen Anwendungen kommt es oft vor, dass raumfüllende Kurven verwendet werden, um effizient geographische Daten, die in eindimensionaler oder zweidimensionaler Form vorhanden sind, in eindimensionale Daten umzuwandeln. Dafür wird das Gebiet in Zellen aufgeteilt. Diese dienen einer kompakten Darstellung der bestimmten Region. Um diese Zellen schnell "ansprechen"' zu können, werden sie indexiert. Dabei ist es erwünscht, dass geographische Nähe, also Nähe in 2 Dimensionen von Bilddaten auch auf der Abbildung in den eindimensionalen Raum erhalten bleibt, da sich so nebeneinander liegende Bilddaten auch nebeneinander im Speicher befinden und effizienter geladen werden können.
 Da eine FASS Kurve genau diese Anforderungen erfüllt, eignet sie sich besonders gut für solch eine Verwendung. Ein konkretes Beispiel der Anwendung wäre die \href{https://code.google.com/archive/p/s2-geometry-library/}{S2-geometry-library von Google}. 
 
-% vielleicht noch erwähnen das es alternativen gibt aber zb Hilbert kurve sehr effizient ist
 \begin{figure}
     \centering
     \begin{minipage}{0.45\textwidth}
@@ -376,6 +359,18 @@ Abb 3.a wirft die Frage auf, weshalb die Assembler Implementierug bei Grad 6 bes
 
 
 \section{Zusammenfassung und Ausblick}
+\subsection{Zusammenfassung}
+Zusammenfassend kann man sagen, dass uns das Erledigen sowohl der theoretischen als auch der praktischen Aufgabe gelungen ist. Im Laufe der Projektphase haben wir zwei verschiedene Ansätze gefunden, die in der Lage sind die Moore Kurve iterativ zu berechnen.
+
+Der Punkt-für-Punkt Algorithmus konzentriert sich isoliert auf einen Punkt, und entsprechend Stelle in der Kurve berechnet er seine Koordinaten. Vorstellen kann man sich dies, als würde man den Pfad der Kurve entlang Laufen. Da aber bei dieser Berechnung die Punkte weit auseinander liegen, kann das volle Potential des Cache Systems nicht genutzt werden. 
+Daher haben wir einen zweiten Reuse-Algorithmus entwickelt, der einem Bottom up Ansatz gleicht. Der erste Grad ist hard-coded und die nächsten bauen jeweils auf eins niedrigerem Grad auf. Die kleinere Kurve wird also 4 mal kopiert und dann entsprechen angeordnet.
+Nicht nur ist der Reuse-Algorithmus effizienter als der Punkt-für-Punkt, sondern sein Design hat es uns ermöglicht SIMD Befehle zu verwenden um ihn noch zusätzlich/(weiter) zu optimieren. Deshalb schlägt sich unser Reuse Algorithmus hervorrangend gegen unsere C-Implementierung und gegen den Punkt-für-Punkt Algorithmus. Seine Rechenzeit steigt bis zum Grad 16 nur linear an, denn ab dem  Grad 16 haben wir  ungenügend Arbeitsspeicher auf unserem Rechner und deswegen kommt es oft zu einem Page-Fault. Dies führt zu vergleichsweise enorm hoher Laufzeit, da man auf Festplattenzugriffe zurückgreifen muss.
+Letztendlich konnten wir mit Hilfe des Reuse-Algorithmus zeigen, dass man ein Punkt der Moore-Kurve in konstanter Zeit berechnen kann.
+\subsection{Ausblick}
+Um unsere Laufzeit zu verbessern würden wir vorschlagen, dass man unser Programm auf einem Rechner laufen lassen sollte der über mehr Arbeitsspeicher und größeren Cache verfügt, damit man Kurven von größeren Grad mit weniger Page-Faults und Cache Misses berechnen kann, was zur kürzeren Laufzeit führen würde.
+Ein weiterer Vorschlag von unserer Seite sei die Datenstruktur auf der wir arbeiten so anzupassen. Zur zeit arbeiten wir auf zwei Arrays einem X-Array und Y-Array diese liegen nacheinander im Speicher, unsere Idee ist, die Arrays folgend zu kombinieren XY-Array: x1,y1,x2,y2,….,xn,yn
+sodass man kleinere Sprünge macht beim hin und her kopieren. 
+
 
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
 % Referenzieren Sie diese dann mit \cite{}.
