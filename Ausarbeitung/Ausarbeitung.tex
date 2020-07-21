@@ -55,8 +55,7 @@ Dies birgt wichtige Eigenschaften, weshalb sie in der Praxis Verwendung findet. 
     \caption{Graphik um die Eigenschaft der Lokalität zu verdeutlichen}
     \label{fig:locality}
 \end{figure}
-\newpage
-In raumbezogenen Anwendungen kommt es oft vor, dass raumfüllende Kurven verwendet werden, um effizient geographische Daten, die in eindimensionaler oder zweidimensionaler Form vorhanden sind, in eindimensionale Daten umzuwandeln. Dafür wird das Gebiet in Zellen aufgeteilt. Diese dienen einer kompakten Darstellung der bestimmten Region. Um diese Zellen schnell "ansprechen"' zu können, werden sie indexiert. Dabei ist es erwünscht, dass geographische Nähe, also Nähe in 2 Dimensionen von Bilddaten auch auf der Abbildung in den eindimensionalen Raum erhalten bleibt, da sich so nebeneinander liegende Bilddaten auch nebeneinander im Speicher befinden und effizienter geladen werden können.
+In raumbezogenen Anwendungen kommt es oft vor, dass raumfüllende Kurven verwendet werden, um effizient geographische Daten, die in eindimensionaler oder zweidimensionaler Form vorhanden sind, in eindimensionale Daten umzuwandeln. \\Dafür wird das Gebiet in Zellen aufgeteilt. Diese dienen einer kompakten Darstellung der bestimmten Region. Um diese Zellen schnell ansprechen zu können, werden sie indexiert. Dabei ist es erwünscht, dass geographische Nähe, also Nähe in 2 Dimensionen von Bilddaten auch auf der Abbildung in den eindimensionalen Raum erhalten bleibt, da sich so nebeneinander liegende Bilddaten auch nebeneinander im Speicher befinden und effizienter geladen werden können.
 Da eine FASS Kurve genau diese Anforderungen erfüllt, eignet sie sich besonders gut für solch eine Verwendung. Ein konkretes Beispiel der Anwendung wäre die \href{https://code.google.com/archive/p/s2-geometry-library/}{S2-geometry-library von Google}. 
 
 \begin{figure}
@@ -246,8 +245,6 @@ Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern 
 \\ \Comment{quadrant D: rotate A 180$^{\circ}$ and shift right}
 \State $x[i + 3*quarter] \leftarrow 2*len - 1 - x[i]$
 \State $y[i + 3*quarter] \leftarrow len - 1 - y[i]$
-\\
-
 \EndWhile
 \State $i \leftarrow i+1$
 \State $len \leftarrow 2*len$\Comment{with every iteration, the sidelength doubles...}
@@ -295,30 +292,30 @@ Um das Laufzeitzeitverhalten unserer Implementierung der Moore-Kurve zu überpr�
     \begin{tabular}{| r | r | r | r | r | r | r |}
     \hline
     Grad \textit{n} & \# Punkte & Speicher & \textit{asm\_avx} & \textit{asm} & \textit{c\_batch} & \textit{c\_iter}  \\ \hline
-    3 & 64 & 512 B  & 27 ns & 23 ns & 67 ns & 1796 ns \\  \hline
-    6 & 4096 & 32 KiB  & 601 ns & 1213 ns & 6524 ns & 219 $\mu s$ \\  \hline
-    9 & 26144 & 2048 KiB  & 179 $\mu s$ & 289 $\mu s$ & 830 $\mu s$ & 16562 $\mu s$  \\  \hline
-    12 & 16,78 * 1e6 & 128 MiB & 21,5 ms & 24,5 ms & 94,3 ms & 1303,1 ms \\ \hline
-    15 & 1,07 * 1e9 & 8 GiB & 1575,9 ms & 1607,4 ms & 7108,1 ms & 92985,2 ms \\ \hline
-    16 & 4,29 * 1e9 & 32 GiB & 108,3 s & 125,7 s & 175,9 s & 718,1 s \\ \hline
+    3 & 64 & 512 B  & 27 ns & 23 ns & 67 ns & 564 ns \\  \hline
+    6 & 4096 & 32 KiB  & 601 ns & 1213 ns & 6524 ns & 106 $\mu s$ \\  \hline
+    9 & 26144 & 2048 KiB  & 179 $\mu s$ & 289 $\mu s$ & 830 $\mu s$ & 9436 $\mu s$  \\  \hline
+    12 & 16,78 * 1e6 & 128 MiB & 21,5 ms & 24,5 ms & 94,3 ms & 705,6 ms \\ \hline
+    15 & 1,07 * 1e9 & 8 GiB & 1575,9 ms & 1607,4 ms & 7108,1 ms & 50759 ms \\ \hline
+    16 & 4,29 * 1e9 & 32 GiB & 108,3 s & 125,7 s & 175,9 s & 442,8 s \\ \hline
     \end{tabular}
 \end{center}
 
 \begin{figure}[htbp] 
     \centering
-    \subfloat[alle Implementierungen]{{\includegraphics[width=0.45\textwidth]{laufzeitvergleich_1-6_alle_impl.png} }}%
+    \subfloat[alle Implementierungen]{{\includegraphics[width=0.45\textwidth]{laufzeit_alle_1-9.png} }}%
     \qquad
-    \subfloat[ohne \textit{c\_iter}]{{\includegraphics[width=0.45\textwidth]{laufzeitvergleich_1-6_fast.png} }}%
+    \subfloat[ohne \textit{c\_iter}]{{\includegraphics[width=0.45\textwidth]{laufzeit_ohne_iter.png} }}%
     \caption{Laufzeitverhalten der vier Implementierungen bis Grad 6}%
     \label{fig:Laufzeitvergleich}%
  \end{figure}
  
  \subsection{Iterative Berechnung der Moore-Koordinaten}
-Aus Abb. 1 geht klar hervor, dass die iterative Berechnung der Moore-Koordinaten (wie in Sektion 2 beschrieben) deutlich ineffizienter ist als die anderen Implementierungen. Ein Vorteil dieser Variante ist zwar, dass sie nur sehr wenige Speicherzugriffe benötigt, da alle Berechnungen in den Registern durchgeführt werden können und nur das Endergebnis in den Speicher geschrieben wird. Durch das rein iterative Vorgehen kann dieser Algorithmus jedoch nicht sinnvoll auf Datenebene parallelisiert werden. Auch kann der dynamische Ansatz, von dem die übrigen Implementierungen profitieren, hier nicht angewandt werden. Im folgenden liegt daher der Fokus auf den restlichen Implementierungen.
+Aus Abb. \ref{fig:Laufzeitvergleich} geht klar hervor, dass die iterative Berechnung der Moore-Koordinaten (wie in Sektion 2 beschrieben) deutlich ineffizienter ist als die anderen Implementierungen. Ein Vorteil dieser Variante ist zwar, dass sie nur sehr wenige Speicherzugriffe benötigt, da alle Berechnungen in den Registern durchgeführt werden können und nur das Endergebnis in den Speicher geschrieben wird. Durch das rein iterative Vorgehen kann dieser Algorithmus jedoch nicht sinnvoll auf Datenebene parallelisiert werden. Auch kann der dynamische Ansatz, von dem die übrigen Implementierungen profitieren, hier nicht angewandt werden. Im folgenden liegt daher der Fokus auf den restlichen Implementierungen.
 
 \subsection{Vergleich Assembler- mit Referenzprogramm}
 Die Implementierungen \textit{c\_ batch}, \textit{asm\_avx} und \textit{asm} ... siehe Section 3 ... \newline
-An Abb. 1.b und den Benchmarkwerten kann man erkennen, dass die Assembler Implementierungen deutlich performanter sind als die C-Referenzimplementierung. Für Grad 6 ist die Assembler-Implementierung, welche 128-bit Register benutzt, drei mal schneller als das C-Programm. Dies ist darin begründet, dass sich die dynamische Berechnung der Hilberkurve optimal durch SIMD parallelisieren lässt. Somit können einige Koordinaten gleichzeitig innerhalb einer Operation verarbeitet werden. Die Anzahl der Punkte, die in ein SIMD-Register passen ist abhängig vom Datentypen der Koodinaten und der Größe der Vektorregister. Wir haben uns entschieden, von der in der Aufgabenstellung vorgegebenen Signatur \texttt{moore(uint64\_t degree, uint64\_t *x, uint64\_t *y)} abzuweichen und 32 bit Integer zu benutzen. Der maximale darstellbare Wert verringert sich dadurch zwar auf $2^{32}-1$, jedoch werden größere Werte erst ab einem $n > 32$ benötigt. Der Speicherbedarf einer Moore Kurve mit Grad 33 betrüge $4^{33} \cdot 2 \cdot 4 \text{ Bytes } \approx 590 \cdot 10^{18} \text{ Bytes}$, wenn man alle Koordinaten als 32 bit unsigned Integers darstellen könnte und das Doppelte bei Benutzung von 64 bit Integern. 
+An Abb. \ref{fig:Laufzeitvergleich}.b und den Benchmarkwerten kann man erkennen, dass die Assembler Implementierungen deutlich performanter sind als die C-Referenzimplementierung. Für Grad 6 ist die Assembler-Implementierung, welche 128-bit Register benutzt, drei mal schneller als das C-Programm. Dies ist darin begründet, dass sich die dynamische Berechnung der Hilberkurve optimal durch SIMD parallelisieren lässt. Somit können einige Koordinaten gleichzeitig innerhalb einer Operation verarbeitet werden. Die Anzahl der Punkte, die in ein SIMD-Register passen ist abhängig vom Datentypen der Koodinaten und der Größe der Vektorregister. Wir haben uns entschieden, von der in der Aufgabenstellung vorgegebenen Signatur \texttt{moore(uint64\_t degree, uint64\_t *x, uint64\_t *y)} abzuweichen und 32 bit Integer zu benutzen. Der maximale darstellbare Wert verringert sich dadurch zwar auf $2^{32}-1$, jedoch werden größere Werte erst ab einem $n > 32$ benötigt. Der Speicherbedarf einer Moore Kurve mit Grad 33 betrüge $4^{33} \cdot 2 \cdot 4 \text{ Bytes } \approx 590 \cdot 10^{18} \text{ Bytes}$, wenn man alle Koordinaten als 32 bit unsigned Integers darstellen könnte und das Doppelte bei Benutzung von 64 bit Integern. 
 \newline
 Durch die Reduzierung auf 32 bit Intger können nun bei Verwenung von 128 bit Vektorregistern vier und bei 258 bit Registern acht Werte gleichzeitig verarbeitet werden (siehe Abb. 2).
 
@@ -337,13 +334,13 @@ Durch Disassemblieren der mit \texttt{-march=native -O3} kompilierten Binärdate
     \qquad
     \subfloat[Speedup \textit{asm\_256} ggü. \textit{asm\_128}]{{\includegraphics[width=0.45\textwidth]{speedup_base_asm_128.png} }}%
     \caption{Laufzeitvergleich C/ASM}%
-    \label{fig:Laufzeitvergleich}%
+    \label{fig:Laufzeitvergleich Speedup}%
  \end{figure}
  
- Abb. 3.a bestätigt den ersten Teil unserer Vermutung. Zwischen Grad 4 und 15 ist die \textit{asm\_128} Implementierung 2,8 bis 5,3 mal schneller als die Referenzimplementierung in C. Der zweite Teil trifft nur teilweise zu. Wie in Abb. 3.b zu sehen ist, profitieren vor allem Grade zwischen 6 und 10 von den größeren Vektorregistern. Bei größeren Graden bietet die Verwendung von AVX-Registern keine signifikante Performanzsteigerung.
+ Abb. \ref{fig:Laufzeitvergleich Speedup}.a bestätigt den ersten Teil unserer Vermutung. Zwischen Grad 4 und 15 ist die \textit{asm\_128} Implementierung 2,8 bis 5,3 mal schneller als die Referenzimplementierung in C. Der zweite Teil trifft nur teilweise zu. Wie in Abb. \ref{fig:Laufzeitvergleich Speedup}.b zu sehen ist, profitieren vor allem Grade zwischen 6 und 10 von den größeren Vektorregistern. Bei größeren Graden bietet die Verwendung von AVX-Registern keine signifikante Performanzsteigerung.
  
 \subsection{Cache Effizienz}
-Abb 3.a wirft die Frage auf, weshalb die Assembler Implementierug bei Grad 6 besonders performant ist. Dies lässt sich vermutlich damit beantworten, dass die Moore Kurve sechsten Grades genau \textit{32 KiB} an Speicher benötigt und die Größe des L1 Caches der Maschine auf der getestet wurde \textit{32 KiB} beträgt. Um diese Annahme zu überprüfen wurde das Programm mit dem MacOS Tool \textit{Instruments} auf Cache-Misses (insbesondere L1) überprüft, mit dem Ergebnis, dass 6 der höchste Grad ist, bei dem noch nahezu keine L1 Misses auftreten.
+Abb. \ref{fig:Laufzeitvergleich Speedup}.a wirft die Frage auf, weshalb die Assembler Implementierug bei Grad 6 besonders performant ist. Dies lässt sich vermutlich damit beantworten, dass die Moore Kurve sechsten Grades genau \textit{32 KiB} an Speicher benötigt und die Größe des L1 Caches der Maschine auf der getestet wurde \textit{32 KiB} beträgt. Um diese Annahme zu überprüfen wurde das Programm mit dem MacOS Tool \textit{Instruments} auf Cache-Misses (insbesondere L1) überprüft, mit dem Ergebnis, dass 6 der höchste Grad ist, bei dem noch nahezu keine L1 Misses auftreten.
 
 \begin{figure}[htbp] 
     \centering
