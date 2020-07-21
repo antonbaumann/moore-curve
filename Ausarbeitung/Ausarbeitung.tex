@@ -105,32 +105,22 @@ Geht man davon aus, schon einen solchen funktionierenden Algorithmus für die Hi
 \end{figure}
 \begin{algorithm}[H]
 \begin{algorithmic}
-\caption{Compute coordinates of point on Moore curve}
+\caption{Berechne Koordinaten eines Punktes auf Moore Kurve}
 \label{moore:iterative}
-\Function{computeMooreCoord}{$index$, $degree$}
-	\State $len \leftarrow 2^{degree -1}$ \Comment{Half of the sidelength of final curve}
-	\State find out quadrant $q$ of point ($q \in \{A, B, C, D\}$)
-	\State t$uple \leftarrow$ computeHilbertCoord($index$, $degree-1$)
-	\State $tmp \leftarrow tuple.x$
+\Function{berechneMooreKoordinate}{$index$, $degree$}
+	\State finde Quadrant $q$ des Punkts q heraus ($q \in \{A, B, C, D\}$)
+	\State $tuple \leftarrow$ berechneHilbertKoordinate($index$, $degree-1$)
 	\If {$q = A$} 
-		\Comment{A: rotate 90$^{\circ} \circlearrowleft$}
-		\State $tuple.x \leftarrow len - tuple.y - 1$
-		\State $tuple.y \leftarrow tmp$
+		\State rotiere A um 90$^{\circ} \circlearrowleft$
 	\ElsIf{$q = B$}
-		\Comment{B: rotate 90$^{\circ}\circlearrowleft$ and shift up}
-		\State $tuple.x \leftarrow len - tuple.y - 1$
-		\State $tuple.y \leftarrow tmp + len$
+		\State rotiere A um 90$^{\circ}\circlearrowleft$ und verschiebe nach oben
 	\ElsIf{$q = C$}
-		\Comment{C: rotate 90$^{\circ}\circlearrowright$ and shift up and right}
-		\State $tuple.x \leftarrow tuple.y + len$
-		\State $tuple.y \leftarrow 2*len - tmp -1$
+		\State rotiere A um 90$^{\circ}\circlearrowright$ und verschiebe nach oben und nach rechts
 	\ElsIf{$q = D$} 
-		\Comment{D: rotate 90$^{\circ} \circlearrowright$ and shift right}
-		\State $tuple.x \leftarrow tuple.y + len$
-		\State $tuple.y \leftarrow len - tmp -1$
+		\State rotiere A um  90$^{\circ} \circlearrowright$ und verschiebe nach rechts
 	\EndIf
 \EndFunction
-\Function{computeHilbertCoord}{$index$, $degree$}
+\Function{berechneHilbertKoordinate}{$index$, $degree$}
 	\State [...]
 \EndFunction
 \end{algorithmic}
@@ -147,31 +137,31 @@ Damit Algorithmus \ref{moore:iterative} funktioniert, fehlt noch eine Methode, d
 
 \begin{algorithm}[H]
 \begin{algorithmic}
-\caption{Compute coordinates of given point on Hilbert curve}
+\caption{Berechne Koordinaten eines gegebenen Punkts auf der Hilbert Kurve}
 \label{hilbert:iterative}
-\Function{computeHilbertCoord}{$index$, $degree$}
+\Function{berechneHilbertKoordinate}{$index$, $degree$}
 	\State $sidelength \leftarrow 2^{degree}$
 	\State $i \leftarrow 1$
 	\State $coord \leftarrow (0, 0)$
 	\While {$i < sidelength$}
-		\State find out quadrant $q \in \{A, B, C, D\}$ by looking at last two bits of $index$:
+		\State ermittle Quadrant q $q \in \{A, B, C, D\}$ mit den letzten zwei Bits von $index$:
 		\State $A \iff '00'$, $B \iff '01'$, $C \iff '10'$, $D \iff '11'$
 		\If{$q \in \{A, D\}$}
 			\If{$q = D$}
-			\State $tmp \leftarrow coord.y$\Comment{mirror along $y = i-1-x$ axis}
+			\State $tmp \leftarrow coord.y$\Comment{spiegle an $y = i-1-x$ Achse}
 			\State $coord.y \leftarrow i - 1 - coord.x$
 			\State $coord.x \leftarrow i - 1 - tmp$	
 			\Else 
-			\State $swap(coord.x, coord.y)$\Comment{mirror along $y=x$ axis}
+			\State $swap(coord.x, coord.y)$\Comment{spiegle an $y=x$ Achse/Winkelhalbierender}
 			\EndIf
 		\Else 
-		\State $coord.y \leftarrow coord.y + i$ \Comment{translate upwards, because $q \in \{B, C\}$}
+		\State $coord.y \leftarrow coord.y + i$ \Comment{verschiebe nach oben, denn $q \in \{B, C\}$}
 		\EndIf
 		\If{$q \in \{C, D\}$}
-		\State $coord.x \leftarrow coord.x + i$ \Comment{translate to the right}
+		\State $coord.x \leftarrow coord.x + i$ \Comment{verschiebe nach rechts}
 		\EndIf
-		\State $index \leftarrow \frac{index}{4}$ \Comment{shift to the right by two bits to look at next two}
-		\State $i \leftarrow 2i$\Comment{sidelength doubles with every iteration}
+		\State $index \leftarrow \frac{index}{4}$ \Comment{zweimaliger rechts-Bitshift um nächste 2 Bits anzusehen}
+		\State $i \leftarrow 2i$\Comment{Die Seitenlänge verdoppelt sich mit jeder Iteration}
 	\EndWhile
 	\State \Return $coord$
 \EndFunction
@@ -181,10 +171,10 @@ Damit Algorithmus \ref{moore:iterative} funktioniert, fehlt noch eine Methode, d
 
 
 
-\subsection{Erzeugung der Hilbert Kurve: Effizienterer Reuse-Ansatz}
+\subsection{Erzeugung der Hilbert Kurve: Dynamischer Ansatz}
 Der oben dargestellte Algorithmus hat den Vorteil, für einen gegebenen Index und Grad die Koordinaten des korrespondierenden Punktes ausrechnen zu können, ohne dafür die gesamte Kurve erzeugen zu müssen und dann die Koordinaten an der Stelle des Index auszulesen.\\ 
 Soll allerdings die gesamte Kurve erstellt werden, also x-Werte und y-Werte für alle Punkte errechnet werden, so ist der iterative Aufruf des oben gezeigten Algorithmus für jeden Index sehr ineffizient.\\
-Ebenso wie die Moore Kurve des Grads $n$ aus vier Kopien der Hilbert Kurve des Grads n aufgebaut werden kann, so kann auch die Hilbert Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads $n-1$ erzeugt werden (Abbildung \ref{HilbertZuHilbert}).
+Ebenso wie die Moore Kurve des Grads $n$ aus vier Kopien der Hilbert Kurve des Grads n aufgebaut werden kann, kann auch die Hilbert Kurve des Grads n aus vier Kopien der Hilbert Kurve des Grads $n-1$ erzeugt werden (Abbildung \ref{HilbertZuHilbert}).
 \begin{figure}[h]
 \centering
 \def\svgwidth{240pt}
@@ -197,58 +187,40 @@ Die Spiegelungen, Rotationen und Translationen für die jeweiligen Quadranten si
 Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern ohne die gesamte Kurve zu berechnen, andererseits ist dafür die Berechnung aller Punkte der Kurve insgesamt bei weitem effizienter als der iterative Aufruf des Punkt-zu-Punkt Ansatzes, da schon durchgeführte Berechnungen wiederverwertet werden. Algorithmus \ref{moore:batch} zeigt, wie zunächst die Hilbert Kurve bis Grad $n-1$ aufgebaut und daraus dann die Moore Kurve des Grads $n$ erzeugt wird. Für die Nachvollziehbarkeit sind Abbildung \ref{HilbertZuMoore} und \ref{HilbertZuHilbert} essentiell.
 \begin{algorithm}[H]
 \begin{algorithmic}
-\caption{Compute all points of Moore Curve}
+\caption{Berechne alle Punkte der Moore Kurve}
 \label{moore:batch}
-\Function{computeAllMoorePoints}{$degree$, int[] $x$, int[] $y$}
-\State hardcode coordinates for $degree =1$ into arrays (each 4 values)
+\Function{berechneMoorePunkte}{$degree$, int[] $x$, int[] $y$}
+\State Koordinaten für $degree =1$ in Arrays hardcoden (jeweils 4 Werte)
 \If {$degree = 1$}
 	\Return
 \EndIf	
-\State computeAllHilbertPoints($degree - 1$, int[] $x$, int[] $y$)
+\State berechneHilbertPunkte($degree - 1$, int[] $x$, int[] $y$)
 \State $i \leftarrow 0$
-\State $len \leftarrow 2^{degree - 1} -1$ \Comment{offset for translation}
-\State $quarter \leftarrow 4^{degree-1}$\Comment{sidelength of hilbert curve squared $= {(2^{degree - 1}})^2$}
+\State $len \leftarrow 2^{degree - 1} -1$ \Comment{Offset für Translation}
+\State $quarter \leftarrow 4^{degree-1}$\Comment{Seitenlänge der Hilbertkurve quadriert $= {(2^{degree - 1}})^2$}
 \While {$i < quarter$}
-\\ \Comment{quadrant B: rotate A 90$^{\circ}\circlearrowleft$ and shift up}
-\State $x[i + quarter] \leftarrow len - y[i]$
-\State $y[i + quarter] \leftarrow x[i] + len + 1$
-\\ \Comment{quadrant C: rotate A 90$^{\circ}\circlearrowright$ and shift up and right}
-\State $x[i + 2*quarter] \leftarrow y[i] + len + 1$
-\State $y[i + 2*quarter] \leftarrow 2 * len - x[i] + 1$
-\\ \Comment{quadrant D: copy C and shift down}
-\State $x[i + 3*quarter] \leftarrow x[i + 2*quarter]$
-\State $y[i + 3*quarter] \leftarrow y[i + 2*quarter] - len - 1$
-\\ \Comment{quadrant A: copy B and shift down}
-\State $x[i] \leftarrow x[i + quarter]$
-\State $y[i] \leftarrow y[i + quarter] - len - 1$
-\\
+\State Quadrant B: rotiere A um 90$^{\circ}\circlearrowleft$ und verschiebe um $len$ nach oben
+\State Quadrant C: rotiere A um 90$^{\circ}\circlearrowright$ und verschiebe um $len$ nach oben und rechts
+\State Quadrant D: kopiere C und verschiebe um $len$ nach unten
+\State Quadrant A: kopiere B and verschiebe um $len$ nach unten
 \State $i \leftarrow i+1$
 \EndWhile
 \EndFunction
-
-
-\Function{computeAllHilbertPoints}{$degree$, int[] $x$, int[] $y$}
-
-\State $j \leftarrow 2$\Comment{we start buildup from degree 2, as degree 1 is hardcoded}
-\State $len \leftarrow 2$ \Comment{offset starts at 2}
-\State $quarter \leftarrow 4$\Comment{we begin with 4 points which are hardcoded}
+\ \\
+\Function{berechneHilbertPunkte}{$degree$, int[] $x$, int[] $y$}
+\State $j \leftarrow 2$\Comment{Die Erzeugung beginnt bei Grad 2, da Grad 1 bereits im Speicher steht}
+\State $len \leftarrow 2$ \Comment{Offset beginnt bei 2}
+\State $quarter \leftarrow 4$\Comment{Algorithmus beginnt mit 4 hardgecodeten Punkten}
 \While{$j \leq degree$}
 \While {$i < quarter$}
-\\ \Comment{quadrant B: shift up A}
-\State $x[i + quarter] \leftarrow x[i]$
-\State $y[i + quarter] \leftarrow y[i] + len$
-\\ \Comment{quadrant A: mirror along the line $x=y$}
-\State swap($x[i], y[i]$)
-\\ \Comment{quadrant C: copy B and shift right}
-\State $x[i + 2*quarter] \leftarrow x[i + quarter] + len$
-\State $y[i + 2*quarter] \leftarrow y[i + quarter]$
-\\ \Comment{quadrant D: rotate A 180$^{\circ}$ and shift right}
-\State $x[i + 3*quarter] \leftarrow 2*len - 1 - x[i]$
-\State $y[i + 3*quarter] \leftarrow len - 1 - y[i]$
+	\State Quadrant B: kopiere und verschiebe A um $len$ nach oben
+	\State Quadrant A: spiegle an Winkelhalbierender $x=y$
+	\State Quadrant C: kopiere B und verschiebe um $len$ nach oben
+	\State Quadrant D: rotiere A  um 180$^{\circ}$ und verschiebe um $len$ nach rechts
 \EndWhile
 \State $i \leftarrow i+1$
-\State $len \leftarrow 2*len$\Comment{with every iteration, the sidelength doubles...}
-\State $quarter \leftarrow 4*quarter$\Comment{ ...and the amount of points quadruples}
+\State $len \leftarrow 2*len$\Comment{mit jeder Iteration verdoppelt sich die Seitenlänge..}
+\State $quarter \leftarrow 4*quarter$\Comment{...und vervierfacht sich die Anzahl der Punkte}
 \EndWhile
 \EndFunction
 \end{algorithmic}
@@ -256,7 +228,7 @@ Dieser Ansatz kann zwar keinen einzelnen Punkt an einem gegebenen Index liefern 
 
 
 \subsection{Theoretische Laufzeitanalyse und Vergleich}
-Für Algorithmus \ref{hilbert:iterative} lässt sich schnell sehen, dass der Aufwand für die Berechnung eines Punkts vom Grad der Kurve abhängt: In der computeHilberCoord($index, degree$) Unterfunktion wird eine Schleife $log_2(2^{degree})-1 = degree -1$ mal durchlaufen. Da der Aufwand der Operationen innerhalb der Schleife konstant ist, steigt der Aufwand für die Berechnung eines einzelnen Punkts bei Algorithmus \ref{hilbert:iterative} also linear mit dem Grad der Kurve.
+Bei Algorithmus \ref{hilbert:iterative} sieht man, dass der Aufwand für die Berechnung eines Punkts vom Grad der Kurve abhängt: In der $berechneHilbertKoordinate(index, degree)$ Unterfunktion wird eine Schleife $log_2(2^{degree})-1 = degree -1$ mal durchlaufen. Da der Aufwand der Operationen innerhalb der Schleife konstant ist, steigt der Aufwand für die Berechnung eines einzelnen Punkts bei Algorithmus \ref{hilbert:iterative} also linear mit dem Grad der Kurve.
 \newline
 Für Algorithmus \ref{moore:batch} lässt sich zeigen, dass der durschnittliche Aufwand für die Berechnung eines Punktes konstant ist, unabhängig vom Grad der Kurve. \\
 Algorithmus \ref{moore:batch} besteht aus dem einmaligen Aufruf der Hilbert-Unterfunktion und dann dem Verschieben der erhaltenen Punkte zur Erzeugung der Moore Kurve. \\
@@ -280,9 +252,8 @@ Der durchschnittliche Rechenaufwand pro Punkt konvergiert also zu einem konstant
 
 % TODO: Je nach Aufgabenstellung einen der Begriffe wählen
 \section{Korrektheit}
-Im Gegensatz zu Aufgabenstellungen, die Floating-Point Berechnungen enthalten oder im Bereich der Kryptographie liegen, ist in unserem Fall eine Überprüfung der Korrektheit unserer Lösung zumindest in Graden <10 allein schon durch das Betrachten der visuellen Repräsentation der Koordinaten im vom Rahmenprogramm erzeugten .svg File möglich. Dass unser Lösung korrekt ist, zeigen außerdem die oben dargelegten Algorithmen, die theoretisch für beliebige $n>0$ funktionieren.
-
-%Ist das zu dreist???
+Im Gegensatz zu Aufgabenstellungen, die Floating-Point Berechnungen enthalten oder im Bereich der Kryptographie liegen, ist in unserem Fall eine Überprüfung der Korrektheit unserer Lösung zumindest in Graden <10 allein schon durch das Betrachten der visuellen Repräsentation der Koordinaten im vom Rahmenprogramm erzeugten .svg File möglich. Automatisierte Tests können lediglich die erzeugten Koordinaten mit von einer anderen Implementierung erzeugten Koordinaten abgleichen und feststellen, ob diese identisch sind, was nur bei einer bewiesen korrekten Vergleichsimplementierung aussagekräftig ist oder große Mengen an im Vorhinein gespeicherten Punktdaten erfordert.
+Der Nachweis der Korrektheit der Algorithmen ist also zunächst nur durch detailliertes Nachvollziehen ihrer Funktionsweise möglich, kann aber in niedrigeren Graden sehr gut visuell überprüft werden.
 
 
 \section{Performanzanalyse}
@@ -356,17 +327,16 @@ Abb. \ref{fig:Laufzeitvergleich Speedup}.a wirft die Frage auf, weshalb die Asse
 
 
 \section{Zusammenfassung und Ausblick}
-\subsection{Zusammenfassung}
-Zusammenfassend kann man sagen, dass uns das Erledigen sowohl der theoretischen als auch der praktischen Aufgabe gelungen ist. Im Laufe der Projektphase haben wir zwei verschiedene Ansätze gefunden, die in der Lage sind die Moore Kurve iterativ zu berechnen.
 
-Der Punkt-für-Punkt Algorithmus konzentriert sich isoliert auf einen Punkt, und entsprechend Stelle in der Kurve berechnet er seine Koordinaten. Vorstellen kann man sich dies, als würde man den Pfad der Kurve entlang Laufen. Da aber bei dieser Berechnung die Punkte weit auseinander liegen, kann das volle Potential des Cache Systems nicht genutzt werden. 
-Daher haben wir einen zweiten Reuse-Algorithmus entwickelt, der einem Bottom up Ansatz gleicht. Der erste Grad ist hard-coded und die nächsten bauen jeweils auf eins niedrigerem Grad auf. Die kleinere Kurve wird also 4 mal kopiert und dann entsprechen angeordnet.
-Nicht nur ist der Reuse-Algorithmus effizienter als der Punkt-für-Punkt, sondern sein Design hat es uns ermöglicht SIMD Befehle zu verwenden um ihn noch zusätzlich/(weiter) zu optimieren. Deshalb schlägt sich unser Reuse Algorithmus hervorrangend gegen unsere C-Implementierung und gegen den Punkt-für-Punkt Algorithmus. Seine Rechenzeit steigt bis zum Grad 16 nur linear an, denn ab dem  Grad 16 haben wir  ungenügend Arbeitsspeicher auf unserem Rechner und deswegen kommt es oft zu einem Page-Fault. Dies führt zu vergleichsweise enorm hoher Laufzeit, da man auf Festplattenzugriffe zurückgreifen muss.
-Letztendlich konnten wir mit Hilfe des Reuse-Algorithmus zeigen, dass man ein Punkt der Moore-Kurve in konstanter Zeit berechnen kann.
-\subsection{Ausblick}
-Um unsere Laufzeit zu verbessern würden wir vorschlagen, dass man unser Programm auf einem Rechner laufen lassen sollte der über mehr Arbeitsspeicher und größeren Cache verfügt, damit man Kurven von größeren Grad mit weniger Page-Faults und Cache Misses berechnen kann, was zur kürzeren Laufzeit führen würde.
-Ein weiterer Vorschlag von unserer Seite sei die Datenstruktur auf der wir arbeiten so anzupassen. Zur zeit arbeiten wir auf zwei Arrays einem X-Array und Y-Array diese liegen nacheinander im Speicher, unsere Idee ist, die Arrays folgend zu kombinieren XY-Array: x1,y1,x2,y2,….,xn,yn
-sodass man kleinere Sprünge macht beim hin und her kopieren. 
+Selten gibt es einen Punkt, ab dem man mit Sicherheit die Möglichkeit weiterer Performanceoptimierungen eines Programms ausschließen kann. Besonders beim Schreiben von Assemblycode können so viele Faktoren wie ein simpler Tausch der Reihenfolge zweier Befehle die Schnelligkeit des Programms beeinflussen, sodass die Annahme eines voll optimierten Programms nie getroffen werden kann. \\
+Nach wachsender Einarbeitung in die Thematik und Entwicklung und ständiger Verbesserung unserer Algorithmen fallen uns zu diesem Zeitpunkt noch weitere mögliche Wege der Optimierung ein.\\
+Unsere Benutzung von 32-Bit Integern statt 64-Bit-Integern zur Darstellung der Koordinaten hat zu einer höheren Parallelisierbarkeit des Programms geführt. Mit hoher Wahrscheinlichkeit kann für Grade $\leq 16$ die dynamische Anpassung der Datenbreite auf 16 Bit zu einem weiteren Performancegewinn führen. In Verbindung mit der Benutzung noch breiterer Register, zum Beispiel 512 Bit AVX Registern können Berechnungen noch stärker parallelisiert werden, wobei sich die  Limitierung derartiger Optimierungen schon bei der Erhöhung von 128 Bit auf 256 Bit gezeigt hat, mit teilweise kaum besserer Perfomanz trotz breiterer Register. \\
+Auch das Experimentieren mit einer veränderten Datenstruktur, also dass $x$ und $y$ Koordinaten zum Beispiel nebeneinander im gleichen Array stehen, könnte in bestimmten Fällen die Performance durch eine verbesserte Reihenfolge von Lade- und Schreibbefehlen auf den Speicher erhöhen. \\
+All dies kann in unserer Herangehensweise jedoch nur den konstanten Aufwand pro Punkt verringern. Dass die Laufzeit des Algorithmus mit Erhöhung des Grads exponentiell steigt, ändert auch eine Verringerung dieser Konstante nicht und ist durch die exponentiell wachsende Punktanzahl bedingt.
+
+%Um unsere Laufzeit zu verbessern würden wir vorschlagen, dass man unser Programm auf einem Rechner laufen lassen sollte der über mehr Arbeitsspeicher und größeren Cache verfügt, damit man Kurven von größeren Grad mit weniger Page-Faults und Cache Misses berechnen kann, was zur kürzeren Laufzeit führen würde.
+%Ein weiterer Vorschlag von unserer Seite sei die Datenstruktur auf der wir arbeiten so anzupassen. Zur zeit arbeiten wir auf zwei Arrays einem X-Array und Y-Array diese liegen nacheinander im Speicher, unsere Idee ist, die Arrays folgend zu kombinieren XY-Array: x1,y1,x2,y2,….,xn,yn
+%sodass man kleinere Sprünge macht beim hin und her kopieren. 
 
 
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
