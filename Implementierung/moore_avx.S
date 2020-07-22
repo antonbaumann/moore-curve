@@ -16,6 +16,10 @@ _moore_avx: // mac compatibility
     push rsi
     push rdx
 
+    //DISCLAIMER: To understand how and why this program works and its structure, please read the "Explanation of procedure" in the file "moore.S"
+    //		  The only difference in this program is the use of bigger (avx) registers to further parallelise calculations.
+
+
     // Args
     //
     // edi:     degree
@@ -71,12 +75,12 @@ _moore_avx: // mac compatibility
     movdqa xmm13, xmm14
     psubd xmm13, xmm15
 
-    // id degree = 2 -> generate moore
+    // if degree = 2 -> generate moore ( degree 1 is hardcoded so only moore transformations left)
     cmp edi, 0x02
     je .L_moore_transformation_128
 
     // since hilbert(1) has only 4 coordinates we have to handle
-    // hilbert(2) separately
+    // hilbert(2) separately (because we cant fill a whole avx register with the coordinates)
     // the easiest and most efficient way is to hardcode hilbert(2) into the array
     // hardcode x-vaues of hilbert(2) into array
 .L_hardcode_hilbert_degree_2:
@@ -135,8 +139,8 @@ _moore_avx: // mac compatibility
     // if we are here: degree >= 3
     // so we can use 256 bit registers
     VBROADCASTSS ymm15, xmm15           // ymm15 = {1,1,1,1,1,1,1,1}
-    VBROADCASTSS ymm14, xmm14           // ymm14 = {side len} * 8
-    VBROADCASTSS ymm13, xmm13           // ymm14 = {side len - 1} * 8
+    VBROADCASTSS ymm14, xmm14           // ymm14 = {side len, side len, ..., side len}  (8 times)
+    VBROADCASTSS ymm13, xmm13           // ymm14 = {side len - 1, side len -1, ...., side len -1} (8 times) 
 
     // we need hilbert(degree-1) to calculate moore(degree)
     // initialize counter with c = degree - 3
@@ -148,14 +152,16 @@ _moore_avx: // mac compatibility
     xor r12, r12                    // hilbert_inner_counter with 0
 
 .L_hilbert_inner_loop_body:         // iterate over all coordinates from previous hilbert iteration
-    // write register content to memory
-    // init temp registers
+
+    //======LOAD DATA OF PREVIOUS HILBERT ITERATION
+    // start adresses of the y and x coorsinates of previous hilbert curve that are going to be copied and manipulated
     lea r10, [rsi + 4* r12]         // r10 = rsi + 4 * r12
     lea r11, [rdx + 4* r12]         // r11 = rdx + 4 * r12
 
     vmovdqu ymm0, [r10]             // fill xmm registers with next 4 coordinates we want to process
     vmovdqu ymm1, [r11]
 
+    //=======MANIPULATE COORDINATES IN REGISTERS TO SHIFT/ROTATE/MIRROR
     // copy coordinates from A -> B
     // ymm0 holds correct x values for quardrant B
     vpaddd ymm3, ymm1, ymm14         // shift y values upwards (into quadrant B)
@@ -171,6 +177,7 @@ _moore_avx: // mac compatibility
     vpsubd ymm6, ymm6, ymm1
     vpsubd ymm7,ymm13 ,ymm0         // ymm7 holds y values that go into quadrant D
 
+    //====== LOAD CALCULATED COORDINATES BACK INTO MEMORY
     vmovdqu [r10], ymm1             // quadrant A
     vmovdqu [r11], ymm0             // swap x and y values
 
@@ -207,14 +214,16 @@ _moore_avx: // mac compatibility
     xor r15, r15                    // set counter to 0
 
 .L_moore_loop_body_128:
-    // write register content to memory
-    // init temp registers
+    //======LOAD DATA OF PREVIOUS HILBERT ITERATION
+    // start adresses of the y and x coordinates of hilbert curve of degree n-1 that are going to be copied and manipulated
     lea r10, [rsi + 4* r15]         // r10 = rsi + 4 * r12
     lea r11, [rdx + 4* r15]         // r11 = rdx + 4 * r12
 
     movdqu xmm0, [r10]
     movdqu xmm1, [r11]
 
+
+    //=======MANIPULATE COORDINATES IN REGISTERS TO SHIFT/ROTATE/MIRROR
     // copy coordinates from bottom left to top left (hilbert A -> moore B)
     movdqa xmm2, xmm13              // x -> len - 1 - y
     psubd xmm2, xmm1
@@ -234,7 +243,8 @@ _moore_avx: // mac compatibility
     // copy (moore B -> moore A)
     movdqa xmm1, xmm3               // y -> y - len
     psubd xmm1, xmm14               // correct x values already in xmm2
-
+   
+    //====== LOAD CALCULATED COORDINATES BACK INTO MEMORY
     movdqu [r10], xmm2              // quadrant A
     movdqu [r11], xmm1              // use x values from quadrant B
 
@@ -261,14 +271,15 @@ _moore_avx: // mac compatibility
     xor r15, r15
 
 .L_moore_loop_body_256:
-    // write register content to memory
-    // init temp registers
+    //======LOAD DATA OF PREVIOUS HILBERT ITERATION
+    // start adresses of the y and x coordinates of hilbert curve of degree n-1 that are going to be copied and manipulated
     lea r10, [rsi + 4 * r15]         // r10 = rsi + 4 * r12
     lea r11, [rdx + 4 * r15]         // r11 = rdx + 4 * r12
 
     vmovdqu ymm0, [r10]
     vmovdqu ymm1, [r11]
-
+    
+    //=======MANIPULATE COORDINATES IN REGISTERS TO SHIFT/ROTATE/MIRROR
     // copy coordinates from bottom left to top left (hilbert A -> moore B)
     vpsubd ymm2, ymm13, ymm1         // x -> len - 1 - y
     vpaddd ymm3, ymm14, ymm0         // y -> len + x
@@ -285,6 +296,7 @@ _moore_avx: // mac compatibility
     vpsubd ymm1, ymm3, ymm14         // y -> y - len
                                      // correct x values already in ymm2
 
+    //====== LOAD CALCULATED COORDINATES BACK INTO MEMORY
     vmovdqu [r10], ymm2              // quadrant A
     vmovdqu [r11], ymm1              // use x values from quadrant B
 
