@@ -15,7 +15,60 @@ _moore: // mac compatibility
     push r15
     push rsi
     push rdx
+    /*
+	EXPLANATION OF THE PROCEDURE:
+	
+	In this code we calculate all x and y coordinates of the moore curve corresponding to the given degree.
+	Address of the y-coordinate array is gven in rdx, of the x-coordinate array in rsi and the degree is given in edi (32bit int)
+	To do this, we first build up the Hilbert curve of degree -1 and then transform it into the moore curve by copying and moving
+	the already calculated points.
+	To create the Hilbert curve, we take the hilbert curve of one degree less and also copy and move the already calculated points.
+	The general structure of our code therefore looks something like this:
+	
+	General Structure:
 
+	-hardcode hilbert degree 1
+	
+	-outer hilbert loop:
+		 counts up index i from 2 to degree -1
+	---------inner hilbert loop:
+			 go through all points of the hilbert curve of degree i-1 and copy and move the to create
+			points of hilbert curve of degree i
+	---------end inner hilbert loop
+	-end outer hilbert loop
+
+	-moore loop:
+		go through all points of the created hilbert curve of degree n-1 and copy and move them to create
+		moore curve of degree n	
+	-end moore loop 
+
+	How do we copy and move the created points to become the Hilbert/Moore Curve of the next higher degree?
+	Each Hilber curve consists of 4 quadrants. These quadrants each hold one rotated and/or mirrored and/or translated copy of the hilbert curve of one degree less. 
+	
+				
+				________________
+	________		|	|	|
+	|	|		|	|	|
+	|	|	---->	|_______|_______|
+	|_______|		|	|	|
+				|	|	|
+				|_______|_______|
+	
+	In case Hilbert(n-1)-> Hilbert(n): To create..
+						lower left quadrant, we mirror the curve of degree n-1 along the x=y axis (-> swap x and y)
+						lower right quadrant, we mirror the curve of degree n-1 along the y = sidelength -1 -x axis
+						upper left quadrant, we shift up the curve of degree n-1 by the sidelength
+						upper right quadrant, we shhift up and right the curve of degree n-1 by the sidelength
+						
+	In case Hilbert(n-1) -> Moore(n): To create...
+                                        	lower left quadrant, we rotate the curve of degree n-1 90° counterclockwise
+                                                upper left quadrant, we rotate the curve of degree n-1 90° counterclockwise and shift up 
+                                                lower right quadrant, we rotate the curve of degree n-1 90° clockwise and shift right
+                                                upper right quadrant, we rotate the curve of degree n-1 90° clockwise and shift right and up
+
+	This is parallelised by using 4* 32 bit ints (which represent coordinates) in a 128 bit xmm register and doing the same manipulations to all of them in parallel.
+
+    */	
     // Args
     //
     // edi:     degree
@@ -72,29 +125,30 @@ _moore: // mac compatibility
     cmp edi, 0x01
     jle .L_done
 
-    // id degree = 2 -> generate moore
+    // if degree = 2 -> generate moore, as hilbert curve and moore curve of degree 1 are the same
     cmp edi, 0x02
     je .L_moore_transformation
 
     // we need hilbert(degree-1) to calculate moore(degree)
-    // initialize counter with c = degree - 2
+    // initialize maximum with c = degree - 2
     xor r15, r15
     mov r15d, edi
     sub r15d, 0x02
 
 .L_hilbert_loop_body:
-    xor r12, r12                    // hilbert_inner_counter with 0
+    xor r12, r12                    // initialise hilbert_inner_counter with 0
 
 .L_hilbert_inner_loop_body:         // iterate over all coordinates from previous hilbert iteration
 
-    // write register content to memory
-    // init temp registers
+    //=====LOAD DATA FROM CURVE OF ONE DEGREE LESS
+    // start adress of currently copied points of hilbert curve of degree one less
     lea r10, [rsi + 4* r12]         // r10 = rsi + 4 * r12
     lea r11, [rdx + 4* r12]         // r11 = rdx + 4 * r12
 
     movdqu xmm0, [r10]              // fill xmm registers with next 4 coordinates we want to process
     movdqu xmm1, [r11]
 
+    //======MANIPULATE COORDINATES IN REGISTER	
     // copy coordinates from A -> B
     // xmm0 holds correct x values for quardrant B
     movdqa xmm3, xmm1               // xmm3 holds y values that go into quadrant B
@@ -114,6 +168,8 @@ _moore: // mac compatibility
     movdqa xmm7, xmm13              // xmm6 holds y values that go into quadrant D
     psubd xmm7, xmm0
 
+    //=====WRITE CALCULATED COORDINATES BACK INTO MEMORY
+
     movdqu [r10], xmm1            // quadrant A
     movdqu [r11], xmm0            // swap x and y values
 
@@ -132,7 +188,7 @@ _moore: // mac compatibility
     add r12, 0x04                   // increase counter by 4 since we processed 4 points in one step
 
 .L_hilbert_inner_loop_cond:
-    cmp r12, r14
+    cmp r12, r14		    //r14 holds number of points ofcurve with degree one less, if we've copied all, r12 and r14 are equal
     jnz .L_hilbert_inner_loop_body
 
     shl r14, 0x02                   // number of points *= 4
