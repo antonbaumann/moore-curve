@@ -35,7 +35,6 @@ struct tuple hilbert_coord_at_index(uint64_t index, uint64_t degree) {
     return coord;
 }
 
-// constructs moore curve out of 4 * (n-1) degree Hilbert-Curves
 struct tuple moore_coord_at_index(
         uint64_t index,
         uint64_t degree,
@@ -44,7 +43,7 @@ struct tuple moore_coord_at_index(
     if (degree == 1) {
         return hilbert_coord_at_index(index, 1);
     }
-    // converting moore_Index to hilbert_Index, the Hilbert-Curve (degree = n-1) fits exactly 4 times into Moore-Curve (degree = n)
+    // converting moore_Index to hilbert_Index, the Hilbert-Curve with degree = n-1 fits exactly 4 times into Moore-Curve with degree = n
     uint64_t hilbert_max_iterations = max_iterations / 4;
     uint64_t hilbert_index = index % hilbert_max_iterations;
     uint64_t hilbert_side_length = (uint64_t) 2 << (degree - 2);
@@ -86,9 +85,7 @@ struct tuple moore_coord_at_index(
 
 void moore_c_iterative(uint32_t degree, uint32_t *x, uint32_t *y) {
     uint64_t shifts = 2 * degree - 1;
-    uint64_t max_iterations = (uint64_t) 2
-            << shifts; // 2 ^ (2n) , each shift == 2* in binary we use this to iterate over the index in binary for ex. 7 == 0b0111
-    // pass max_iterations which equals amount of points 2^(2n) = 4^n
+    uint64_t max_iterations = (uint64_t) 2 << shifts; // 2 * 2^(degree - 1), each iteration is *=2, which means it goes by two binary-digits
     for (uint64_t i = 0; i < max_iterations; i++) {
         struct tuple coord = moore_coord_at_index(i, degree, max_iterations);
         x[i] = coord.x;
@@ -98,10 +95,7 @@ void moore_c_iterative(uint32_t degree, uint32_t *x, uint32_t *y) {
 
 void hilbert_c_iterative(uint32_t degree, uint32_t *x, uint32_t *y) {
     uint64_t shifts = 2 * degree - 1;
-    uint64_t max_iterations = (uint64_t) 2
-            << shifts; // 2 ^ (2n) , each shift == 2* in binary we use this to iterate over the index in binary for ex. 7 == 0b0111
-    // pass max_iterations which equals amount of points 2^(2n) = 4^n
-
+    uint64_t max_iterations = (uint64_t) 2 << shifts; // 2 * 2^(degree - 1), each iteration is *=2, which means it goes by two binary-digits
     for (uint64_t i = 0; i < max_iterations; i++) {
         struct tuple coord = hilbert_coord_at_index(i, degree);
         x[i] = coord.x;
@@ -109,7 +103,7 @@ void hilbert_c_iterative(uint32_t degree, uint32_t *x, uint32_t *y) {
     }
 }
 
-// Bottom-Up approach increasing size by 4 each iteration
+// Bottom-Up approach increasing size by *4 each iteration
 void hilbert_c_batch(uint32_t degree, uint32_t *x, uint32_t *y) {
     uint64_t quarter = 4;
     uint32_t offset = 2;
