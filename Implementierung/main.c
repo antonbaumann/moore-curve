@@ -16,6 +16,7 @@
 
 // don't set MAX_DEGREE > 30
 // otherwise size of allocation cannot be saved in uint64_t
+// and application could be vulnerable to buffer overflow attacks
 const uint32_t MAX_DEGREE = 30;
 
 enum impl_variant {
@@ -136,10 +137,11 @@ int main(int argc, char **argv) {
 
     free(x_coords);
     free(y_coords);
+
     return err;
 }
 
-// parses argument for --degree flag
+// parses argument for --degree and --repetitions flag
 // if argument is invalid return 0
 uint32_t parse_uint32(char *str) {
     errno = 0;  // reset errno to 0 before call of strtol
@@ -202,6 +204,8 @@ void print_help() {
 }
 
 void moore_asm_wrapper(uint32_t degree, uint32_t *x, uint32_t *y) {
+    // gcc sets __AVX2__ macro if AVX2 is supported on target machine
+    // see flags in makefile: -march=native
     #ifdef __AVX2__
     printf("moore assembly using avx registers: degree %u\n", degree);
     moore_avx(degree, x, y);

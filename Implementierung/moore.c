@@ -8,7 +8,7 @@ struct tuple {
 // rotates/modifies shape for all 4 quadrants
 struct tuple rotate(struct tuple coord, uint32_t length, uint32_t top, uint32_t right) {
     struct tuple new_coord;
-    if (!top) {                                     // the two top one ones are the same shape
+    if (!top) {                                     // the two top one quadrants are the same shape
         if (right) {                                // and the bottom shapes are mirrored on a diagonal axis
             new_coord.x = (length - 1) - coord.y;   // they are moved accordingly as well
             new_coord.y = (length - 1) - coord.x;
