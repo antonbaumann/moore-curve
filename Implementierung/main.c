@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    if (!(4 <= path_length &&
+    if (!(5 <= path_length &&
           !strcmp(path + path_length - 4, ".svg"))) {   // pointer arithmetik "file.svg"\0 und srtlen(".svg") == 4
         printf("[!] invalid argument: filename, filename should resemble \"file.svg\"\n");
         print_help();
