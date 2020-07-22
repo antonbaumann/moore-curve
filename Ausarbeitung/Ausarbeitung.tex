@@ -1,4 +1,4 @@
-% Diese Zeile bitte -nicht- aendern.
+
 \documentclass[course=erap]{aspdoc}
 \graphicspath{ {./images/} }
 \usepackage{algorithm}
@@ -7,22 +7,18 @@
 \usepackage{amssymb}
 \usepackage[section]{placeins}
 \usepackage[font=small,labelfont=bf]{caption}
+\usepackage{subfig}
 \newcommand{\uproman}[1]{\uppercase\expandafter{\romannumeral#1}}
 \newcommand{\lowroman}[1]{\romannumeral#1\relax}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% TODO: Ersetzen Sie in den folgenden Zeilen die entsprechenden -Texte-
-%% mit den richtigen Werten.
-\newcommand{\theGroup}{142} % Beispiel: 42
-\newcommand{\theNumber}{A213} % Beispiel: A123
+\newcommand{\theGroup}{142}
+\newcommand{\theNumber}{A213} 
 \author{Anton Baumann \and Felix Brandis \and Michal Cizevskij}
-\date{Sommersemester 2020}  % Beispiel: Wintersemester 2019/20
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\date{Sommersemester 2020}  
 
 % Diese Zeile bitte -nicht- aendern.
 \title{Gruppe \theGroup{} -- Abgabe zu Aufgabe \theNumber}
 
-\usepackage{subfig}
+
 
 \begin{document}
 \maketitle
@@ -33,19 +29,19 @@ Im Rahmen des Praktikums Rechnerarchitektur hat sich unsere Gruppe mit dem Thema
 \begin{figure}[h]
 \centering
     \includegraphics[width=8cm, height=5cm]{Moore_and_Hilbert}
-    \caption{Die drei ersten Iterationen der Hilbert- und Moore Kurve}
+    \caption{Die drei ersten Iterationen der Hilbert- und Moore Kurve \cite{pic:hilbert}, \cite{pic:Moore}}
     \label{fig:mooreCurve}
 \end{figure}
 
 \subsection{Charakterisierung der Moore-Kurve und weiteren raumfüllenden Kurven}
 Raumfüllende Kurven sind Linien, die jeden Punkt des Intervals $[0,1]^d$ durchlaufen. Diese können im zweidimensionalen Raum als surjektive Abbildungen dargestellt werden, welche vom Einheitsinterval $[0,1]$ in das Inheitsquadrat $[0,1]^2$ abbilden. 
 \newline
-Eine wichtige Unterkategorie der raumfüllende Kurven ist FASS („space-filling, self-avoiding, simple and self-similar“). Solche Kurven erfüllen viele oft in der Praxis geforderte Bedingungen: Zu einem ist jede FASS-Kurve selbstausweichend. Das bedeutet, dass jeder Punkt exakt einmal durchlaufen werden muss. Außerdem behalten die Kurven die Lokalität der Punkte bei. Sind Punkte räumlich nah im eindimensionalen Einheitsintervall, so gilt dies ebenfalls für ihr Bild in $[0,1]^d$ (siehe Abb. \ref{fig:locality}). % http://blog.christianperone.com/2015/08/googles-s2-geometry-on-the-sphere-cells-and-hilbert-curve/
+Eine wichtige Unterkategorie der raumfüllende Kurven ist FASS („space-filling, self-avoiding, simple and self-similar“). Solche Kurven erfüllen viele oft in der Praxis geforderte Bedingungen: Zu einem ist jede FASS-Kurve selbstausweichend. Das bedeutet, dass jeder Punkt exakt einmal durchlaufen werden muss. Außerdem behalten die Kurven die Lokalität der Punkte bei. Sind Punkte räumlich nah im eindimensionalen Einheitsintervall, so gilt dies ebenfalls für ihr Bild in $[0,1]^d$ (siehe Abb. \ref{fig:locality}). 
 
 \begin{figure}[h]
 \centering
       \includegraphics[width=6cm, height=4cm]{Locality}
-    \caption{Lokalität einer raumfüllenden Kurve}
+    \caption{Lokalität einer raumfüllenden Kurve \cite{pic:locality}}
     \label{fig:locality}
 \end{figure}
 
@@ -60,27 +56,18 @@ In raumbezogenen Anwendungen kommt es oft vor, dass raumfüllende Kurven verwend
     \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=0.8\textwidth]{Map}\\
-        \caption{Einteilung von New York in Zellen}
+        \caption{Einteilung von New York in Zellen \cite{Kreiss2016}}
         \label{fig:Gmaps}
     \end{minipage}\hfill
     \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=0.9\textwidth]{Earth} \\
-        \caption{Hilbert Kurve projiziert auf die Erde}
+        \caption{Hilbert Kurve projiziert auf die Erde \cite{Kreiss2016}}
         \label{fig:hilbertCurveOnEarth}
     \end{minipage}
 \end{figure}
 
 Da eine FASS Kurve genau diese Anforderungen erfüllt, eignet sie sich besonders gut für solch eine Verwendung. Ein konkretes Beispiel der Anwendung wäre die \href{https://code.google.com/archive/p/s2-geometry-library/}{S2-geometry-library von Google}. 
-
-%https://medium.com/sidewalk-talk/s2-cells-and-space-filling-curves-keys-to-building-better-digital-map-tools-for-cities-a312aa5e2f59
-
-
-%\begin{center}
-%   \includegraphics[width=9cm, height=6cm]{Earth}\\    %cite
-%   \tiny Abbildung 6: Einteinlung der Erde 
-%\end{center}
-
 
 \section{Lösungsansatz}
 
@@ -101,12 +88,12 @@ Geht man davon aus, schon einen solchen funktionierenden Algorithmus für die Hi
 \caption{Transformation von Hilbert Kurve des Grads n-1 zu Moore Kurve des Grads n}
 \label{HilbertZuMoore}
 \end{figure}
-Damit Algorithmus \ref{moore:iterative} funktioniert, fehlt noch eine Methode, die für gegebenen Index $i$ und Grad $n$ die Koordinaten des entsprechenden Punktes auf der Hilbert Kurve zurückgibt. Abbildung \ref{fig:hilbertBuildup} zeigt, wie das funktioniert: Jeder Punkt beginnt mit den Koordinatnen $(0, 0)$. Wird der Index in Binärdarstellung umgewandelt, so können von hinten beginnend immer zwei Stellen angesehen werden und dann nach dem in der Graphik dargestellten Entscheidungsmuster die Koordinaten durch Spiegelung und Verschiebung verändert werden. Durch iterative Ausführung und mit jeder Iteration einer Vergrößerung des Offsets können so die Koordinaten jedes Punktes bestimmt werden. Algorithmus \ref{hilbert:iterative} zeigt eine mögliche Formalisierung.
+Damit Algorithmus \ref{moore:iterative} funktioniert, fehlt noch eine Methode, die für gegebenen Index $i$ und Grad $n$ die Koordinaten des entsprechenden Punktes auf der Hilbert Kurve zurückgibt. Abbildung \ref{fig:hilbertBuildup} zeigt, wie das funktioniert: Jeder Punkt beginnt mit den Koordinatnen $(0, 0)$. Wird der Index in Binärdarstellung umgewandelt, so können von hinten beginnend immer zwei Stellen angesehen werden und dann nach dem in der Graphik dargestellten Entscheidungsmuster die Koordinaten durch Spiegelung und Verschiebung verändert werden. Durch iterative Ausführung und mit jeder Iteration einer Vergrößerung des Offsets können so die Koordinaten jedes Punktes bestimmt werden. \cite{Chwedzuk2016} Algorithmus \ref{hilbert:iterative} zeigt eine mögliche Formalisierung.
 
 \begin{figure}[h]
     \centering
     \subfloat{{\includegraphics[width=1.0\textwidth]{HilbertToHilbert} }}%
-    \caption{Bottom-up Errechnung der Koordinaten eines Punkts der Hilbert Kurve, Beispiel für Punkt mit Index 54 und HIlbert Kurve des Grads 3}%
+    \caption{Bottom-up Errechnung der Koordinaten eines Punkts der Hilbert Kurve, Beispiel für Punkt mit Index 54 und HIlbert Kurve des Grads 3 (Adaptiert von \cite{Chwedzuk2016})}%
     \label{fig:hilbertBuildup}%
 \end{figure}
 
@@ -141,7 +128,7 @@ Algorithmus \ref{moore:batch} besteht aus dem einmaligen Aufruf der Hilbert-Unte
 In der Hilbert Unterfunktion gibt es zwei ineinander verschachtelte Schleifen: eine, die die Indexvariable $j$ von $2$ bis inklusiv  $degree -1$ durchläuft (Denn die Hilbert Unterfunktion wird ja mit $degree-1$ aufgerufen) und die innere Schleife, bei der die Punkte des letzten Grades kopiert und verschoben werden. \\ 
 Diese innere Schleife wird $quarter = 4^{j-1}$ mal durchlaufen, denn es müssen immer alle Punkte der Kurve des Grads $j-1$ kopiert und verschoben werden. Diese innere Schleife hat konstanten Aufwand $c$. In ihr wird ein Punkt aus dem Speicher  geladen, die Koordinaten werden manipuliert und an 4 Stellen wieder in den Speicher geschrieben. (Die Annahme der Konstanz ist hier natürlich theoretisch: sie berücksichtigt keine Zeitunterschiede durch Caching oder RAM-Limits, sondern geht von einem idealisierten Maschinenmodell ohne die Probleme des Von-Neumann-Bottlenecks aus)\\
 Nach Durchlaufen der Hilbert Unterfunktion werden in der Moore Funktion dann noch einmal  $4^{degree-1}$ Punkte kopiert und verschoben. \\ Der Aufwand für die Berechnung der Punkte der Moore Kurve des Grads n $Op(n)$ kann also folgendermaßen rekursiv definiert werden: \ \\
-\[\uproman{1}: Op(n) = Op(n-1) + 4^{n-1}*\cdot\]
+\[\uproman{1}: Op(n) = Op(n-1) + 4^{n-1}\cdot c\]
 \[\uproman{2}: Op(1) = c\] \ \\ 
 Diese rekursive Gleichung kann nun aufgelöst werden:  \ \\ 
 \begin{align*}
@@ -344,6 +331,7 @@ All dies kann in unserer Herangehensweise jedoch nur den konstanten Aufwand pro 
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
 % Referenzieren Sie diese dann mit \cite{}.
 % Beispiel: CR2 ist ein Register der x86-Architektur~\cite{intel2017man}.
+\nocite{intel2017man}
 \bibliographystyle{plain}
 \bibliography{Ausarbeitung}{}
 
