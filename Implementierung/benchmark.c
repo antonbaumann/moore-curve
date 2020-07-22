@@ -75,7 +75,12 @@ int save_last_result(long degree, enum implementation impl, uint32_t *x_coords, 
 
     printf("[i] writing last result to disk ...\n");
     save_as_svg(x_coords, y_coords, degree, 5, svg_file);
-    return 0;
+
+    int err = fclose(svg_file);
+    if (err != 0) {
+        printf("[!] failed to close file\n");
+    }
+    return err;
 }
 
 // utility function that pretty prints benchmarking result
