@@ -10,6 +10,8 @@
 #include "moore.h"
 #include "svg.h"
 
+// name of directory where svg files from benchmark runs are stored
+// to check if benchmarked function produced correct result
 static const char *BENCHMARK_DIR = "benchmark";
 
 struct benchmark_result {
@@ -32,6 +34,8 @@ int create_benchmark_dir() {
     return -1;
 }
 
+// saves result from last iteration as svg
+// also handles naming of file
 int save_last_result(long degree, enum implementation impl, uint32_t *x_coords, uint32_t *y_coords) {
     char *implementation_description;
     switch (impl) {
@@ -58,8 +62,8 @@ int save_last_result(long degree, enum implementation impl, uint32_t *x_coords, 
         return -1;
     }
     // this is save since
-    // - len(benchmark_dir) < 30
-    // - string representation of a double can't be longer than 20
+    // - len(benchmark_dir) <= 30
+    // - string representation of a long can't be longer than 20
     // - len(implementation_description) <= 4
     sprintf(filename, "%s/moore_d%ld_%s.svg", BENCHMARK_DIR, degree, implementation_description);
 
@@ -74,6 +78,7 @@ int save_last_result(long degree, enum implementation impl, uint32_t *x_coords, 
     return 0;
 }
 
+// utility function that pretty prints benchmarking result
 void print_result(struct benchmark_result res) {
     double seconds = res.abs_time_ns * 1e-9;
 
@@ -81,6 +86,9 @@ void print_result(struct benchmark_result res) {
     printf("[i] average time:  %ldns\n", res.avg_time_ns);
 }
 
+// takes a implementation of a moore curve generating function
+// and runs it `repetitions` times
+// returns the benchmark result
 struct benchmark_result benchmark_implementation(
         long degree,
         long repetitions,
@@ -116,6 +124,8 @@ struct benchmark_result benchmark_implementation(
     return res;
 }
 
+// run benchmark of all supported implementations `repetitions` times with `degree`
+// writes result of last repetition to benchmark directory if `write_result` is true
 void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
     int err = create_benchmark_dir();
     if (err != 0) {
@@ -141,6 +151,7 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
 
     struct benchmark_result res;
 
+    // only run avx2 implementation if supported on machine
     #ifdef __AVX2__
     printf("[i] running assembly avx implementation %d times (degree: %d)\n", repetitions, degree);
     res = benchmark_implementation(
@@ -151,6 +162,8 @@ void benchmark(uint32_t degree, uint32_t repetitions, uint32_t write_result) {
             moore_avx
     );
     print_result(res);
+
+    // wait a bit before benchmarking next implementation
     sleep(3);
 
     if (write_result) {
