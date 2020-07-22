@@ -38,9 +38,9 @@ int main(int argc, char **argv) {
 
     static struct option long_options[] = {
             {"degree",         required_argument, NULL,                    'd'},
-            {"implementation", optional_argument, NULL,                    'i'},
-            {"path",           optional_argument, NULL,                    'p'},
-            {"repetitions",    optional_argument, NULL,                    'r'},
+            {"implementation", required_argument, NULL,                    'i'},
+            {"path",           required_argument, NULL,                    'p'},
+            {"repetitions",    required_argument, NULL,                    'r'},
             {"benchmark",      no_argument, &benchmark_flag,               1},
             {"write_results",  no_argument, &write_benchmark_results_flag, 1},
             {NULL,             no_argument,       NULL,                    0},
