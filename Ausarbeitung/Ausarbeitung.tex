@@ -272,6 +272,7 @@ All dies kann in unserer Herangehensweise jedoch nur den konstanten Aufwand pro 
 \Function{berechneHilbertKoordinate}{$index$, $degree$}
 	\State $sidelength \leftarrow 2^{degree}$
 	\State $i \leftarrow 1$
+	\State Koordinaten beginnen bei $(0, 0)$
 	\While {$i < sidelength$}
 		\State ermittle Quadrant q $q \in \{A, B, C, D\}$ mit den letzten zwei Bits von $index$:
 		\State $A \iff '00'$, $B \iff '01'$, $C \iff '10'$, $D \iff '11'$
