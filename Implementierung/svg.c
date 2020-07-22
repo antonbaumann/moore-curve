@@ -3,6 +3,9 @@
 
 #include "svg.h"
 
+// takes a list of coordinates and writes them into a .svg file
+// degree is used to calculate number of coordinates in this curve
+// distance between two neighbouring coordinates can be altered by scale
 void save_as_svg(
         const uint32_t *x,
         const uint32_t *y,
