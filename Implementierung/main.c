@@ -43,13 +43,14 @@ int main(int argc, char **argv) {
             {"repetitions",    required_argument, NULL,                    'r'},
             {"benchmark",      no_argument, &benchmark_flag,               1},
             {"write_results",  no_argument, &write_benchmark_results_flag, 1},
+            {"help",           no_argument, NULL,                    'h'},
             {NULL,             no_argument,       NULL,                    0},
     };
 
     int c;
     int option_index = 0;
     // loop over all of the options
-    while ((c = getopt_long(argc, argv, "i:d:p:r:", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "i:d:p:r:h", long_options, &option_index)) != -1) {
         if (c == -1)break;
         switch (c) {
             case 0:
@@ -70,6 +71,9 @@ int main(int argc, char **argv) {
                 path = optarg;
                 path_length = strlen(path);
                 break;
+            case 'h':
+                print_help();
+                return EXIT_SUCCESS;
             case '?':
             default:
                 print_help();
@@ -206,13 +210,13 @@ void print_help() {
 void moore_asm_wrapper(uint32_t degree, uint32_t *x, uint32_t *y) {
     // gcc sets __AVX2__ macro if AVX2 is supported on target machine
     // see flags in makefile: -march=native
-    #ifdef __AVX2__
+#ifdef __AVX2__
     printf("moore assembly using avx registers: degree %u\n", degree);
     moore_avx(degree, x, y);
-    #else
+#else
     printf("moore assembly (without avx registers): degree %u\n", degree);
     moore(degree, x, y);
-    #endif
+#endif
     printf("done!\n");
 }
 
