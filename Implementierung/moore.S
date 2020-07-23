@@ -46,7 +46,7 @@ _moore: // mac compatibility
 	Each Hilber curve consists of 4 quadrants. These quadrants each hold one rotated and/or mirrored and/or translated copy of the hilbert curve of one degree less. 
 	
 	                      ______________	
-	 _______             |      |      |
+     _______             |      |      |
     |       |            |      |      | 
     |       |   -------> |------|------|
     |_______|            |      |      |
