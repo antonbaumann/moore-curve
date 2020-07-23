@@ -24,7 +24,7 @@
 \maketitle
 
 \section{Einleitung}
-Im Rahmen des Praktikums Rechnerarchitektur hat sich unsere Gruppe mit dem Thema der Moore Kurve auseinandergesetzt. Die Moore Kurve ist eine von dem Mathematiker Eliakim Hastings Moore (1862-1932) entwickelte raumfüllende Kurve. Sie basiert auf der Hilbert Kurve und findet oft Anwendung in Bildverarbeitung und Datendarstellung. Unsere erste Aufgabe war es, einen Algorithmus in Assembler zu entwickeln, der die Koordinaten einer Moore Kurve beliebigen Grades berechnet. Hierbei sollten wir auch beantworten, ob es möglich ist, einen beliebigen Punkt der Kurve in konstanter Zeit unabhängig vom Grad zu berechnen.
+Im Rahmen des Praktikums Rechnerarchitektur hat sich unsere Gruppe mit dem Thema der Moore Kurve auseinandergesetzt. Die Moore Kurve ist eine von dem Mathematiker Eliakim Hastings Moore in 1900 entwickelte raumfüllende Kurve. Sie basiert auf der Hilbert Kurve und findet oft Anwendung in Bildverarbeitung und Datendarstellung. Unsere Aufgabe war es, einen Algorithmus in Assembler zu entwickeln, der die Koordinaten einer Moore Kurve beliebigen Grades berechnet. Hierbei sollten wir auch beantworten, ob es möglich ist, einen beliebigen Punkt der Kurve in konstanter Zeit unabhängig vom Grad zu berechnen.
 
 \begin{figure}[h]
 \centering
@@ -33,10 +33,10 @@ Im Rahmen des Praktikums Rechnerarchitektur hat sich unsere Gruppe mit dem Thema
     \label{fig:mooreCurve}
 \end{figure}
 
-\subsection{Charakterisierung der Moore-Kurve und weiteren raumfüllenden Kurven}
-Raumfüllende Kurven sind Linien, die jeden Punkt des Intervals $[0,1]^d$ durchlaufen. Diese können im zweidimensionalen Raum als surjektive Abbildungen dargestellt werden, welche vom Einheitsinterval $[0,1]$ in das Inheitsquadrat $[0,1]^2$ abbilden. 
+\subsection{Charakterisierung der Moore Kurve und weiteren raumfüllenden Kurven}
+Raumfüllende Kurven sind Linien, die jeden Punkt des Intervalls $[0,1]^d$ durchlaufen. Diese können im zweidimensionalen Raum als surjektive Abbildungen dargestellt werden, welche vom Einheitsintervall $[0,1]$ in das Einheitsquadrat $[0,1]^2$ abbilden. 
 \newline
-Eine wichtige Unterkategorie der raumfüllende Kurven ist FASS („space-filling, self-avoiding, simple and self-similar“). Solche Kurven erfüllen viele oft in der Praxis geforderte Bedingungen: Zu einem ist jede FASS-Kurve selbstausweichend. Das bedeutet, dass jeder Punkt exakt einmal durchlaufen werden muss. Außerdem behalten die Kurven die Lokalität der Punkte bei. Sind Punkte räumlich nah im eindimensionalen Einheitsintervall, so gilt dies ebenfalls für ihr Bild in $[0,1]^d$ (siehe Abb. \ref{fig:locality}). 
+Eine wichtige Unterkategorie der raumfüllenden Kurven ist FASS („space-filling, self-avoiding, simple and self-similar“). Solche Kurven  erfüllen viele oft in der Praxis geforderte Bedingungen: Zu einem ist jede FASS Kurve selbst ausweichend. Das bedeutet, dass jeder Punkt exakt einmal durchlaufen werden muss. Außerdem behalten die FASS Kurven die Lokalität der Punkte bei. Sind Punkte räumlich nah im eindimensionalen Einheitsintervall, so gilt dies ebenfalls für ihr Bild in $[0,1]^d$ (siehe Abb. \ref{fig:locality}). 
 
 \begin{figure}[h]
 \centering
@@ -45,11 +45,12 @@ Eine wichtige Unterkategorie der raumfüllende Kurven ist FASS („space-filling
     \label{fig:locality}
 \end{figure}
 
-Eine sehr bekannte Kurve, die die FASS-Eigenschaften erfüllt, ist die Hilbertkurve. Diese wurde von dem gleichnamigen Mathematiker David Hilbert in 1891 entwickelt und findet aufgrund ihres einfachen Aufbaus und ihrer Stetigkeit besonders oft in der Praxis Verwendung.
+Eine sehr bekannte Kurve, die die FASS-Eigenschaften erfüllt, ist die Hilbert Kurve. Diese wurde von dem gleichnamigen Mathematiker David Hilbert in 1891 entwickelt und findet aufgrund ihres einfachen Aufbaus und ihrer Stetigkeit besonders oft in der Praxis Verwendung.
 \newline
-Die Moore Kurve ist eine Variation der Hilbert Kurve, welche sich aus vier rotierten Hilbert Kurven geringeren Grades zusammensetzt. Sie unterscheidet sich vor allem dadurch, dass ihre Endpunkte im Gegensatz zu denen der Hilbertkurve nebeneinander liegen.
+Die Moore Kurve ist eine Variation der Hilbert Kurve, welche sich aus vier rotierten Hilbert Kurven geringeren Grades zusammensetzt. 
+Der wesentliche unterschied zwischen ihnen ist, dass im Gegensatz zur Hilbert Kurve, die Moore Kurve eine geschlossene Form hat.
 \\
-In raumbezogenen Anwendungen kommt es oft vor, dass raumfüllende Kurven verwendet werden, um effizient geographische Daten, die in zwei-oder dreidimensionaler Form vorhanden sind, auf eindimensionale Indices zu abzubilden. Hierfür wird das Gebiet in Zellen aufgeteilt, welche zu einer kompakten Darstellung der bestimmten Region dienen. Dabei ist es erwünscht, dass geographische Nähe auch in der Abbildung auf den eindimensionalen Raum erhalten bleibt. Benachbarte Bilddaten liegen somit nebeneinander im Speicher und können daher effizienter geladen werden.
+In raumbezogenen Anwendungen kommt es oft vor, dass raumfüllende Kurven verwendet werden, um effizient geographische Daten, die in zwei- oder dreidimensionaler Form vorhanden sind, auf eindimensionale Indizes zu abzubilden. Hierfür wird das Gebiet in Zellen aufgeteilt, welche zu einer kompakten Darstellung der bestimmten Region dienen. Dabei ist es erwünscht, dass geographische Nähe auch in der Abbildung auf den eindimensionalen Raum erhalten bleibt. Benachbarte Bilddaten liegen somit nebeneinander im Speicher und können daher effizienter geladen werden.
 
 \begin{figure}[h]
     \centering
