@@ -45,14 +45,12 @@ _moore: // mac compatibility
 	How do we copy and move the created points to become the Hilbert/Moore Curve of the next higher degree?
 	Each Hilber curve consists of 4 quadrants. These quadrants each hold one rotated and/or mirrored and/or translated copy of the hilbert curve of one degree less. 
 	
-				
-				________________
-	________		|	|	|
-	|	|		|	|	|
-	|	|	---->	|_______|_______|
-	|_______|		|	|	|
-				|	|	|
-				|_______|_______|
+	                      ______________	
+	 _______             |      |      |
+    |       |            |      |      | 
+    |       |   -------> |------|------|
+    |_______|            |      |      |
+                         |______|______|
 	
 	In case Hilbert(n-1)-> Hilbert(n): To create..
 						lower left quadrant, we mirror the curve of degree n-1 along the x=y axis (-> swap x and y)
