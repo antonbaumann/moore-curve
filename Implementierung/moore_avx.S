@@ -164,11 +164,11 @@ _moore_avx: // mac compatibility
     //=======MANIPULATE COORDINATES IN REGISTERS TO SHIFT/ROTATE/MIRROR
     // copy coordinates from A -> B
     // ymm0 holds correct x values for quardrant B
-    vpaddd ymm3, ymm1, ymm14         // shift y values upwards (into quadrant B)
+    vpaddd ymm3, ymm1, ymm14        // shift y values upwards (into quadrant B)
 
     // copy coordinates from B -> C
     // ymm3 holds correct y vaues for quadrant C
-    vpaddd ymm4, ymm0, ymm14         // shift x values to the right (into quadrant C)
+    vpaddd ymm4, ymm0, ymm14        // shift x values to the right (into quadrant C)
 
     // copy and transform A -> D
     // x -> 2 * len - 1 - x
@@ -184,13 +184,13 @@ _moore_avx: // mac compatibility
     lea r10, [r10 + 4 * r14]
     lea r11, [r11 + 4 * r14]
 
-    vmovdqu [r10], ymm0              // quadrant B
+    vmovdqu [r10], ymm0             // quadrant B
     vmovdqu [r11], ymm3
 
-    vmovdqu [r10 + 4 * r14], ymm4    // quadrant C
+    vmovdqu [r10 + 4 * r14], ymm4   // quadrant C
     vmovdqu [r11 + 4 * r14], ymm3
 
-    vmovdqu [r10 + 8 * r14], ymm6    // quadrant D
+    vmovdqu [r10 + 8 * r14], ymm6   // quadrant D
     vmovdqu [r11 + 8 * r14], ymm7
 
     add r12, 0x08                   // increase counter by 8 since we processed 8 points in one step

@@ -108,10 +108,10 @@ _moore: // mac compatibility
 
      // nr of coordinates in hilbert(1) is 4
      mov r14, 0x04
-     mov r13, 0x02      // side len
+     mov r13, 0x02                 // side len
 
      // init temp register that holds 4 copies of 1
-     mov r11d, 0x01                  // use temp register
+     mov r11d, 0x01                // use temp register
      movd xmm15, r11d
      pshufd xmm15, xmm15, 0x00
 
@@ -170,13 +170,13 @@ _moore: // mac compatibility
 
     //=====WRITE CALCULATED COORDINATES BACK INTO MEMORY
 
-    movdqu [r10], xmm1            // quadrant A
-    movdqu [r11], xmm0            // swap x and y values
+    movdqu [r10], xmm1              // quadrant A
+    movdqu [r11], xmm0              // swap x and y values
 
     lea r10, [r10 + 4*r14]
     lea r11, [r11 + 4*r14]
 
-    movdqu [r10], xmm0    // quadrant B
+    movdqu [r10], xmm0   	    // quadrant B
     movdqu [r11], xmm3
 
     movdqu [r10 + 4 * r14], xmm4    // quadrant C
@@ -234,19 +234,19 @@ _moore: // mac compatibility
     movdqa xmm1, xmm3               // y -> y - len
     psubd xmm1, xmm14               // correct x values already in xmm2
 
-    movdqu [r10], xmm2            // quadrant A
-    movdqu [r11], xmm1            // use x values from quadrant B
+    movdqu [r10], xmm2              // quadrant A
+    movdqu [r11], xmm1              // use x values from quadrant B
 
     lea r10, [r10 + 4 * r14]
     lea r11, [r11 + 4 * r14]
 
-    movdqu [r10], xmm2    // quadrant B
+    movdqu [r10], xmm2              // quadrant B
     movdqu [r11], xmm3
 
-    movdqu [r10 + 4*r14], xmm6    // quadrant C
-    movdqu [r11 + 4*r14], xmm5    // use x values from quadrant D
+    movdqu [r10 + 4*r14], xmm6      // quadrant C
+    movdqu [r11 + 4*r14], xmm5      // use x values from quadrant D
 
-    movdqu [r10 + 8*r14], xmm6    // quadrant D
+    movdqu [r10 + 8*r14], xmm6      // quadrant D
     movdqu [r11 + 8*r14], xmm7
 
     add r15, 0x04
