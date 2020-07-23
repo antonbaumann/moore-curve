@@ -43,7 +43,7 @@ _moore: // mac compatibility
 	-end moore loop 
 
 	How do we copy and move the created points to become the Hilbert/Moore Curve of the next higher degree?
-	Each Hilber curve consists of 4 quadrants. These quadrants each hold one rotated and/or mirrored and/or translated copy of the hilbert curve of one degree less. 
+	Each Hilbert curve consists of 4 quadrants. These quadrants each hold one rotated and/or mirrored and/or translated copy of the hilbert curve of one degree less. 
 	
                           ______________	
      _______             |      |      |
