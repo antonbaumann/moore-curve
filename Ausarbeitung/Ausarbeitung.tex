@@ -71,9 +71,9 @@ In raumbezogenen Anwendungen kommt es oft vor, dass raumfüllende Kurven verwend
 Da eine FASS Kurve genau diese Anforderungen erfüllt, eignet sie sich besonders gut für solch eine Verwendung. Ein konkretes Beispiel der Anwendung wäre die \href{https://code.google.com/archive/p/s2-geometry-library/}{S2-geometry-library von Google}. 
 
 \subsection{Benutzerdokumentation}
-Der Quellcode dieses Programms enthält ein Makefile. Somit kann auf einem Computer, welcher \textit{AVX2} unterstützt der Code durch einen Aufruf von \texttt{make} kompiliert werden. Auf älteren Maschinen kann mit \texttt{make disable\_avx} gebuildet werden.
+Der Quellcode unseres Programms enthält ein Makefile. Somit kann auf einem Computer, der \textit{AVX2} unterstützt der Code durch einen Aufruf von \texttt{make} kompiliert werden. Auf älteren Maschinen kann mit \texttt{make disable\_avx} gebuildet werden.
 \newline
-Um eine Moore Kurve \textit{6. Grades} zu berechnen und unter \textit{moore.svg} abzuspeichern kann man nun die Binärdatei mit \texttt{./moore -{}-implementation asm -{}-degree 6 -{}-path moore.svg} ausführen. 
+Um eine Moore Kurve \textit{6. Grades} mithilfe der Assembler-Implementierung zu berechnen und unter \textit{moore.svg} abzuspeichern kann man nun die Binärdatei mit \texttt{./moore -{}-implementation asm -{}-degree 6 -{}-path moore.svg} ausführen. 
 Um die verschiedenen Implementierungen zu benchmarken kann das Programm wie folgt im Benchmark-Modus aufgerufen werden: \texttt{./moore -{}-benchmark -{}-degree 6 -{}-repetitions 1000 -{}-write\_results}. Da hier die \textit{write results} Flag gesetzt ist, wird für jede getestete Implementierung das Ergebnis der letzten Iteration als \textit{.svg} Datei gespeichert. 
 
 \section{Lösungsansatz}
