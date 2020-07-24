@@ -48,7 +48,7 @@ Eine wichtige Unterkategorie der raumfüllenden Kurven ist FASS („space-fillin
 Eine sehr bekannte Kurve, die die FASS-Eigenschaften erfüllt, ist die Hilbert-Kurve. Diese wurde von dem gleichnamigen Mathematiker David Hilbert in 1891 entwickelt und findet aufgrund ihres einfachen Aufbaus und ihrer Stetigkeit besonders oft in der Praxis Verwendung.
 \newline
 Die Moore-Kurve ist eine Variation der Hilbert-Kurve, welche sich aus vier rotierten Hilbert-Kurven geringeren Grades zusammensetzt. 
-Der wesentliche unterschied zwischen ihnen ist, dass im Gegensatz zur Hilbert-Kurve, die Moore-Kurve eine geschlossene Form hat.
+Der wesentliche Unterschied zwischen den beiden Kurven ist, dass die Moore-Kurve im Gegensatz zur Hilbert-Kurve eine geschlossene Form hat, Anfangs- und Endpunkt also benachbart sind.
 \\
 In raumbezogenen Anwendungen kommt es oft vor, dass raumfüllende Kurven verwendet werden, um effizient geographische Daten, die in zwei- oder dreidimensionaler Form vorhanden sind, auf eindimensionale Indizes zu abzubilden. Hierfür wird das Gebiet in Zellen aufgeteilt, welche zu einer kompakten Darstellung der bestimmten Region dienen. Dabei ist es erwünscht, dass geographische Nähe auch in der Abbildung auf den eindimensionalen Raum erhalten bleibt. Benachbarte Bilddaten liegen somit nebeneinander im Speicher und können daher effizienter geladen werden.
 
@@ -339,6 +339,8 @@ All dies kann in unserer Herangehensweise jedoch nur den konstanten Aufwand pro 
 % Referenzieren Sie diese dann mit \cite{}.
 % Beispiel: CR2 ist ein Register der x86-Architektur~\cite{intel2017man}.
 \nocite{intel2017man}
+\nocite{moore1900}
+\nocite{PointForPoint}
 \bibliographystyle{plain}
 \bibliography{Ausarbeitung}{}
 
