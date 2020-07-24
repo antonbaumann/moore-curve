@@ -37,7 +37,7 @@
     - jeder Punkt Quasi exklusiv berechnet 4^n
     - Also abhängig vom grad der Kurve
 - Vorteile:
-    - Möglichkeit einzelne Punkte der Kruve zu berechnen
+    - Möglichkeit einzelne Punkte der Kurve zu berechnen
 - Als würde man die Kurve entlang laufen Punkt für Punkt
 - die Länge der Binärzahl 2^n die einen Punkt Repräsentiert
 - denn es braucht immer 2 Stellen je Grad der Kurve
