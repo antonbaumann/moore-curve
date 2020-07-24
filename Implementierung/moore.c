@@ -8,11 +8,14 @@ struct tuple {
 // rotates/modifies shape for all 4 quadrants
 struct tuple rotate(struct tuple coord, uint32_t length, uint32_t top, uint32_t right) {
     struct tuple new_coord;
-    if (!top) {                                     // the two top one quadrants are the same shape
-        if (right) {                                // and the bottom shapes are mirrored on a diagonal axis
-            new_coord.x = (length - 1) - coord.y;   // they are moved accordingly as well
+    // the two top quadrants do not have to be mirrored
+    if (!top) {
+        if (right) {
+            // mirror on top-left-to-bottom-right diagonal axis
+            new_coord.x = (length - 1) - coord.y;
             new_coord.y = (length - 1) - coord.x;
         } else {
+            // mirror on top-right-to-bottom-left diagonal axis
             new_coord.x = coord.y;
             new_coord.y = coord.x;
         }
@@ -23,13 +26,20 @@ struct tuple rotate(struct tuple coord, uint32_t length, uint32_t top, uint32_t 
 
 struct tuple hilbert_coord_at_index(uint64_t index, uint64_t degree) {
     struct tuple coord = {.x=0, .y=0};
-    uint64_t sidelength = (uint64_t) 2 << (degree - 1); // i *= 2,  sidelength starts at 1 and is doubled with every iteration
-    for (uint64_t i = 1; i < sidelength; i *= 2) {      // to decide what Quadrant look up the 2 least significant Bits of i, for ex. 7 = 0b01(11)
-        uint64_t right = (uint64_t) 1 & (index /2);     // first see if on left or right Half by checking the first of those deciding Bits 1-> right, 0-> left
-        uint64_t top = (uint64_t) 1 & (index ^ right);  // secondly check if bits are same or different: same -> bottom, different -> top
-        coord = rotate(coord, i, top, right);           // rotate according to previously determined quadrant ( by looking at last two bits)
-        if (right) coord.x += i;                        // if on the right translate by current sidelength (=i) to the right
-        if (top) coord.y += i;                          // if on the top translate by current sidelength (=i) upwards
+    // i *= 2,  sidelength starts at 1 and is doubled with every iteration
+    uint64_t sidelength = (uint64_t) 2 << (degree - 1);
+    // to decide what Quadrant look up the 2 least significant Bits of i, for ex. 7 = 0b01(11)
+    for (uint64_t i = 1; i < sidelength; i *= 2) {
+        // first see if on left or right Half by checking the first of those deciding Bits 1-> right, 0-> left
+        uint64_t right = (uint64_t) 1 & (index /2);
+        // secondly check if bits are same or different: same -> bottom, different -> top
+        uint64_t top = (uint64_t) 1 & (index ^ right);
+        // rotate according to previously determined quadrant ( by looking at last two bits)
+        coord = rotate(coord, i, top, right);
+        // if on the right translate by current sidelength (=i) to the right
+        if (right) coord.x += i;
+        // if on the top translate by current sidelength (=i) upwards
+        if (top) coord.y += i;
         index >>= (uint64_t) 2;
     }
     return coord;
@@ -43,7 +53,9 @@ struct tuple moore_coord_at_index(
     if (degree == 1) {
         return hilbert_coord_at_index(index, 1);
     }
-    // converting moore_Index to hilbert_Index, the Hilbert-Curve with degree = n-1 fits exactly 4 times into Moore-Curve with degree = n
+    // converting moore_Index to hilbert_Index,
+    // the Hilbert-Curve with degree = n-1 fits exactly 4 times
+    // into Moore-Curve with degree = n
     uint64_t hilbert_max_iterations = max_iterations / 4;
     uint64_t hilbert_index = index % hilbert_max_iterations;
     uint64_t hilbert_side_length = (uint64_t) 2 << (degree - 2);
@@ -57,8 +69,10 @@ struct tuple moore_coord_at_index(
 
     uint64_t tmp;
 
-    switch (quadrant) {                                   // each Switchstatement is according to one quadrant
-        case 0:                                           // which is filled with a hilbert curve and rotated
+    // each Switchstatement is according to one quadrant
+    // which is filled with a hilbert curve and rotated
+    switch (quadrant) {
+        case 0:
             tmp = coord.x;
             coord.x = hilbert_side_length - coord.y - 1;
             coord.y = tmp;
@@ -85,7 +99,7 @@ struct tuple moore_coord_at_index(
 
 void moore_c_iterative(uint32_t degree, uint32_t *x, uint32_t *y) {
     uint64_t shifts = 2 * degree - 1;
-    uint64_t max_iterations = (uint64_t) 2 << shifts; // 2 * 2^(degree - 1), each iteration is *=2, which means it goes by two binary-digits
+    uint64_t max_iterations = (uint64_t) 2 << shifts; // 2^(2*degree)
     for (uint64_t i = 0; i < max_iterations; i++) {
         struct tuple coord = moore_coord_at_index(i, degree, max_iterations);
         x[i] = coord.x;
@@ -95,7 +109,7 @@ void moore_c_iterative(uint32_t degree, uint32_t *x, uint32_t *y) {
 
 void hilbert_c_iterative(uint32_t degree, uint32_t *x, uint32_t *y) {
     uint64_t shifts = 2 * degree - 1;
-    uint64_t max_iterations = (uint64_t) 2 << shifts; // 2 * 2^(degree - 1), each iteration is *=2, which means it goes by two binary-digits
+    uint64_t max_iterations = (uint64_t) 2 << shifts; // 2^(2*degree)
     for (uint64_t i = 0; i < max_iterations; i++) {
         struct tuple coord = hilbert_coord_at_index(i, degree);
         x[i] = coord.x;

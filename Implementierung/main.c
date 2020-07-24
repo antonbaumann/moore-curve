@@ -11,8 +11,6 @@
 #include "main.h"
 #include "benchmark.h"
 
-// Rechnerhalle does not allow us to allocate enough ram to calculate
-// moore curve of degree 17
 
 // don't set MAX_DEGREE > 30
 // otherwise size of allocation cannot be saved in uint64_t
@@ -43,7 +41,7 @@ int main(int argc, char **argv) {
             {"repetitions",    required_argument, NULL,                    'r'},
             {"benchmark",      no_argument, &benchmark_flag,               1},
             {"write_results",  no_argument, &write_benchmark_results_flag, 1},
-            {"help",           no_argument, NULL,                    'h'},
+            {"help",           no_argument,       NULL,                    'h'},
             {NULL,             no_argument,       NULL,                    0},
     };
 
@@ -134,7 +132,7 @@ int main(int argc, char **argv) {
             break;
         default:
             printf("this should not have happened\n");
-            return 1;
+            return EXIT_FAILURE;
     }
 
     int err = write_svg(path, x_coords, y_coords, degree);
@@ -180,7 +178,7 @@ int write_svg(char *path, uint32_t *x_coords, uint32_t *y_coords, unsigned int d
             x_coords,
             y_coords,
             degree,
-            5,
+            /*scale*/ 5,
             out_file
     );
 
